@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TVS Lanka — Stores Tracking</title>
+<style>
+  :root{
+    --navy:#0B1D33;
+    --navy-2:#122A47;
+    --paper:#FAF8F4;
+    --paper-dim:#EFEBE3;
+    --steel:#3A6EA5;
+    --steel-light:#7FA6CC;
+    --amber:#C9862A;
+    --rust:#B84A3E;
+    --ink:#0B1D33;
+    --ink-dim:#5B6B80;
+    --line:rgba(11,29,51,0.14);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--navy);
+    color:var(--paper);
+    font-family:'Segoe UI','Inter',system-ui,-apple-system,sans-serif;
+    font-variant-numeric:tabular-nums;
+    line-height:1.4;
+  }
+  a{color:inherit;}
+
+  .wrap{max-width:1180px;margin:0 auto;padding:0 28px 80px;}
+
+  /* ---- Header ---- */
+  header{
+    padding:44px 28px 30px;
+    max-width:1180px;
+    margin:0 auto;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    flex-wrap:wrap;
+    gap:16px;
+    border-bottom:1px solid rgba(250,248,244,0.14);
+  }
+  .brand{font-size:13px;letter-spacing:0.02em;color:var(--steel-light);margin-bottom:6px;}
+  h1{
+    font-size:34px;
+    font-weight:600;
+    margin:0;
+    letter-spacing:-0.01em;
+  }
+  .updated{
+    font-size:13px;
+    color:rgba(250,248,244,0.55);
+    text-align:right;
+  }
+  .updated strong{color:var(--paper);font-weight:600;}
+
+  /* ---- Summary strip ---- */
+  .summary{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:0;
+    margin:40px 0 48px;
+    border-top:1px solid rgba(250,248,244,0.14);
+    border-bottom:1px solid rgba(250,248,244,0.14);
+  }
+  .summary .stat{
+    padding:26px 28px;
+    border-right:1px solid rgba(250,248,244,0.14);
+  }
+  .summary .stat:last-child{border-right:none;}
+  .stat .num{
+    font-size:44px;
+    font-weight:600;
+    line-height:1;
+    letter-spacing:-0.02em;
+  }
+  .stat .label{
+    margin-top:8px;
+    font-size:13px;
+    color:rgba(250,248,244,0.6);
+  }
+  .stat.warn .num{color:var(--amber);}
+  .stat.risk .num{color:var(--rust);}
+
+  /* ---- Panels ---- */
+  .panel{
+    background:var(--paper);
+    color:var(--ink);
+    border-radius:2px;
+    padding:32px;
+    margin-bottom:28px;
+  }
+  .panel h2{
+    font-size:15px;
+    font-weight:600;
+    margin:0 0 4px;
+    color:var(--navy);
+  }
+  .panel .sub{
+    font-size:13px;
+    color:var(--ink-dim);
+    margin-bottom:24px;
+  }
+
+  .grid-2{display:grid;grid-template-columns:1.3fr 1fr;gap:28px;}
+  @media (max-width:900px){.grid-2{grid-template-columns:1fr;}}
+
+  /* ---- Location bars ---- */
+  .loc-row{display:flex;align-items:center;gap:14px;margin-bottom:14px;}
+  .loc-name{width:100px;font-size:13px;color:var(--ink-dim);flex-shrink:0;}
+  .loc-bar-track{flex:1;background:var(--paper-dim);height:22px;position:relative;}
+  .loc-bar-fill{height:100%;background:var(--steel);}
+  .loc-val{width:64px;text-align:right;font-size:13px;font-weight:600;flex-shrink:0;}
+
+  /* ---- Category list ---- */
+  .cat-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);}
+  .cat-row:last-child{border-bottom:none;}
+  .cat-name{font-size:14px;}
+  .cat-val{font-size:14px;font-weight:600;color:var(--steel);}
+
+  /* ---- Trend chart ---- */
+  .trend-wrap svg{width:100%;height:180px;display:block;}
+  .trend-axis text{font-size:10px;fill:var(--ink-dim);}
+
+  /* ---- Ledger table ---- */
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  thead th{
+    text-align:left;
+    font-weight:600;
+    color:var(--ink-dim);
+    font-size:11px;
+    padding:0 12px 10px 0;
+    border-bottom:1px solid var(--line);
+  }
+  thead th.num{text-align:right;}
+  tbody td{padding:9px 12px 9px 0;border-bottom:1px solid var(--line);}
+  tbody td.num{text-align:right;font-weight:600;}
+  tbody td.mono{font-family:'Consolas','SFMono-Regular',monospace;font-size:12.5px;}
+  .status-pill{
+    display:inline-block;
+    padding:2px 8px;
+    font-size:11px;
+    font-weight:600;
+    border-radius:2px;
+  }
+  .status-ok{color:var(--ink-dim);}
+  .status-aging{background:rgba(201,134,42,0.14);color:var(--amber);}
+  .status-risk{background:rgba(184,74,62,0.14);color:var(--rust);}
+
+  .empty-note{color:var(--ink-dim);font-size:13px;padding:20px 0;}
+  footer{max-width:1180px;margin:0 auto;padding:20px 28px 0;font-size:12px;color:rgba(250,248,244,0.4);}
+
+  @media (prefers-reduced-motion: no-preference){
+    @keyframes riseIn{
+      from{opacity:0;transform:translateY(14px);}
+      to{opacity:1;transform:translateY(0);}
+    }
+    @keyframes pulseDot{
+      0%,100%{opacity:1;}
+      50%{opacity:0.35;}
+    }
+    header{animation:riseIn 0.6s ease both;}
+    .summary .stat{animation:riseIn 0.5s ease both;}
+    .summary .stat:nth-child(1){animation-delay:0.1s;}
+    .summary .stat:nth-child(2){animation-delay:0.17s;}
+    .summary .stat:nth-child(3){animation-delay:0.24s;}
+    .summary .stat:nth-child(4){animation-delay:0.31s;}
+    .panel{animation:riseIn 0.55s ease 0.35s both;}
+    .loc-bar-fill{transition:width 1.1s cubic-bezier(.2,.8,.2,1);}
+    .cat-row{opacity:0;animation:riseIn 0.4s ease forwards;}
+    tbody tr{opacity:0;animation:riseIn 0.35s ease forwards;}
+  }
+  .live-badge{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:11px;letter-spacing:0.02em;color:var(--steel-light);
+  }
+  .live-badge .dot{
+    width:6px;height:6px;border-radius:50%;background:var(--steel-light);
+  }
+  @media (prefers-reduced-motion: no-preference){
+    .live-badge .dot{animation:pulseDot 1.8s ease-in-out infinite;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="brand"><a href="../index.html" style="color:inherit;text-decoration:none;">TVS LANKA HORANA MIS</a> · STORES</div>
+    <h1>Stores Tracking</h1>
+  </div>
+  <div class="updated" id="updatedLabel">Loading…</div>
+</header>
+
+<div class="wrap">
+
+  <div class="summary" id="summaryStrip">
+    <div class="stat"><div class="num" id="s-total">—</div><div class="label">Units on hand, latest count</div></div>
+    <div class="stat"><div class="num" id="s-pending">—</div><div class="label">Containers still pending</div></div>
+    <div class="stat warn"><div class="num" id="s-aging">—</div><div class="label">Aging 14+ days</div></div>
+    <div class="stat risk"><div class="num" id="s-risk">—</div><div class="label">Cost risk — Spectra Yard</div></div>
+  </div>
+
+  <div class="grid-2">
+    <div class="panel">
+      <h2>Stock by location</h2>
+      <div class="sub">Units currently held, latest snapshot</div>
+      <div id="locChart"></div>
+    </div>
+    <div class="panel">
+      <h2>Stock by model</h2>
+      <div class="sub">Units currently held, latest snapshot</div>
+      <div id="catChart"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Daily stock trend</h2>
+    <div class="sub">Total units recorded per day, across all locations</div>
+    <div class="trend-wrap" id="trendChart"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Containers by age — oldest first</h2>
+    <div class="sub">Still pending as of the latest count · flagged at 14 days · Spectra Yard breaches cost storage</div>
+    <div id="ageTable"></div>
+  </div>
+
+</div>
+
+<footer>Sourced from Piyumal (Delivery) &amp; Shantha's (Stores) daily stock emails, parsed automatically.</footer>
+
+<script>
+// -----------------------------------------------------------------
+// Point this at your deployed Apps Script Web App URL (…/exec)
+// -----------------------------------------------------------------
+const API_URL = "https://script.google.com/macros/s/AKfycbzJFWD_AQc8UwEkVHcb3q9lDmzoMcO-fq9qDX3wIEAoUi8gIZN09Uxbbjfj3Z30spjjpw/exec";
+
+function fmt(n){ return Number(n).toLocaleString('en-US'); }
+
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function countUp(el, target, duration=900){
+  if(reduceMotion){ el.textContent = fmt(target); return; }
+  const start = performance.now();
+  function tick(now){
+    const p = Math.min(1, (now-start)/duration);
+    const eased = 1 - Math.pow(1-p, 3);
+    el.textContent = fmt(Math.round(target*eased));
+    if(p<1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+function renderSummary(s){
+  countUp(document.getElementById('s-total'), s.totalUnitsLatest);
+  countUp(document.getElementById('s-pending'), s.containersPending);
+  countUp(document.getElementById('s-aging'), s.agingCount);
+  countUp(document.getElementById('s-risk'), s.costRiskCount);
+  document.getElementById('updatedLabel').innerHTML =
+    '<span class="live-badge"><span class="dot"></span>LIVE</span> &nbsp;Latest stock date <strong>' + (s.latestDate || '—') + '</strong>';
+}
+
+function renderLocationBars(rows){
+  const el = document.getElementById('locChart');
+  if(!rows.length){ el.innerHTML = '<div class="empty-note">No data yet.</div>'; return; }
+  const max = Math.max(...rows.map(r=>r.total));
+  const sorted = rows.slice().sort((a,b)=>b.total-a.total);
+  el.innerHTML = sorted.map(r => `
+      <div class="loc-row">
+        <div class="loc-name">${r.location}</div>
+        <div class="loc-bar-track"><div class="loc-bar-fill" data-target="${(r.total/max*100).toFixed(1)}" style="width:0%"></div></div>
+        <div class="loc-val">${fmt(r.total)}</div>
+      </div>`).join('');
+  requestAnimationFrame(() => {
+    el.querySelectorAll('.loc-bar-fill').forEach(bar => {
+      bar.style.width = bar.getAttribute('data-target') + '%';
+    });
+  });
+}
+
+function renderCategoryList(rows){
+  const el = document.getElementById('catChart');
+  if(!rows.length){ el.innerHTML = '<div class="empty-note">No data yet.</div>'; return; }
+  el.innerHTML = rows.map((r,i) => `
+    <div class="cat-row" style="animation-delay:${0.05*i}s">
+      <div class="cat-name">${r.category}</div>
+      <div class="cat-val">${fmt(r.total)}</div>
+    </div>`).join('');
+}
+
+function renderTrend(rows){
+  const el = document.getElementById('trendChart');
+  if(rows.length < 2){ el.innerHTML = '<div class="empty-note">Need at least two days of data for a trend.</div>'; return; }
+  const W = 1120, H = 180, padL = 40, padB = 24, padT = 10;
+  const vals = rows.map(r=>r.total);
+  const max = Math.max(...vals), min = Math.min(...vals);
+  const span = (max - min) || 1;
+  const x = i => padL + (i/(rows.length-1)) * (W - padL - 10);
+  const y = v => padT + (1 - (v-min)/span) * (H - padT - padB);
+  const points = rows.map((r,i)=>`${x(i)},${y(r.total)}`).join(' ');
+  const dots = rows.map((r,i)=>`<circle cx="${x(i)}" cy="${y(r.total)}" r="3" fill="#3A6EA5"/>`).join('');
+  const labels = rows.map((r,i)=> i % Math.ceil(rows.length/7) === 0 || i===rows.length-1
+      ? `<text x="${x(i)}" y="${H-6}" text-anchor="middle">${r.date.slice(5)}</text>` : '').join('');
+  el.innerHTML = `
+    <svg viewBox="0 0 ${W} ${H}" class="trend-axis">
+      <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H-padB}" stroke="#0B1D33" stroke-opacity="0.14"/>
+      <line x1="${padL}" y1="${H-padB}" x2="${W-10}" y2="${H-padB}" stroke="#0B1D33" stroke-opacity="0.14"/>
+      <polyline id="trendLine" points="${points}" fill="none" stroke="#3A6EA5" stroke-width="2"/>
+      <g id="trendDots" opacity="0">${dots}</g>
+      ${labels}
+    </svg>`;
+  const line = document.getElementById('trendLine');
+  if(reduceMotion){
+    document.getElementById('trendDots').setAttribute('opacity','1');
+  } else {
+    const len = line.getTotalLength();
+    line.style.strokeDasharray = len;
+    line.style.strokeDashoffset = len;
+    line.getBoundingClientRect(); // force reflow
+    line.style.transition = 'stroke-dashoffset 1.1s cubic-bezier(.2,.8,.2,1)';
+    requestAnimationFrame(() => { line.style.strokeDashoffset = '0'; });
+    setTimeout(() => {
+      document.getElementById('trendDots').style.transition = 'opacity 0.4s ease';
+      document.getElementById('trendDots').setAttribute('opacity','1');
+    }, 1000);
+  }
+}
+
+function renderAgeTable(rows){
+  const el = document.getElementById('ageTable');
+  if(!rows.length){ el.innerHTML = '<div class="empty-note">No containers currently pending — clean board.</div>'; return; }
+  const statusClass = s => s.indexOf('Cost Risk')!==-1 ? 'status-risk' : (s.indexOf('Aging')!==-1 ? 'status-aging' : 'status-ok');
+  const rowsHtml = rows.slice(0, 40).map((r,i) => `
+    <tr style="animation-delay:${Math.min(i*0.03, 0.6)}s">
+      <td class="mono">${r.container}</td>
+      <td>${r.category}</td>
+      <td>${r.color}</td>
+      <td>${r.location}</td>
+      <td>${r.firstSeen}</td>
+      <td class="num">${r.ageDays}</td>
+      <td><span class="status-pill ${statusClass(r.status)}">${r.status}</span></td>
+    </tr>`).join('');
+  el.innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>Container</th><th>Model</th><th>Color</th><th>Location</th>
+          <th>First seen</th><th class="num">Age (days)</th><th>Status</th>
+        </tr>
+      </thead>
+      <tbody>${rowsHtml}</tbody>
+    </table>`;
+}
+
+async function load(){
+  try{
+    const res = await fetch(API_URL);
+    const data = await res.json();
+    renderSummary(data.summary);
+    renderLocationBars(data.locationBreakdown);
+    renderCategoryList(data.categoryBreakdown);
+    renderTrend(data.dailyTotals);
+    renderAgeTable(data.ageList);
+  }catch(err){
+    document.getElementById('updatedLabel').textContent = 'Could not load data — check API_URL is set';
+    console.error(err);
+  }
+}
+load();
+</script>
+</body>
+</html>
