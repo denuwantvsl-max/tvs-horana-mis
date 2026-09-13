@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TVS Lanka — Stores Warehouses</title>
+<style>
+  :root{
+    --navy:#0B1D33;
+    --navy-2:#0E2440;
+    --paper:#FAF8F4;
+    --paper-dim:#EFEBE3;
+    --steel:#3A6EA5;
+    --steel-light:#7FA6CC;
+    --amber:#C9862A;
+    --rust:#B84A3E;
+    --ink:#0B1D33;
+    --ink-dim:#5B6B80;
+    --line:rgba(11,29,51,0.14);
+    --grid-line:rgba(127,166,204,0.09);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--navy);
+    color:var(--paper);
+    font-family:'Segoe UI','Inter',system-ui,-apple-system,sans-serif;
+    font-variant-numeric:tabular-nums;
+    line-height:1.4;
+    overflow-x:hidden;
+  }
+  a{color:inherit;}
+
+  .grid-bg{
+    position:fixed; inset:0; z-index:0; pointer-events:none;
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size:48px 48px;
+  }
+
+  .wrap{max-width:1180px;margin:0 auto;padding:0 28px 80px;position:relative;z-index:1;}
+
+  header{
+    padding:40px 28px 26px;
+    max-width:1180px;
+    margin:0 auto;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    flex-wrap:wrap;
+    gap:16px;
+    border-bottom:1px solid rgba(250,248,244,0.14);
+    position:relative; z-index:1;
+  }
+  .brand{font-size:13px;letter-spacing:0.02em;color:var(--steel-light);margin-bottom:6px;}
+  .brand a{color:inherit;text-decoration:none;}
+  h1{font-size:32px;font-weight:600;margin:0;letter-spacing:-0.01em;}
+  .updated{font-size:13px;color:rgba(250,248,244,0.55);text-align:right;}
+  .updated strong{color:var(--paper);font-weight:600;}
+  .live-badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;letter-spacing:0.02em;color:var(--steel-light);}
+  .live-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--steel-light);}
+  @media (prefers-reduced-motion: no-preference){
+    @keyframes pulseGlow{0%,100%{box-shadow:0 0 0 0 rgba(127,166,204,0.55);}50%{box-shadow:0 0 0 5px rgba(127,166,204,0);}}
+    .live-badge .dot{animation:pulseGlow 1.8s ease-in-out infinite;}
+  }
+
+  /* ---- Slim summary strip ---- */
+  .summary{display:flex;gap:0;margin:24px 0 8px;border-bottom:1px solid rgba(250,248,244,0.14);flex-wrap:wrap;}
+  .summary .stat{padding:16px 28px 16px 0;margin-right:28px;}
+  .summary .num{font-size:26px;font-weight:600;letter-spacing:-0.02em;}
+  .summary .label{font-size:12px;color:rgba(250,248,244,0.5);margin-top:2px;}
+  .summary .stat.warn .num{color:var(--amber);}
+  .summary .stat.risk .num{color:var(--rust);}
+
+  /* ---- Warehouse zone hero ---- */
+  .zones-title{font-size:14px;color:rgba(250,248,244,0.55);margin:36px 0 16px;letter-spacing:0.02em;}
+  .zones{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(250,248,244,0.14);}
+  @media (max-width:900px){.zones{grid-template-columns:repeat(2,1fr);}}
+  @media (max-width:520px){.zones{grid-template-columns:1fr;}}
+  .zone{
+    background:var(--navy-2);
+    padding:26px 22px;
+    cursor:pointer;
+    position:relative;
+    overflow:hidden;
+    transition:transform 0.3s cubic-bezier(.2,.8,.2,1), box-shadow 0.3s ease;
+  }
+  .zone::before{
+    content:'';position:absolute;top:0;left:-60%;width:40%;height:100%;
+    background:linear-gradient(90deg,transparent,rgba(127,166,204,0.1),transparent);
+    transform:skewX(-15deg);transition:left 0.6s ease;pointer-events:none;
+  }
+  .zone:hover{transform:translateY(-4px);box-shadow:0 12px 28px -8px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(127,166,204,0.3);}
+  .zone:hover::before{left:120%;}
+  .zone .idx{font-size:11px;color:var(--steel-light);letter-spacing:0.08em;margin-bottom:10px;font-family:'Consolas',monospace;}
+  .zone .name{font-size:16px;font-weight:600;margin-bottom:4px;}
+  .zone .ifs{font-size:11px;color:rgba(250,248,244,0.4);font-family:'Consolas',monospace;margin-bottom:18px;}
+  .zone .qty{font-size:38px;font-weight:600;letter-spacing:-0.02em;line-height:1;}
+  .zone .qty-label{font-size:11px;color:rgba(250,248,244,0.45);margin-top:4px;}
+  .zone .bar-track{height:4px;background:rgba(250,248,244,0.1);margin-top:16px;}
+  .zone .bar-fill{height:100%;background:var(--steel-light);width:0%;transition:width 1.1s cubic-bezier(.2,.8,.2,1);}
+  .zone .go{margin-top:14px;font-size:12px;color:var(--steel-light);display:flex;align-items:center;gap:5px;transition:gap 0.25s ease;}
+  .zone:hover .go{gap:10px;}
+
+  /* ---- Detail sections ---- */
+  .zone-detail{
+    background:var(--paper);
+    color:var(--ink);
+    margin-top:28px;
+    padding:0;
+    scroll-margin-top:24px;
+  }
+  .zone-detail-head{
+    padding:26px 30px 18px;
+    display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;
+    border-bottom:1px solid var(--line);
+  }
+  .zone-detail-head h2{font-size:19px;margin:0;color:var(--navy);}
+  .zone-detail-head .meta{font-size:13px;color:var(--ink-dim);}
+  .zone-detail-head .meta strong{color:var(--navy);}
+
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  thead th{
+    text-align:left;font-weight:600;color:var(--ink-dim);font-size:11px;
+    padding:12px 14px;border-bottom:1px solid var(--line);
+    position:sticky;top:0;background:var(--paper);
+  }
+  thead th.num{text-align:right;}
+  tbody td{padding:9px 14px;border-bottom:1px solid var(--line);}
+  tbody td.num{text-align:right;font-weight:600;}
+  tbody td.mono{font-family:'Consolas','SFMono-Regular',monospace;font-size:12.5px;color:var(--ink-dim);}
+  tbody tr:hover{background:var(--paper-dim);}
+  .cat-tag{font-size:11px;color:var(--steel);font-weight:600;}
+  .yard-tag{font-size:10px;color:var(--amber);font-weight:600;letter-spacing:0.03em;background:rgba(201,134,42,0.12);padding:2px 6px;border-radius:2px;}
+  .table-scroll{max-height:420px;overflow-y:auto;}
+
+  @media (prefers-reduced-motion: no-preference){
+    .zone{animation:riseIn 0.55s cubic-bezier(.2,.8,.2,1) both;}
+    .zone:nth-child(1){animation-delay:0.05s;}
+    .zone:nth-child(2){animation-delay:0.12s;}
+    .zone:nth-child(3){animation-delay:0.19s;}
+    .zone:nth-child(4){animation-delay:0.26s;}
+    @keyframes riseIn{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+    .table-reveal tbody tr{opacity:0;animation:rowIn 0.35s ease forwards;}
+    @keyframes rowIn{from{opacity:0;transform:translateX(-6px);}to{opacity:1;transform:translateX(0);}}
+    .zone-detail{opacity:0;transform:translateY(20px);transition:opacity 0.6s ease, transform 0.6s cubic-bezier(.2,.8,.2,1);}
+    .zone-detail.in{opacity:1;transform:translateY(0);}
+  }
+
+  .trend-panel{background:var(--paper);color:var(--ink);margin-top:28px;padding:28px 30px;}
+  .trend-panel h2{font-size:15px;margin:0 0 4px;color:var(--navy);}
+  .trend-panel .sub{font-size:13px;color:var(--ink-dim);margin-bottom:20px;}
+  .trend-wrap svg{width:100%;height:160px;display:block;}
+  .trend-axis text{font-size:10px;fill:var(--ink-dim);}
+
+  .empty-note{color:var(--ink-dim);font-size:13px;padding:24px 30px;}
+  footer{max-width:1180px;margin:0 auto;padding:24px 28px 0;font-size:12px;color:rgba(250,248,244,0.4);position:relative;z-index:1;}
+</style>
+</head>
+<body>
+
+<div class="grid-bg" id="gridBg"></div>
+
+<header>
+  <div>
+    <div class="brand"><a href="../index.html">TVS LANKA HORANA MIS</a> · STORES · <a href="index.html">Map View</a></div>
+    <h1>Warehouse Stock — Full Detail</h1>
+  </div>
+  <div class="updated" id="updatedLabel">Loading…</div>
+</header>
+
+<div class="wrap">
+
+  <div class="summary" id="summaryStrip">
+    <div class="stat"><div class="num" id="s-total">—</div><div class="label">Total units, all warehouses</div></div>
+    <div class="stat"><div class="num" id="s-pending">—</div><div class="label">Containers pending</div></div>
+    <div class="stat warn"><div class="num" id="s-aging">—</div><div class="label">Aging 14+ days</div></div>
+    <div class="stat risk"><div class="num" id="s-risk">—</div><div class="label">Cost risk — Yard</div></div>
+  </div>
+
+  <div class="zones-title">Four warehouses — click any zone to jump to its detail</div>
+  <div class="zones" id="zones"></div>
+
+  <div id="zoneDetails"></div>
+
+  <div class="trend-panel">
+    <h2>Daily stock trend</h2>
+    <div class="sub">Total units recorded per day, across all warehouses</div>
+    <div class="trend-wrap" id="trendChart"></div>
+  </div>
+
+</div>
+
+<footer>Sourced from Shantha's daily Stores stock email, parsed automatically. Warehouse codes per Shantha's IFS location mapping.</footer>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbzJFWD_AQc8UwEkVHcb3q9lDmzoMcO-fq9qDX3wIEAoUi8gIZN09Uxbbjfj3Z30spjjpw/exec";
+
+const ZONE_ORDER = [
+  { key: "Plant WH",     label: "Plant Warehouse",   ifs: "BOX / TWBOX" },
+  { key: "180/C WH",     label: "180/C Warehouse",   ifs: "BOX-180C / TWBOX-180C" },
+  { key: "Munagama WH",  label: "Munagama Warehouse",ifs: "BOX-MUN / TWBOX-MUN" },
+  { key: "Yard",         label: "Spectra Yard",      ifs: "BOXWH / TWBOXWH" }
+];
+
+function fmt(n){ return Number(n).toLocaleString('en-US'); }
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function countUp(el, target, duration=900){
+  if(reduceMotion){ el.textContent = fmt(target); return; }
+  const start = performance.now();
+  function tick(now){
+    const p = Math.min(1, (now-start)/duration);
+    const eased = 1 - Math.pow(1-p, 3);
+    el.textContent = fmt(Math.round(target*eased));
+    if(p<1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+function renderSummary(s){
+  countUp(document.getElementById('s-total'), s.totalUnitsLatest);
+  countUp(document.getElementById('s-pending'), s.containersPending);
+  countUp(document.getElementById('s-aging'), s.agingCount);
+  countUp(document.getElementById('s-risk'), s.costRiskCount);
+  document.getElementById('updatedLabel').innerHTML =
+    '<span class="live-badge"><span class="dot"></span>LIVE</span> &nbsp;Latest stock date <strong>' + (s.latestDate || '—') + '</strong>';
+}
+
+function renderZones(byLocation){
+  const el = document.getElementById('zones');
+  const totals = ZONE_ORDER.map(z => {
+    const rows = byLocation[z.key] || [];
+    return { ...z, total: rows.reduce((s,r)=>s+r.qty,0), count: rows.length };
+  });
+  const max = Math.max(...totals.map(t=>t.total), 1);
+
+  el.innerHTML = totals.map((z,i) => `
+    <div class="zone" data-target="zone-${i}">
+      <div class="idx">ZONE ${String(i+1).padStart(2,'0')}</div>
+      <div class="name">${z.label}</div>
+      <div class="ifs">${z.ifs}</div>
+      <div class="qty" data-final="${z.total}">0</div>
+      <div class="qty-label">units · ${z.count} line item${z.count===1?'':'s'}</div>
+      <div class="bar-track"><div class="bar-fill" data-w="${(z.total/max*100).toFixed(1)}"></div></div>
+      <div class="go">View detail <span>&rarr;</span></div>
+    </div>
+  `).join('');
+
+  el.querySelectorAll('.zone').forEach(z => {
+    z.addEventListener('click', () => {
+      document.getElementById(z.dataset.target).scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+    });
+  });
+
+  setTimeout(() => {
+    el.querySelectorAll('.qty').forEach(q => countUp(q, Number(q.dataset.final), 1100));
+    el.querySelectorAll('.bar-fill').forEach(b => { b.style.width = b.dataset.w + '%'; });
+  }, reduceMotion ? 0 : 500);
+}
+
+function renderZoneDetails(byLocation){
+  const el = document.getElementById('zoneDetails');
+  el.innerHTML = ZONE_ORDER.map((z, i) => {
+    const rows = (byLocation[z.key] || []).slice().sort((a,b) => {
+      if (a.category !== b.category) return a.category.localeCompare(b.category);
+      return b.qty - a.qty;
+    });
+    const total = rows.reduce((s,r)=>s+r.qty,0);
+
+    const rowsHtml = rows.length ? rows.map((r,ri) => `
+      <tr style="animation-delay:${Math.min(ri*0.02,0.5)}s">
+        <td><span class="cat-tag">${r.category}</span></td>
+        <td>${r.model}</td>
+        <td>${r.color}</td>
+        <td class="mono">${r.wOrder || '—'}</td>
+        <td class="mono">${r.container || (r.rowType === 'YardSubtotal' ? '<span class="yard-tag">YARD STOCK</span>' : '—')}</td>
+        <td class="num">${fmt(r.qty)}</td>
+      </tr>
+    `).join('') : '';
+
+    return `
+      <div class="zone-detail" id="zone-${i}">
+        <div class="zone-detail-head">
+          <h2>${z.label}</h2>
+          <div class="meta"><strong>${fmt(total)}</strong> units across <strong>${rows.length}</strong> line items</div>
+        </div>
+        ${rows.length ? `
+        <div class="table-scroll">
+          <table class="table-reveal">
+            <thead>
+              <tr><th>Category</th><th>Model</th><th>Color</th><th>W/Order</th><th>Container</th><th class="num">Qty</th></tr>
+            </thead>
+            <tbody>${rowsHtml}</tbody>
+          </table>
+        </div>` : `<div class="empty-note">No stock currently recorded at this location.</div>`}
+      </div>
+    `;
+  }).join('');
+
+  if (!reduceMotion && 'IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('in');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    document.querySelectorAll('.zone-detail').forEach(d => io.observe(d));
+  } else {
+    document.querySelectorAll('.zone-detail').forEach(d => d.classList.add('in'));
+  }
+}
+
+function renderTrend(rows){
+  const el = document.getElementById('trendChart');
+  if(rows.length < 2){ el.innerHTML = '<div class="empty-note">Need at least two days of data for a trend.</div>'; return; }
+  const W = 1120, H = 160, padL = 40, padB = 24, padT = 10;
+  const vals = rows.map(r=>r.total);
+  const max = Math.max(...vals), min = Math.min(...vals);
+  const span = (max - min) || 1;
+  const x = i => padL + (i/(rows.length-1)) * (W - padL - 10);
+  const y = v => padT + (1 - (v-min)/span) * (H - padT - padB);
+  const points = rows.map((r,i)=>`${x(i)},${y(r.total)}`).join(' ');
+  const dots = rows.map((r,i)=>`<circle cx="${x(i)}" cy="${y(r.total)}" r="3" fill="#3A6EA5"/>`).join('');
+  const labels = rows.map((r,i)=> i % Math.ceil(rows.length/7) === 0 || i===rows.length-1
+      ? `<text x="${x(i)}" y="${H-6}" text-anchor="middle">${r.date.slice(5)}</text>` : '').join('');
+  el.innerHTML = `
+    <svg viewBox="0 0 ${W} ${H}" class="trend-axis">
+      <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H-padB}" stroke="#0B1D33" stroke-opacity="0.14"/>
+      <line x1="${padL}" y1="${H-padB}" x2="${W-10}" y2="${H-padB}" stroke="#0B1D33" stroke-opacity="0.14"/>
+      <polyline id="trendLine" points="${points}" fill="none" stroke="#3A6EA5" stroke-width="2"/>
+      <g id="trendDots" opacity="${reduceMotion?1:0}">${dots}</g>
+      ${labels}
+    </svg>`;
+  const line = document.getElementById('trendLine');
+  if (!reduceMotion) {
+    const len = line.getTotalLength();
+    line.style.strokeDasharray = len;
+    line.style.strokeDashoffset = len;
+    line.getBoundingClientRect();
+    line.style.transition = 'stroke-dashoffset 1.1s cubic-bezier(.2,.8,.2,1)';
+    requestAnimationFrame(() => { line.style.strokeDashoffset = '0'; });
+    setTimeout(() => {
+      const dotsEl = document.getElementById('trendDots');
+      dotsEl.style.transition = 'opacity 0.4s ease';
+      dotsEl.setAttribute('opacity','1');
+    }, 1000);
+  }
+}
+
+document.addEventListener('mousemove', (e) => {
+  if (reduceMotion) return;
+  const x = (e.clientX / window.innerWidth - 0.5) * 6;
+  const y = (e.clientY / window.innerHeight - 0.5) * 6;
+  document.getElementById('gridBg').style.transform = `translate(${x}px, ${y}px)`;
+});
+
+async function load(){
+  try{
+    const res = await fetch(API_URL);
+    const data = await res.json();
+    renderSummary(data.summary);
+    renderZones(data.byLocation || {});
+    renderZoneDetails(data.byLocation || {});
+    renderTrend(data.dailyTotals || []);
+  }catch(err){
+    document.getElementById('updatedLabel').textContent = 'Could not load data — check API_URL is set';
+    console.error(err);
+  }
+}
+load();
+</script>
+</body>
+</html>
