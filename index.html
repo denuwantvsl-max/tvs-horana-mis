@@ -64,31 +64,34 @@
   }
 
   header{
-    padding:44px 28px 30px;
-    max-width:1180px;
-    margin:0 auto;
-    display:flex;
-    justify-content:space-between;
-    align-items:flex-end;
-    flex-wrap:wrap;
-    gap:16px;
-    border-bottom:1px solid rgba(250,248,244,0.14);
+    padding:70px 28px 60px; margin:0;
     position:relative; z-index:1;
+    background:
+      linear-gradient(180deg, rgba(6,15,28,0.55) 0%, rgba(6,15,28,0.45) 40%, var(--navy) 100%),
+      url('assets/assembly-line.jpg');
+    background-size:cover;
+    background-position:center 35%;
   }
-  .brand{font-size:13px;letter-spacing:0.02em;color:var(--steel-light);margin-bottom:6px;}
+  .header-inner{
+    max-width:1180px; margin:0 auto;
+    display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:16px;
+  }
+  .brand{font-size:13px;letter-spacing:0.02em;color:var(--steel-light);margin-bottom:8px;text-shadow:0 2px 12px rgba(0,0,0,0.5);}
   h1{
-    font-size:34px;
+    font-size:44px;
     font-weight:600;
     margin:0;
     letter-spacing:-0.01em;
     font-family:'Consolas','SFMono-Regular',monospace;
     white-space:pre;
+    text-shadow:0 4px 24px rgba(0,0,0,0.55);
   }
   .flap-char{display:inline-block; min-width:0.62ch;}
   .updated{
     font-size:13px;
-    color:rgba(250,248,244,0.55);
+    color:rgba(250,248,244,0.7);
     text-align:right;
+    text-shadow:0 2px 12px rgba(0,0,0,0.5);
   }
   .updated strong{color:var(--paper);font-weight:600;}
 
@@ -124,6 +127,7 @@
     box-shadow:0 12px 28px -8px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(127,166,204,0.3);
   }
   .mod.link:hover::before{ left:120%; }
+  .mod .idx{position:absolute; top:22px; right:24px; font-size:11px; color:rgba(250,248,244,0.22); font-family:'Consolas',monospace;}
   .mod .status{
     font-size:11px;
     letter-spacing:0.02em;
@@ -132,6 +136,20 @@
     display:flex; align-items:center;
   }
   .mod.soon .status{color:rgba(250,248,244,0.35);}
+
+  .photo-band{
+    margin-top:44px; height:180px; position:relative; overflow:hidden;
+    background:
+      linear-gradient(90deg, rgba(6,15,28,0.85) 0%, rgba(6,15,28,0.35) 55%, rgba(6,15,28,0.15) 100%),
+      url('assets/assembly-worker.jpg');
+    background-size:cover; background-position:center 30%;
+    display:flex; align-items:center;
+  }
+  .photo-band-text{ padding:0 40px; max-width:420px; }
+  .photo-band-text .pb-label{font-size:11px;letter-spacing:0.06em;color:var(--steel-light);margin-bottom:6px;}
+  .photo-band-text .pb-title{font-size:18px;font-weight:600;line-height:1.35;text-shadow:0 2px 10px rgba(0,0,0,0.5);}
+  @media (max-width:700px){ .photo-band{height:220px;} .photo-band-text{padding:0 24px;} }
+
   .mod h2{font-size:19px;font-weight:600;margin:0 0 8px;}
   .mod.soon h2{color:rgba(250,248,244,0.4);}
   .mod p{font-size:13px;color:rgba(250,248,244,0.55);margin:0;flex:1;}
@@ -214,41 +232,55 @@
 </div>
 
 <header>
-  <div>
-    <div class="brand reveal" id="brandLine">TVS LANKA · HORANA ASSEMBLY PLANT</div>
-    <h1 id="titleFlap"></h1>
+  <div class="header-inner">
+    <div>
+      <div class="brand reveal" id="brandLine">TVS LANKA · HORANA ASSEMBLY PLANT</div>
+      <h1 id="titleFlap"></h1>
+    </div>
+    <div class="updated reveal" id="updatedLine">Live plant data, unified</div>
   </div>
-  <div class="updated reveal" id="updatedLine">Live plant data, unified</div>
 </header>
 
 <div class="wrap">
 
   <div class="modules">
     <a class="mod link reveal" href="stores/index.html">
+      <span class="idx">01</span>
       <div class="status"><span class="live-dot"></span>LIVE</div>
       <h2>Stores</h2>
       <p>Container-level stock tracking, warehouse location, and aging against the 14-day Spectra Yard threshold.</p>
       <div class="go">Open <span>&rarr;</span></div>
     </a>
     <div class="mod soon reveal">
+      <span class="idx">02</span>
       <div class="status">IN PROGRESS</div>
       <h2>Delivery</h2>
       <p>Dealer delivery status, weekly requested vs. delivered quantities, and pending delivery tracking.</p>
     </div>
     <div class="mod soon reveal">
+      <span class="idx">03</span>
       <div class="status">PLANNED</div>
       <h2>Production</h2>
       <p>Batch production plans, daily assembly output, and model-wise build tracking.</p>
     </div>
     <div class="mod soon reveal">
+      <span class="idx">04</span>
       <div class="status">PLANNED</div>
       <h2>Quality</h2>
       <p>Non-conformance tracking, corrective actions, and quality objective monitoring.</p>
     </div>
     <div class="mod soon reveal">
+      <span class="idx">05</span>
       <div class="status">PLANNED</div>
       <h2>Costing</h2>
       <p>Capital project tracking and cost monitoring across ongoing plant initiatives.</p>
+    </div>
+  </div>
+
+  <div class="photo-band reveal">
+    <div class="photo-band-text">
+      <div class="pb-label">HORANA ASSEMBLY COMPLEX</div>
+      <div class="pb-title">Every number on this site traces back to what's physically moving on this floor.</div>
     </div>
   </div>
 
