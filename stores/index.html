@@ -9,25 +9,18 @@
     --navy:#0B1D33;
     --navy-2:#0E2440;
     --paper:#FAF8F4;
-    --paper-dim:#EFEBE3;
     --steel:#3A6EA5;
     --steel-light:#7FA6CC;
-    --amber:#C9862A;
     --rust:#B84A3E;
-    --ink:#0B1D33;
     --ink-dim:#5B6B80;
-    --line:rgba(11,29,51,0.14);
     --grid-line:rgba(127,166,204,0.09);
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
   body{
-    background:var(--navy);
-    color:var(--paper);
+    background:var(--navy); color:var(--paper);
     font-family:'Segoe UI','Inter',system-ui,-apple-system,sans-serif;
-    font-variant-numeric:tabular-nums;
-    line-height:1.4;
-    overflow-x:hidden;
+    font-variant-numeric:tabular-nums; line-height:1.4;
   }
   a{color:inherit;}
   .grid-bg{
@@ -38,7 +31,6 @@
     background-size:48px 48px;
   }
   .wrap{max-width:1180px;margin:0 auto;padding:0 28px 80px;position:relative;z-index:1;}
-
   header{
     padding:40px 28px 26px; max-width:1180px; margin:0 auto;
     display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:16px;
@@ -55,128 +47,31 @@
 
   .cards-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(250,248,244,0.14);margin-top:28px;}
   @media (max-width:900px){.cards-row{grid-template-columns:repeat(2,1fr);}}
-  .wcard{background:var(--navy-2);padding:22px 20px;}
+  .wcard{background:var(--navy-2);padding:22px 20px;cursor:pointer;transition:background 0.2s ease;}
+  .wcard:hover{background:#12294a;}
   .wcard .wname{font-size:13px;font-weight:600;margin-bottom:4px;}
   .wcard .wqty{font-size:26px;font-weight:600;letter-spacing:-0.02em;}
   .wcard .wlabel{font-size:11px;color:rgba(250,248,244,0.5);margin-top:2px;}
 
-  .map-panel{background:var(--paper);color:var(--ink);margin-top:28px;padding:30px;position:relative;}
-  .map-panel h2{font-size:15px;margin:0 0 4px;color:var(--navy);}
-  .map-panel .sub{font-size:13px;color:var(--ink-dim);margin-bottom:4px;}
-  .map-note{font-size:11px;color:var(--ink-dim);margin-bottom:8px;}
-  .drag-hint{font-size:11px;color:var(--steel);margin-bottom:20px;font-weight:600;}
+  .map-panel{background:var(--paper);color:var(--ink-dim);margin-top:28px;padding:0;position:relative;}
+  .map-head{padding:26px 30px 16px;}
+  .map-head h2{font-size:15px;margin:0 0 4px;color:var(--navy);}
+  .map-head .sub{font-size:13px;color:var(--ink-dim);}
+  #map{ width:100%; height:560px; }
+  .map-fallback{padding:60px 30px;text-align:center;color:var(--ink-dim);font-size:14px;}
 
-  /* ---- 3D scene ---- */
-  .scene{
-    perspective:1500px;
-    height:560px;
-    margin-top:10px;
-    display:flex; align-items:center; justify-content:center;
-    cursor:grab;
-    user-select:none;
-  }
-  .scene.grabbing{cursor:grabbing;}
-  .stage{
-    position:relative;
-    width:820px; height:560px;
-    transform-style:preserve-3d;
-    transform: rotateX(58deg) rotateZ(-10deg);
-    transition: transform 0.15s ease-out;
-  }
-  .floor{
-    position:absolute; inset:0;
-    background:
-      repeating-linear-gradient(0deg, rgba(11,29,51,0.07) 0 1px, transparent 1px 40px),
-      repeating-linear-gradient(90deg, rgba(11,29,51,0.07) 0 1px, transparent 1px 40px),
-      linear-gradient(135deg, #F3EFE6, #E9E3D6);
-    border:1px solid rgba(11,29,51,0.15);
-    box-shadow:0 0 60px rgba(11,29,51,0.15) inset;
-    transform: translateZ(0px);
-  }
-  .region-tag{
-    position:absolute; font-size:11px; color:var(--ink-dim); letter-spacing:0.03em;
-    transform: translateZ(1px) rotateX(-58deg) rotateZ(10deg);
-    transform-origin: left top;
-    white-space:nowrap;
-  }
-
-  .route{
-    position:absolute; height:3px; background:repeating-linear-gradient(90deg, var(--steel) 0 6px, transparent 6px 11px);
-    transform-origin:left center;
-    transform: translateZ(1px);
-    opacity:0.8;
-  }
-  .route-label{
-    position:absolute; font-size:11px; font-family:'Consolas',monospace; color:var(--ink-dim);
-    background:rgba(250,248,244,0.85); padding:2px 6px; white-space:nowrap;
-    transform: translateZ(2px) rotateX(-58deg) rotateZ(10deg);
-    transform-origin:center;
-  }
-
-  .site{
-    position:absolute;
-    transform-style:preserve-3d;
-  }
-  .site-base{
-    position:absolute; width:26px; height:26px; margin-left:-13px; margin-top:-13px;
-    border-radius:50%; background:rgba(58,110,165,0.25);
-    box-shadow:0 0 0 6px rgba(58,110,165,0.08);
-    transform: translateZ(0.5px);
-  }
-  .site.risk .site-base{ background:rgba(184,74,62,0.28); box-shadow:0 0 0 6px rgba(184,74,62,0.1); }
-  .site-upright{
-    position:absolute;
-    transform: rotateX(-58deg) rotateZ(10deg);
-    transform-origin:bottom center;
-    transform-style:preserve-3d;
-  }
-  .site-pole{
-    position:absolute; bottom:0; left:-1.5px; width:3px; background:linear-gradient(var(--steel-light), var(--steel));
-    transform-origin:bottom center;
-    box-shadow:0 0 8px rgba(127,166,204,0.6);
-  }
-  .site.risk .site-pole{ background:linear-gradient(#e8998f, var(--rust)); box-shadow:0 0 8px rgba(184,74,62,0.6); }
-  .site-orb{
-    position:absolute; width:16px; height:16px; margin-left:-8px; border-radius:50%;
-    background:radial-gradient(circle at 35% 30%, #fff, var(--steel) 60%);
-    box-shadow:0 0 10px 2px rgba(127,166,204,0.7);
-    cursor:pointer;
-  }
-  .site.risk .site-orb{ background:radial-gradient(circle at 35% 30%, #fff, var(--rust) 60%); box-shadow:0 0 10px 2px rgba(184,74,62,0.7); }
-  .site-label{
-    position:absolute; left:16px; top:-10px; white-space:nowrap;
-    font-size:12.5px; font-weight:600; color:var(--ink);
-    background:rgba(250,248,244,0.9); padding:2px 8px;
-    pointer-events:none;
-  }
-  .site-qty{
-    position:absolute; left:16px; top:10px; white-space:nowrap;
-    font-size:11px; color:var(--steel); font-weight:600;
-    background:rgba(250,248,244,0.9); padding:1px 8px;
-    pointer-events:none;
-  }
-
-  .legend{display:flex;gap:24px;margin-top:16px;flex-wrap:wrap;}
+  .legend{display:flex;gap:24px;padding:16px 30px;flex-wrap:wrap;}
   .legend-item{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-dim);}
   .legend-dot{width:10px;height:10px;border-radius:50%;background:var(--steel);}
   .legend-dot.risk{background:var(--rust);}
 
-  .tooltip{
-    position:absolute; background:var(--navy); color:var(--paper);
-    padding:16px 18px; min-width:220px; pointer-events:none;
-    opacity:0; transform:translateY(6px); transition:opacity 0.18s ease, transform 0.18s ease;
-    box-shadow:0 14px 32px -10px rgba(0,0,0,0.5); z-index:20; font-size:13px;
-  }
-  .tooltip.show{opacity:1; transform:translateY(0); pointer-events:auto;}
-  .tooltip .t-name{font-size:14px;font-weight:600;margin-bottom:2px;}
-  .tooltip .t-ifs{font-size:10.5px;color:var(--steel-light);font-family:'Consolas',monospace;margin-bottom:10px;}
-  .tooltip .t-row{display:flex;justify-content:space-between;padding:4px 0;border-top:1px solid rgba(250,248,244,0.12);font-size:12.5px;}
-  .tooltip .t-row:first-of-type{border-top:none;}
-  .tooltip .t-row span:last-child{font-weight:600;}
-  .tooltip .t-link{display:block;margin-top:12px;font-size:12px;color:var(--steel-light);text-decoration:none;font-weight:600;}
-  .tooltip .t-status{display:inline-block;margin-top:8px;font-size:10.5px;padding:2px 7px;letter-spacing:0.02em;}
-  .tooltip .t-status.ok{background:rgba(127,166,204,0.18);color:var(--steel-light);}
-  .tooltip .t-status.risk{background:rgba(184,74,62,0.2);color:#e8998f;}
+  .iw{font-family:'Segoe UI',system-ui,sans-serif;min-width:200px;}
+  .iw .iw-name{font-size:14px;font-weight:700;color:#0B1D33;margin-bottom:2px;}
+  .iw .iw-ifs{font-size:10.5px;color:#3A6EA5;font-family:'Consolas',monospace;margin-bottom:8px;}
+  .iw .iw-row{display:flex;justify-content:space-between;font-size:12.5px;color:#333;padding:3px 0;border-top:1px solid #eee;}
+  .iw .iw-row:first-of-type{border-top:none;}
+  .iw .iw-row b{font-weight:700;}
+  .iw a{display:block;margin-top:8px;font-size:12px;color:#3A6EA5;font-weight:700;text-decoration:none;}
 
   footer{max-width:1180px;margin:0 auto;padding:24px 28px 0;font-size:12px;color:rgba(250,248,244,0.4);position:relative;z-index:1;}
 </style>
@@ -198,70 +93,11 @@
   <div class="cards-row" id="cardsRow"></div>
 
   <div class="map-panel">
-    <h2>Four warehouses, real geography — in 3D</h2>
-    <div class="sub">Pin height is data-driven: taller = more stock. Drag to rotate the scene.</div>
-    <div class="map-note">Positions are proportional to real coordinates; the ~40 km Yard-to-Horana gap is distance-compressed so the whole network fits one view (noted, not hidden). Times are road-distance estimates, not live routing.</div>
-    <div class="drag-hint">🖱️ Click and drag to rotate</div>
-
-    <div class="scene" id="scene">
-      <div class="stage" id="stage">
-        <div class="floor"></div>
-        <div class="region-tag" style="left:60px; top:40px;">COLOMBO / WATTALA AREA</div>
-        <div class="region-tag" style="left:520px; top:370px;">HORANA · PORUWADANDA</div>
-
-        <!-- Route: Yard to Horana cluster -->
-        <div class="route" id="routeMain"></div>
-        <div class="route-label" id="routeMainLabel">~54 km road · ~87 min est.</div>
-
-        <!-- Cluster internal routes -->
-        <div class="route" id="routePlant180"></div>
-        <div class="route-label" id="labelPlant180">~4 km · ~7 min</div>
-        <div class="route" id="routePlantMuna"></div>
-        <div class="route-label" id="labelPlantMuna">~5 km · ~7 min</div>
-
-        <!-- Sites -->
-        <div class="site" id="site-Yard" data-loc="Yard" style="left:110px; top:90px;">
-          <div class="site-base"></div>
-          <div class="site-upright" id="upright-Yard">
-            <div class="site-pole" id="pole-Yard"></div>
-            <div class="site-orb" id="orb-Yard"></div>
-            <div class="site-label" id="lbl-Yard">Spectra Yard</div>
-            <div class="site-qty" id="qty-Yard">—</div>
-          </div>
-        </div>
-
-        <div class="site" id="site-PlantWH" data-loc="Plant WH" style="left:560px; top:400px;">
-          <div class="site-base"></div>
-          <div class="site-upright" id="upright-PlantWH">
-            <div class="site-pole" id="pole-PlantWH"></div>
-            <div class="site-orb" id="orb-PlantWH"></div>
-            <div class="site-label" id="lbl-PlantWH">Plant Warehouse</div>
-            <div class="site-qty" id="qty-PlantWH">—</div>
-          </div>
-        </div>
-
-        <div class="site" id="site-180CWH" data-loc="180/C WH" style="left:660px; top:380px;">
-          <div class="site-base"></div>
-          <div class="site-upright" id="upright-180CWH">
-            <div class="site-pole" id="pole-180CWH"></div>
-            <div class="site-orb" id="orb-180CWH"></div>
-            <div class="site-label" id="lbl-180CWH">180/C Warehouse</div>
-            <div class="site-qty" id="qty-180CWH">—</div>
-          </div>
-        </div>
-
-        <div class="site" id="site-MunagamaWH" data-loc="Munagama WH" style="left:610px; top:460px;">
-          <div class="site-base"></div>
-          <div class="site-upright" id="upright-MunagamaWH">
-            <div class="site-pole" id="pole-MunagamaWH"></div>
-            <div class="site-orb" id="orb-MunagamaWH"></div>
-            <div class="site-label" id="lbl-MunagamaWH">Munagama Warehouse</div>
-            <div class="site-qty" id="qty-MunagamaWH">—</div>
-          </div>
-        </div>
-      </div>
+    <div class="map-head">
+      <h2>Real map — grey theme, live stock per site</h2>
+      <div class="sub">Click a pin (or a card above) for full details. Marker size reflects stock volume.</div>
     </div>
-
+    <div id="map"></div>
     <div class="legend">
       <div class="legend-item"><span class="legend-dot"></span>Normal stock level</div>
       <div class="legend-item"><span class="legend-dot risk"></span>Has Cost Risk items (14+ days, Yard)</div>
@@ -270,18 +106,39 @@
 
 </div>
 
-<div class="tooltip" id="tooltip"></div>
-
-<footer>Warehouse coordinates from Google Places data. Distances estimated from real coordinates using typical Sri Lankan road-distance modeling — not live traffic routing. The 3D scene is pure CSS (no external library), so it works fully offline / on restricted networks.</footer>
+<footer>Warehouse coordinates from Google Places data. Map tiles and geocoding © Google.</footer>
 
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbzJFWD_AQc8UwEkVHcb3q9lDmzoMcO-fq9qDX3wIEAoUi8gIZN09Uxbbjfj3Z30spjjpw/exec";
+const MAPS_API_KEY = "PASTE_YOUR_GOOGLE_MAPS_API_KEY_HERE";
+
+// Grey / "Silver" style
+const GREY_STYLE = [
+  {elementType:"geometry",stylers:[{color:"#f5f5f5"}]},
+  {elementType:"labels.icon",stylers:[{visibility:"off"}]},
+  {elementType:"labels.text.fill",stylers:[{color:"#616161"}]},
+  {elementType:"labels.text.stroke",stylers:[{color:"#f5f5f5"}]},
+  {featureType:"administrative.land_parcel",stylers:[{visibility:"off"}]},
+  {featureType:"administrative.land_parcel",elementType:"labels.text.fill",stylers:[{color:"#bdbdbd"}]},
+  {featureType:"poi",stylers:[{visibility:"off"}]},
+  {featureType:"poi",elementType:"geometry",stylers:[{color:"#eeeeee"}]},
+  {featureType:"poi",elementType:"labels.text.fill",stylers:[{color:"#757575"}]},
+  {featureType:"poi.park",elementType:"geometry",stylers:[{color:"#e5e5e5"}]},
+  {featureType:"road",elementType:"geometry",stylers:[{color:"#ffffff"}]},
+  {featureType:"road.arterial",elementType:"labels.text.fill",stylers:[{color:"#757575"}]},
+  {featureType:"road.highway",elementType:"geometry",stylers:[{color:"#dadada"}]},
+  {featureType:"road.highway",elementType:"labels.text.fill",stylers:[{color:"#616161"}]},
+  {featureType:"road.local",elementType:"labels.text.fill",stylers:[{color:"#9e9e9e"}]},
+  {featureType:"transit",stylers:[{visibility:"off"}]},
+  {featureType:"water",elementType:"geometry",stylers:[{color:"#c9c9c9"}]},
+  {featureType:"water",elementType:"labels.text.fill",stylers:[{color:"#9e9e9e"}]}
+];
 
 const SITES = {
-  "Yard":         { id: "Yard",       label: "Spectra Yard",        ifs: "BOXWH / TWBOXWH",              detailAnchor: "zone-3" },
-  "Plant WH":     { id: "PlantWH",    label: "Plant Warehouse",     ifs: "BOX / TWBOX",                  detailAnchor: "zone-0" },
-  "180/C WH":     { id: "180CWH",     label: "180/C Warehouse",     ifs: "BOX-180C / TWBOX-180C",        detailAnchor: "zone-1" },
-  "Munagama WH":  { id: "MunagamaWH", label: "Munagama Warehouse",  ifs: "BOX-MUN / TWBOX-MUN",          detailAnchor: "zone-2" }
+  "Yard":         { label: "Spectra Yard",       ifs: "BOXWH / TWBOXWH",         lat: 7.0183799, lng: 79.8795426, anchor: "zone-3" },
+  "Plant WH":     { label: "Plant Warehouse",    ifs: "BOX / TWBOX",             lat: 6.7434949, lng: 80.1101455, anchor: "zone-0" },
+  "180/C WH":     { label: "180/C Warehouse",    ifs: "BOX-180C / TWBOX-180C",   lat: 6.7442,    lng: 80.1108,    anchor: "zone-1" },
+  "Munagama WH":  { label: "Munagama Warehouse", ifs: "BOX-MUN / TWBOX-MUN",     lat: 6.7235692, lng: 80.0881115, anchor: "zone-2" }
 };
 
 function fmt(n){ return Number(n).toLocaleString('en-US'); }
@@ -300,151 +157,126 @@ function buildStats(byLocation, ageList) {
   return stats;
 }
 
-function renderCards(stats) {
+function renderCards(stats, onClick) {
   const el = document.getElementById('cardsRow');
   el.innerHTML = Object.keys(SITES).map(key => {
     const s = stats[key];
-    return `<div class="wcard">
+    return `<div class="wcard" data-loc="${key}">
       <div class="wname">${SITES[key].label}</div>
       <div class="wqty">${fmt(s.total)}</div>
       <div class="wlabel">units · ${s.items} line item${s.items===1?'':'s'}</div>
     </div>`;
   }).join('');
+  el.querySelectorAll('.wcard').forEach(card => {
+    card.addEventListener('click', () => onClick(card.dataset.loc));
+  });
 }
 
-function applyPinHeights(stats) {
+let map, markers = {}, infoWindow;
+
+function initMapWithData(stats) {
+  map = new google.maps.Map(document.getElementById('map'), {
+    zoom: 10,
+    center: { lat: 6.88, lng: 79.99 },
+    styles: GREY_STYLE,
+    disableDefaultUI: false,
+    streetViewControl: false,
+    mapTypeControl: false
+  });
+  infoWindow = new google.maps.InfoWindow();
+
+  const bounds = new google.maps.LatLngBounds();
   const totals = Object.keys(SITES).map(k => stats[k].total);
   const max = Math.max(...totals, 1);
-  const MIN_H = 26, MAX_H = 160;
 
   Object.keys(SITES).forEach(key => {
     const meta = SITES[key];
     const s = stats[key];
-    const h = Math.round(MIN_H + (s.total / max) * (MAX_H - MIN_H));
+    const scale = 10 + (s.total / max) * 18; // marker radius scales with stock
+    const color = s.riskCount > 0 ? '#B84A3E' : '#3A6EA5';
 
-    const pole = document.getElementById('pole-' + meta.id);
-    const orb = document.getElementById('orb-' + meta.id);
-    const lbl = document.getElementById('lbl-' + meta.id);
-    const qty = document.getElementById('qty-' + meta.id);
+    const marker = new google.maps.Marker({
+      position: { lat: meta.lat, lng: meta.lng },
+      map: map,
+      title: meta.label,
+      icon: {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale: scale,
+        fillColor: color,
+        fillOpacity: 0.85,
+        strokeColor: '#FAF8F4',
+        strokeWeight: 2
+      }
+    });
 
-    pole.style.height = h + 'px';
-    orb.style.bottom = h + 'px';
-    lbl.style.bottom = (h + 6) + 'px';
-    qty.style.bottom = (h - 14) + 'px';
-    qty.textContent = fmt(s.total) + ' units';
+    const statusHtml = s.riskCount > 0
+      ? `<span style="color:#B84A3E;font-weight:700;">${s.riskCount} Cost Risk item${s.riskCount===1?'':'s'}</span>`
+      : `<span style="color:#3A6EA5;">No cost-risk items</span>`;
 
-    if (s.riskCount > 0) document.getElementById('site-' + meta.id).classList.add('risk');
+    const content = `<div class="iw">
+      <div class="iw-name">${meta.label}</div>
+      <div class="iw-ifs">${meta.ifs}</div>
+      <div class="iw-row"><span>Total stock</span><b>${fmt(s.total)} units</b></div>
+      <div class="iw-row"><span>Line items</span><b>${s.items}</b></div>
+      <div class="iw-row"><span>Oldest container</span><b>${s.maxAge} day${s.maxAge===1?'':'s'}</b></div>
+      <div class="iw-row">${statusHtml}</div>
+      <a href="detail.html#${meta.anchor}">View full detail →</a>
+    </div>`;
+
+    marker.addListener('click', () => {
+      infoWindow.setContent(content);
+      infoWindow.open(map, marker);
+    });
+
+    markers[key] = { marker, content };
+    bounds.extend(marker.getPosition());
+  });
+
+  map.fitBounds(bounds, 60);
+
+  renderCards(stats, (key) => {
+    const m = markers[key];
+    if (!m) return;
+    map.panTo(m.marker.getPosition());
+    map.setZoom(14);
+    infoWindow.setContent(m.content);
+    infoWindow.open(map, m.marker);
   });
 }
 
-function setupTooltips(stats) {
-  const tooltip = document.getElementById('tooltip');
-  Object.keys(SITES).forEach(key => {
-    const meta = SITES[key];
-    const s = stats[key];
-    const orb = document.getElementById('orb-' + meta.id);
-    if (!orb) return;
-
-    function show() {
-      const statusClass = s.riskCount > 0 ? 'risk' : 'ok';
-      const statusText = s.riskCount > 0 ? `${s.riskCount} Cost Risk item${s.riskCount===1?'':'s'}` : 'No cost-risk items';
-      tooltip.innerHTML = `
-        <div class="t-name">${meta.label}</div>
-        <div class="t-ifs">${meta.ifs}</div>
-        <div class="t-row"><span>Total stock</span><span>${fmt(s.total)} units</span></div>
-        <div class="t-row"><span>Line items</span><span>${s.items}</span></div>
-        <div class="t-row"><span>Oldest container</span><span>${s.maxAge} day${s.maxAge===1?'':'s'}</span></div>
-        <span class="t-status ${statusClass}">${statusText}</span>
-        <a class="t-link" href="detail.html#${meta.detailAnchor}">View full detail →</a>
-      `;
-      position();
-      tooltip.classList.add('show');
-    }
-    function position() {
-      const r = orb.getBoundingClientRect();
-      tooltip.style.left = (r.right + window.scrollX + 14) + 'px';
-      tooltip.style.top = (r.top + window.scrollY - 10) + 'px';
-    }
-    function hide() { tooltip.classList.remove('show'); }
-
-    orb.addEventListener('mouseenter', show);
-    orb.addEventListener('mousemove', position);
-    orb.addEventListener('mouseleave', hide);
-    orb.addEventListener('click', () => { window.location.href = `detail.html#${meta.detailAnchor}`; });
-  });
-}
-
-function positionRoutes() {
-  // Coordinates match the inline left/top on each .site element above
-  const pts = {
-    Yard: [110, 90], PlantWH: [560, 400], WH180C: [660, 380], MunagamaWH: [610, 460]
-  };
-  function setRoute(elId, labelId, [x1,y1], [x2,y2], text) {
-    const dx = x2-x1, dy = y2-y1;
-    const len = Math.sqrt(dx*dx+dy*dy);
-    const angle = Math.atan2(dy,dx) * 180/Math.PI;
-    const line = document.getElementById(elId);
-    line.style.left = x1+'px'; line.style.top = y1+'px';
-    line.style.width = len+'px';
-    line.style.transform = `translateZ(1px) rotate(${angle}deg)`;
-    const label = document.getElementById(labelId);
-    if (label && text) label.textContent = text;
-    if (label) { label.style.left = ((x1+x2)/2 - 55)+'px'; label.style.top = ((y1+y2)/2 - 10)+'px'; }
-  }
-  setRoute('routeMain', 'routeMainLabel', pts.Yard, pts.PlantWH, null);
-  setRoute('routePlant180', 'labelPlant180', pts.PlantWH, pts.WH180C, null);
-  setRoute('routePlantMuna', 'labelPlantMuna', pts.PlantWH, pts.MunagamaWH, null);
-}
-
-function setupDrag() {
-  const scene = document.getElementById('scene');
-  const stage = document.getElementById('stage');
-  let dragging = false, lastX = 0, lastY = 0;
-  let rotZ = -10, rotX = 58;
-
-  function apply() {
-    stage.style.transform = `rotateX(${rotX}deg) rotateZ(${rotZ}deg)`;
-  }
-  scene.addEventListener('mousedown', e => { dragging = true; lastX = e.clientX; lastY = e.clientY; scene.classList.add('grabbing'); });
-  window.addEventListener('mouseup', () => { dragging = false; scene.classList.remove('grabbing'); });
-  window.addEventListener('mousemove', e => {
-    if (!dragging) return;
-    const dx = e.clientX - lastX, dy = e.clientY - lastY;
-    rotZ += dx * 0.25;
-    rotX = Math.max(30, Math.min(80, rotX - dy * 0.2));
-    lastX = e.clientX; lastY = e.clientY;
-    apply();
-  });
-  // touch support
-  scene.addEventListener('touchstart', e => { dragging = true; lastX = e.touches[0].clientX; lastY = e.touches[0].clientY; }, {passive:true});
-  window.addEventListener('touchend', () => { dragging = false; });
-  window.addEventListener('touchmove', e => {
-    if (!dragging) return;
-    const dx = e.touches[0].clientX - lastX, dy = e.touches[0].clientY - lastY;
-    rotZ += dx * 0.25;
-    rotX = Math.max(30, Math.min(80, rotX - dy * 0.2));
-    lastX = e.touches[0].clientX; lastY = e.touches[0].clientY;
-    apply();
-  }, {passive:true});
-}
-
-async function load(){
-  positionRoutes();
-  setupDrag();
+async function loadDataThenMap(){
   try{
     const res = await fetch(API_URL);
     const data = await res.json();
     document.getElementById('dateLabel').innerHTML = 'Latest stock date <strong>' + (data.summary.latestDate || '—') + '</strong>';
-    const stats = buildStats(data.byLocation || {}, data.ageList || []);
-    renderCards(stats);
-    applyPinHeights(stats);
-    setupTooltips(stats);
+    window.__stats = buildStats(data.byLocation || {}, data.ageList || []);
+    if (window.google && window.google.maps) initMapWithData(window.__stats);
   }catch(err){
     document.getElementById('dateLabel').textContent = 'Could not load data';
     console.error(err);
   }
 }
-load();
+
+window.gmapsCallback = function() {
+  if (window.__stats) initMapWithData(window.__stats);
+  else window.__mapsReady = true;
+};
+
+loadDataThenMap().then(() => {
+  if (window.__mapsReady && window.__stats) initMapWithData(window.__stats);
+});
 </script>
+
+<script>
+  if (MAPS_API_KEY && MAPS_API_KEY.indexOf('PASTE_') === -1) {
+    var s = document.createElement('script');
+    s.src = 'https://maps.googleapis.com/maps/api/js?key=' + MAPS_API_KEY + '&callback=gmapsCallback';
+    s.async = true;
+    document.head.appendChild(s);
+  } else {
+    document.getElementById('map').innerHTML = '<div class="map-fallback">Add your Google Maps API key in the script (MAPS_API_KEY) to load the live map.</div>';
+  }
+</script>
+
 </body>
 </html>
