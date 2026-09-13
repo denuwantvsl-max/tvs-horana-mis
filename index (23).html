@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TVS Lanka Horana — MIS</title>
+<style>
+  :root{
+    --navy:#0B1D33;
+    --paper:#FAF8F4;
+    --paper-dim:#EFEBE3;
+    --steel:#3A6EA5;
+    --steel-light:#7FA6CC;
+    --amber:#C9862A;
+    --ink:#0B1D33;
+    --ink-dim:#5B6B80;
+    --line:rgba(11,29,51,0.14);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--navy);
+    color:var(--paper);
+    font-family:'Segoe UI','Inter',system-ui,-apple-system,sans-serif;
+    line-height:1.4;
+  }
+  a{color:inherit;text-decoration:none;}
+
+  @media (prefers-reduced-motion: no-preference){
+    @keyframes riseIn{
+      from{opacity:0;transform:translateY(14px);}
+      to{opacity:1;transform:translateY(0);}
+    }
+    @keyframes pulseDot{
+      0%,100%{opacity:1;}
+      50%{opacity:0.35;}
+    }
+    header{animation:riseIn 0.6s ease both;}
+    .lede{animation:riseIn 0.6s ease 0.1s both;}
+    .mod{animation:riseIn 0.55s ease both;}
+    .mod:nth-child(1){animation-delay:0.15s;}
+    .mod:nth-child(2){animation-delay:0.22s;}
+    .mod:nth-child(3){animation-delay:0.29s;}
+    .mod:nth-child(4){animation-delay:0.36s;}
+    .mod:nth-child(5){animation-delay:0.43s;}
+    .external{animation:riseIn 0.6s ease 0.55s both;}
+  }
+
+  .live-dot{
+    display:inline-block;width:6px;height:6px;border-radius:50%;
+    background:var(--steel-light);margin-right:6px;
+    animation:pulseDot 1.8s ease-in-out infinite;
+  }
+
+  .wrap{max-width:1180px;margin:0 auto;padding:0 28px 80px;}
+
+  header{
+    padding:56px 28px 32px;
+    max-width:1180px;
+    margin:0 auto;
+    border-bottom:1px solid rgba(250,248,244,0.14);
+  }
+  .brand{font-size:13px;letter-spacing:0.02em;color:var(--steel-light);margin-bottom:8px;}
+  h1{font-size:38px;font-weight:600;margin:0 0 10px;letter-spacing:-0.01em;}
+  .lede{font-size:15px;color:rgba(250,248,244,0.6);max-width:520px;}
+
+  .modules{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:1px;
+    background:rgba(250,248,244,0.14);
+    margin:44px 0;
+  }
+  @media (max-width:800px){.modules{grid-template-columns:1fr;}}
+
+  .mod{
+    background:var(--navy);
+    padding:30px 28px;
+    display:flex;
+    flex-direction:column;
+    min-height:150px;
+    transition:transform 0.25s ease, background 0.25s ease;
+  }
+  .mod.link:hover{transform:translateY(-3px);}
+  .mod .status{
+    font-size:11px;
+    letter-spacing:0.02em;
+    color:var(--steel-light);
+    margin-bottom:14px;
+  }
+  .mod.soon .status{color:rgba(250,248,244,0.35);}
+  .mod h2{font-size:19px;font-weight:600;margin:0 0 8px;}
+  .mod.soon h2{color:rgba(250,248,244,0.4);}
+  .mod p{font-size:13px;color:rgba(250,248,244,0.55);margin:0;flex:1;}
+  .mod.soon p{color:rgba(250,248,244,0.3);}
+  .mod .go{
+    margin-top:18px;
+    font-size:13px;
+    font-weight:600;
+    color:var(--paper);
+  }
+  .mod.link:hover{background:var(--navy);}
+  a.mod.link{cursor:pointer;}
+  a.mod.link:hover h2{color:var(--steel-light);}
+
+  .external{
+    margin-top:44px;
+    padding-top:32px;
+    border-top:1px solid rgba(250,248,244,0.14);
+  }
+  .external .label{font-size:13px;color:rgba(250,248,244,0.5);margin-bottom:16px;}
+  .ext-row{display:flex;gap:1px;background:rgba(250,248,244,0.14);}
+  @media (max-width:700px){.ext-row{flex-direction:column;}}
+  .ext-item{
+    flex:1;
+    background:var(--navy);
+    padding:22px 24px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    transition:background 0.25s ease;
+  }
+  .ext-item:hover{background:rgba(58,110,165,0.08);}
+  .ext-item span{font-size:14px;font-weight:600;}
+  .ext-item small{display:block;font-size:12px;color:rgba(250,248,244,0.5);margin-top:4px;font-weight:400;}
+  .ext-item .arrow{color:var(--steel-light);font-size:18px;}
+  a.ext-item:hover span{color:var(--steel-light);}
+
+  footer{max-width:1180px;margin:0 auto;padding:20px 28px 0;font-size:12px;color:rgba(250,248,244,0.4);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">TVS LANKA · HORANA ASSEMBLY PLANT</div>
+  <h1>Management Information System</h1>
+  <div class="lede">Live stock, delivery, production, quality and cost tracking for the Horana plant, in one place.</div>
+</header>
+
+<div class="wrap">
+
+  <div class="modules">
+    <a class="mod link" href="stores/index.html">
+      <div class="status"><span class="live-dot"></span>LIVE</div>
+      <h2>Stores</h2>
+      <p>Container-level stock tracking, warehouse location, and aging against the 14-day Spectra Yard threshold.</p>
+      <div class="go">Open →</div>
+    </a>
+    <div class="mod soon">
+      <div class="status">IN PROGRESS</div>
+      <h2>Delivery</h2>
+      <p>Dealer delivery status, weekly requested vs. delivered quantities, and pending delivery tracking.</p>
+    </div>
+    <div class="mod soon">
+      <div class="status">PLANNED</div>
+      <h2>Production</h2>
+      <p>Batch production plans, daily assembly output, and model-wise build tracking.</p>
+    </div>
+    <div class="mod soon">
+      <div class="status">PLANNED</div>
+      <h2>Quality</h2>
+      <p>Non-conformance tracking, corrective actions, and quality objective monitoring.</p>
+    </div>
+    <div class="mod soon">
+      <div class="status">PLANNED</div>
+      <h2>Costing</h2>
+      <p>Capital project tracking and cost monitoring across ongoing plant initiatives.</p>
+    </div>
+  </div>
+
+  <div class="external">
+    <div class="label">Other plant systems</div>
+    <div class="ext-row">
+      <a class="ext-item" href="https://denuwantvsl-max.github.io/tvs-iso-dashboard/index.html" target="_blank" rel="noopener">
+        <span>ISO 9001 Dashboard<small>Compliance & documentation tracking</small></span>
+        <span class="arrow">↗</span>
+      </a>
+      <a class="ext-item" href="https://eclectic-sherbet-f54ab4.netlify.app" target="_blank" rel="noopener">
+        <span>Production Dashboard<small>Assembly floor signage, live</small></span>
+        <span class="arrow">↗</span>
+      </a>
+    </div>
+  </div>
+
+</div>
+
+<footer>TVS Lanka Horana Assembly Plant — Management Information System</footer>
+</body>
+</html>
