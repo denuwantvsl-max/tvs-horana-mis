@@ -137,7 +137,7 @@ const GREY_STYLE = [
 const SITES = {
   "Yard":         { label: "Spectra Yard",       ifs: "BOXWH / TWBOXWH",         lat: 7.0183799, lng: 79.8795426, anchor: "zone-3" },
   "Plant WH":     { label: "Plant Warehouse",    ifs: "BOX / TWBOX",             lat: 6.7434949, lng: 80.1101455, anchor: "zone-0" },
-  "180/C WH":     { label: "180/C Warehouse",    ifs: "BOX-180C / TWBOX-180C",   lat: 6.7442,    lng: 80.1108,    anchor: "zone-1" },
+  "180/C WH":     { label: "180/C Warehouse",    ifs: "BOX-180C / TWBOX-180C",   lat: 6.7420,    lng: 80.1112,    anchor: "zone-1" },
   "Munagama WH":  { label: "Munagama Warehouse", ifs: "BOX-MUN / TWBOX-MUN",     lat: 6.7235692, lng: 80.0881115, anchor: "zone-2" }
 };
 
@@ -175,6 +175,30 @@ function renderCards(stats, onClick) {
 let map, markers = {}, infoWindow;
 
 function initMapWithData(stats) {
+  class RouteLabelOverlay extends google.maps.OverlayView {
+    constructor(position, div, map) {
+      super();
+      this.position = position;
+      this.div = div;
+      this.setMap(map);
+    }
+    onAdd() {
+      this.div.style.position = 'absolute';
+      this.getPanes().floatPane.appendChild(this.div);
+    }
+    draw() {
+      const proj = this.getProjection();
+      if (!proj) return;
+      const pt = proj.fromLatLngToDivPixel(new google.maps.LatLng(this.position.lat, this.position.lng));
+      this.div.style.left = (pt.x - this.div.offsetWidth/2) + 'px';
+      this.div.style.top = (pt.y - 10) + 'px';
+    }
+    onRemove() {
+      if (this.div.parentNode) this.div.parentNode.removeChild(this.div);
+    }
+  }
+  window.RouteLabelOverlay = RouteLabelOverlay;
+
   map = new google.maps.Map(document.getElementById('map'), {
     zoom: 10,
     center: { lat: 6.88, lng: 79.99 },
@@ -223,6 +247,13 @@ function initMapWithData(stats) {
       <a href="detail.html#${meta.anchor}">View full detail →</a>
     </div>`;
 
+    marker.addListener('mouseover', () => {
+      infoWindow.setContent(content);
+      infoWindow.open(map, marker);
+    });
+    marker.addListener('mouseout', () => {
+      infoWindow.close();
+    });
     marker.addListener('click', () => {
       infoWindow.setContent(content);
       infoWindow.open(map, marker);
@@ -233,6 +264,40 @@ function initMapWithData(stats) {
   });
 
   map.fitBounds(bounds, 60);
+
+  // Route lines with real distance/time labels
+  const ROUTES = [
+    { from: "Yard", to: "Munagama WH", text: "~54 km · ~88 min est." },
+    { from: "Munagama WH", to: "Plant WH", text: "~4 km · ~7 min est." }
+  ];
+  ROUTES.forEach(r => {
+    const p1 = { lat: SITES[r.from].lat, lng: SITES[r.from].lng };
+    const p2 = { lat: SITES[r.to].lat, lng: SITES[r.to].lng };
+    new google.maps.Polyline({
+      path: [p1, p2],
+      geodesic: true,
+      strokeColor: '#3A6EA5',
+      strokeOpacity: 0.7,
+      strokeWeight: 2,
+      icons: [{ icon: { path: 'M 0,-1 0,1', strokeOpacity: 1, scale: 3 }, offset: '0', repeat: '12px' }],
+      map: map
+    });
+    const mid = { lat: (p1.lat+p2.lat)/2, lng: (p1.lng+p2.lng)/2 };
+    const labelDiv = document.createElement('div');
+    labelDiv.style.cssText = 'background:#0B1D33;color:#FAF8F4;padding:3px 8px;font-size:11px;font-family:Consolas,monospace;white-space:nowrap;border-radius:2px;box-shadow:0 2px 6px rgba(0,0,0,0.3);';
+    labelDiv.textContent = r.text;
+    new RouteLabelOverlay(mid, labelDiv, map);
+  });
+
+  // "On-site" note for Plant <-> 180/C (negligible distance)
+  const onSiteMid = {
+    lat: (SITES["Plant WH"].lat + SITES["180/C WH"].lat)/2,
+    lng: (SITES["Plant WH"].lng + SITES["180/C WH"].lng)/2
+  };
+  const onSiteDiv = document.createElement('div');
+  onSiteDiv.style.cssText = 'background:#C9862A;color:#0B1D33;padding:3px 8px;font-size:11px;font-weight:700;white-space:nowrap;border-radius:2px;box-shadow:0 2px 6px rgba(0,0,0,0.3);';
+  onSiteDiv.textContent = 'On-site · negligible';
+  new RouteLabelOverlay(onSiteMid, onSiteDiv, map);
 
   renderCards(stats, (key) => {
     const m = markers[key];
