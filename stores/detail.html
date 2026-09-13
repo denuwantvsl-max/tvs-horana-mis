@@ -260,6 +260,23 @@ function renderZones(byLocation){
   }, reduceMotion ? 0 : 500);
 }
 
+function colorToTint(colorName){
+  const c = colorName.toUpperCase();
+  // A small dot in the actual color, plus a very light row tint - subtle enough to keep text readable
+  const map = [
+    [/RED|RCR|RC-RED/,        {dot:'#B84A3E', tint:'rgba(184,74,62,0.07)'}],
+    [/COPPER/,                {dot:'#C9862A', tint:'rgba(201,134,42,0.08)'}],
+    [/BLUE/,                  {dot:'#3A6EA5', tint:'rgba(58,110,165,0.07)'}],
+    [/GREEN/,                 {dot:'#4B8B5E', tint:'rgba(75,139,94,0.07)'}],
+    [/BLACK|BLK/,             {dot:'#2A2A2A', tint:'rgba(42,42,42,0.06)'}],
+    [/GREY|GRY|GRAY/,         {dot:'#8A8F98', tint:'rgba(138,143,152,0.08)'}],
+    [/WHITE|WHT/,             {dot:'#C9C4B8', tint:'rgba(201,196,184,0.10)'}],
+    [/YEL/,                   {dot:'#D4B106', tint:'rgba(212,177,6,0.08)'}],
+  ];
+  for (const [re, style] of map) if (re.test(c)) return style;
+  return {dot:'#B0B0B0', tint:'transparent'};
+}
+
 function renderZoneDetails(byLocation){
   const el = document.getElementById('zoneDetails');
   el.innerHTML = ZONE_ORDER.map((z, i) => {
@@ -269,16 +286,18 @@ function renderZoneDetails(byLocation){
     });
     const total = rows.reduce((s,r)=>s+r.qty,0);
 
-    const rowsHtml = rows.length ? rows.map((r,ri) => `
-      <tr style="animation-delay:${Math.min(ri*0.02,0.5)}s">
+    const rowsHtml = rows.length ? rows.map((r,ri) => {
+      const cs = colorToTint(r.color);
+      return `
+      <tr style="animation-delay:${Math.min(ri*0.02,0.5)}s; background:${cs.tint};">
         <td><span class="cat-tag">${r.category}</span></td>
         <td>${r.model}</td>
-        <td>${r.color}</td>
+        <td><span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${cs.dot};margin-right:7px;vertical-align:middle;border:1px solid rgba(0,0,0,0.15);"></span>${r.color}</td>
         <td class="mono">${r.wOrder || '—'}</td>
         <td class="mono">${r.container || (r.rowType === 'YardSubtotal' ? '<span class="yard-tag">YARD STOCK</span>' : '—')}</td>
         <td class="num">${fmt(r.qty)}</td>
       </tr>
-    `).join('') : '';
+    `;}).join('') : '';
 
     return `
       <div class="zone-detail" id="zone-${i}">
