@@ -3,16 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TVS Lanka — Stores Map</title>
+<title>TVS Lanka — Stores Overview</title>
 <style>
   :root{
     --navy:#0B1D33;
     --navy-2:#0E2440;
     --paper:#FAF8F4;
+    --paper-dim:#EFEBE3;
     --steel:#3A6EA5;
     --steel-light:#7FA6CC;
+    --amber:#C9862A;
     --rust:#B84A3E;
+    --violet:#6B5B95;
+    --ink:#0B1D33;
     --ink-dim:#5B6B80;
+    --line:rgba(11,29,51,0.14);
     --grid-line:rgba(127,166,204,0.09);
   }
   *{box-sizing:border-box;}
@@ -45,33 +50,59 @@
   @keyframes pulseGlow{0%,100%{box-shadow:0 0 0 0 rgba(127,166,204,0.55);}50%{box-shadow:0 0 0 5px rgba(127,166,204,0);}}
   .live-badge .dot{animation:pulseGlow 1.8s ease-in-out infinite;}
 
-  .cards-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(250,248,244,0.14);margin-top:28px;}
-  @media (max-width:900px){.cards-row{grid-template-columns:repeat(2,1fr);}}
-  .wcard{background:var(--navy-2);padding:22px 20px;cursor:pointer;transition:background 0.2s ease;}
-  .wcard:hover{background:#12294a;}
-  .wcard .wname{font-size:13px;font-weight:600;margin-bottom:4px;}
-  .wcard .wqty{font-size:26px;font-weight:600;letter-spacing:-0.02em;}
-  .wcard .wlabel{font-size:11px;color:rgba(250,248,244,0.5);margin-top:2px;}
+  /* ---- Provenance banner ---- */
+  .provenance{
+    margin-top:26px; padding:14px 20px; background:var(--navy-2);
+    border-left:3px solid var(--steel-light);
+    font-size:12.5px; color:rgba(250,248,244,0.75); display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  }
+  .provenance b{color:var(--paper);}
+  .provenance .unverified{color:var(--amber);}
+  .source-tag{
+    font-size:11px; color:var(--ink-dim); margin:10px 0 18px; font-style:italic;
+  }
 
-  .map-panel{background:var(--paper);color:var(--ink-dim);margin-top:28px;padding:0;position:relative;}
-  .map-head{padding:26px 30px 16px;}
-  .map-head h2{font-size:15px;margin:0 0 4px;color:var(--navy);}
-  .map-head .sub{font-size:13px;color:var(--ink-dim);}
-  #map{ width:100%; height:560px; }
-  .map-fallback{padding:60px 30px;text-align:center;color:var(--ink-dim);font-size:14px;}
+  .summary{display:flex;gap:0;margin:20px 0 8px;border-bottom:1px solid rgba(250,248,244,0.14);flex-wrap:wrap;}
+  .summary .stat{padding:16px 28px 16px 0;margin-right:28px;}
+  .summary .num{font-size:26px;font-weight:600;letter-spacing:-0.02em;}
+  .summary .label{font-size:12px;color:rgba(250,248,244,0.5);margin-top:2px;}
+  .summary .stat.warn .num{color:var(--amber);}
+  .summary .stat.risk .num{color:var(--rust);}
+  .summary .stat.good .num{color:var(--steel-light);}
 
-  .legend{display:flex;gap:24px;padding:16px 30px;flex-wrap:wrap;}
-  .legend-item{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-dim);}
-  .legend-dot{width:10px;height:10px;border-radius:50%;background:var(--steel);}
-  .legend-dot.risk{background:var(--rust);}
+  .panel{background:var(--paper);color:var(--ink);margin-top:28px;padding:28px 30px;}
+  .panel h2{font-size:15px;margin:0 0 4px;color:var(--navy);}
+  .panel .sub{font-size:13px;color:var(--ink-dim);margin-bottom:4px;}
 
-  .iw{font-family:'Segoe UI',system-ui,sans-serif;min-width:200px;}
-  .iw .iw-name{font-size:14px;font-weight:700;color:#0B1D33;margin-bottom:2px;}
-  .iw .iw-ifs{font-size:10.5px;color:#3A6EA5;font-family:'Consolas',monospace;margin-bottom:8px;}
-  .iw .iw-row{display:flex;justify-content:space-between;font-size:12.5px;color:#333;padding:3px 0;border-top:1px solid #eee;}
-  .iw .iw-row:first-of-type{border-top:none;}
-  .iw .iw-row b{font-weight:700;}
-  .iw a{display:block;margin-top:8px;font-size:12px;color:#3A6EA5;font-weight:700;text-decoration:none;}
+  /* ---- Model-wise infographic rows ---- */
+  .legend{display:flex;gap:18px;margin:14px 0 20px;flex-wrap:wrap;}
+  .legend-item{display:flex;align-items:center;gap:7px;font-size:11.5px;color:var(--ink-dim);}
+  .legend-swatch{width:11px;height:11px;border-radius:2px;}
+
+  .model-row{padding:14px 0;border-bottom:1px solid var(--line);}
+  .model-row:last-child{border-bottom:none;}
+  .model-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;flex-wrap:wrap;gap:6px;}
+  .model-name{font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px;}
+  .model-dot{width:10px;height:10px;border-radius:50%;border:1px solid rgba(0,0,0,0.15);}
+  .model-total{font-size:14px;font-weight:600;color:var(--steel);}
+  .stack-bar{display:flex;height:14px;width:100%;background:var(--paper-dim);overflow:hidden;border-radius:2px;}
+  .stack-seg{height:100%;}
+  .model-breakdown-text{font-size:11.5px;color:var(--ink-dim);margin-top:6px;}
+
+  /* ---- New shipments ---- */
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  thead th{text-align:left;font-weight:600;color:var(--ink-dim);font-size:11px;padding:10px 12px 10px 0;border-bottom:1px solid var(--line);}
+  tbody td{padding:9px 12px 9px 0;border-bottom:1px solid var(--line);}
+  tbody td.mono{font-family:'Consolas','SFMono-Regular',monospace;font-size:12.5px;color:var(--ink-dim);}
+  .empty-note{color:var(--ink-dim);font-size:13px;padding:16px 0;}
+  .new-tag{font-size:10px;font-weight:700;color:var(--steel);background:rgba(58,110,165,0.12);padding:2px 7px;letter-spacing:0.03em;}
+
+  .nav-cards{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(250,248,244,0.14);margin-top:28px;}
+  @media (max-width:700px){.nav-cards{grid-template-columns:1fr;}}
+  .nav-card{background:var(--navy-2);padding:22px 24px;transition:background 0.2s ease;text-decoration:none;display:block;}
+  .nav-card:hover{background:#12294a;}
+  .nav-card .nc-title{font-size:15px;font-weight:600;margin-bottom:4px;}
+  .nav-card .nc-sub{font-size:12.5px;color:rgba(250,248,244,0.55);}
 
   footer{max-width:1180px;margin:0 auto;padding:24px 28px 0;font-size:12px;color:rgba(250,248,244,0.4);position:relative;z-index:1;}
 </style>
@@ -82,266 +113,178 @@
 
 <header>
   <div>
-    <div class="brand"><a href="../index.html">TVS LANKA HORANA MIS</a> · STORES · <a href="detail.html">Full Detail</a></div>
-    <h1>Warehouse Map</h1>
+    <div class="brand"><a href="../index.html">TVS LANKA HORANA MIS</a> · STORES · <a href="map.html">Map</a> · <a href="detail.html">Full Detail</a></div>
+    <h1>Stores Overview</h1>
   </div>
   <div class="updated"><span class="live-badge"><span class="dot"></span>LIVE</span> &nbsp;<span id="dateLabel">Loading…</span></div>
 </header>
 
 <div class="wrap">
 
-  <div class="cards-row" id="cardsRow"></div>
+  <div class="provenance" id="provenance">Loading source information…</div>
 
-  <div class="map-panel">
-    <div class="map-head">
-      <h2>Real map — grey theme, live stock per site</h2>
-      <div class="sub">Click a pin (or a card above) for full details. Marker size reflects stock volume.</div>
-    </div>
-    <div id="map"></div>
-    <div class="legend">
-      <div class="legend-item"><span class="legend-dot"></span>Normal stock level</div>
-      <div class="legend-item"><span class="legend-dot risk"></span>Has Cost Risk items (14+ days, Yard)</div>
-    </div>
+  <div class="summary" id="summaryStrip"></div>
+
+  <div class="panel">
+    <h2>Stock by model</h2>
+    <div class="sub">Every model currently held, and exactly which warehouse(s) it's sitting in.</div>
+    <div class="source-tag" id="modelSource"></div>
+    <div class="legend" id="legend"></div>
+    <div id="modelRows"></div>
+  </div>
+
+  <div class="panel">
+    <h2>New shipments</h2>
+    <div class="sub">Containers that first appeared in today's stock count — not seen in any prior day.</div>
+    <div class="source-tag" id="shipSource"></div>
+    <div id="shipmentsTable"></div>
+  </div>
+
+  <div class="nav-cards">
+    <a class="nav-card" href="map.html">
+      <div class="nc-title">Warehouse Map →</div>
+      <div class="nc-sub">Real geography, distances, travel times</div>
+    </a>
+    <a class="nav-card" href="detail.html">
+      <div class="nc-title">Full Detail Tables →</div>
+      <div class="nc-sub">Every container, W/Order and color, by warehouse</div>
+    </a>
   </div>
 
 </div>
 
-<footer>Warehouse coordinates from Google Places data. Map tiles and geocoding © Google.</footer>
+<footer>All figures on this page are computed live from the Stores Raw sheet, itself built from Shantha's daily stock email.</footer>
 
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbzJFWD_AQc8UwEkVHcb3q9lDmzoMcO-fq9qDX3wIEAoUi8gIZN09Uxbbjfj3Z30spjjpw/exec";
-const MAPS_API_KEY = "AIzaSyDCGcMa0Dz3nWM9xUCWd5_HN-QN9ZWYRyk";
 
-// Grey / "Silver" style
-const GREY_STYLE = [
-  {elementType:"geometry",stylers:[{color:"#f5f5f5"}]},
-  {elementType:"labels.icon",stylers:[{visibility:"off"}]},
-  {elementType:"labels.text.fill",stylers:[{color:"#616161"}]},
-  {elementType:"labels.text.stroke",stylers:[{color:"#f5f5f5"}]},
-  {featureType:"administrative.land_parcel",stylers:[{visibility:"off"}]},
-  {featureType:"administrative.land_parcel",elementType:"labels.text.fill",stylers:[{color:"#bdbdbd"}]},
-  {featureType:"poi",stylers:[{visibility:"off"}]},
-  {featureType:"poi",elementType:"geometry",stylers:[{color:"#eeeeee"}]},
-  {featureType:"poi",elementType:"labels.text.fill",stylers:[{color:"#757575"}]},
-  {featureType:"poi.park",elementType:"geometry",stylers:[{color:"#e5e5e5"}]},
-  {featureType:"road",elementType:"geometry",stylers:[{color:"#ffffff"}]},
-  {featureType:"road.arterial",elementType:"labels.text.fill",stylers:[{color:"#757575"}]},
-  {featureType:"road.highway",elementType:"geometry",stylers:[{color:"#dadada"}]},
-  {featureType:"road.highway",elementType:"labels.text.fill",stylers:[{color:"#616161"}]},
-  {featureType:"road.local",elementType:"labels.text.fill",stylers:[{color:"#9e9e9e"}]},
-  {featureType:"transit",stylers:[{visibility:"off"}]},
-  {featureType:"water",elementType:"geometry",stylers:[{color:"#c9c9c9"}]},
-  {featureType:"water",elementType:"labels.text.fill",stylers:[{color:"#9e9e9e"}]}
-];
-
-const SITES = {
-  "Yard":         { label: "Spectra Yard",       ifs: "BOXWH / TWBOXWH",         lat: 7.0183799, lng: 79.8795426, anchor: "zone-3" },
-  "Plant WH":     { label: "Plant Warehouse",    ifs: "BOX / TWBOX",             lat: 6.7434949, lng: 80.1101455, anchor: "zone-0" },
-  "180/C WH":     { label: "180/C Warehouse",    ifs: "BOX-180C / TWBOX-180C",   lat: 6.7420,    lng: 80.1112,    anchor: "zone-1" },
-  "Munagama WH":  { label: "Munagama Warehouse", ifs: "BOX-MUN / TWBOX-MUN",     lat: 6.7235692, lng: 80.0881115, anchor: "zone-2" }
+const LOC_COLORS = {
+  "Plant WH": "#3A6EA5",
+  "180/C WH": "#7FA6CC",
+  "Munagama WH": "#C9862A",
+  "Yard": "#B84A3E",
+  "Main Plant": "#6B5B95"
 };
+const LOC_ORDER = ["Plant WH", "180/C WH", "Munagama WH", "Yard", "Main Plant"];
 
 function fmt(n){ return Number(n).toLocaleString('en-US'); }
 
-function buildStats(byLocation, ageList) {
-  const stats = {};
-  Object.keys(SITES).forEach(key => {
-    const rows = byLocation[key] || [];
-    const total = rows.reduce((s,r)=>s+r.qty,0);
-    const items = rows.length;
-    const ages = ageList.filter(a => a.location === key);
-    const maxAge = ages.length ? Math.max(...ages.map(a=>a.ageDays)) : 0;
-    const riskCount = ages.filter(a => a.status.indexOf('Cost Risk') !== -1).length;
-    stats[key] = { total, items, maxAge, riskCount };
-  });
-  return stats;
-}
-
-function renderCards(stats, onClick) {
-  const el = document.getElementById('cardsRow');
-  el.innerHTML = Object.keys(SITES).map(key => {
-    const s = stats[key];
-    return `<div class="wcard" data-loc="${key}">
-      <div class="wname">${SITES[key].label}</div>
-      <div class="wqty">${fmt(s.total)}</div>
-      <div class="wlabel">units · ${s.items} line item${s.items===1?'':'s'}</div>
-    </div>`;
-  }).join('');
-  el.querySelectorAll('.wcard').forEach(card => {
-    card.addEventListener('click', () => onClick(card.dataset.loc));
-  });
-}
-
-let map, markers = {}, infoWindow;
-
-function initMapWithData(stats) {
-  class RouteLabelOverlay extends google.maps.OverlayView {
-    constructor(position, div, map) {
-      super();
-      this.position = position;
-      this.div = div;
-      this.setMap(map);
-    }
-    onAdd() {
-      this.div.style.position = 'absolute';
-      this.getPanes().floatPane.appendChild(this.div);
-    }
-    draw() {
-      const proj = this.getProjection();
-      if (!proj) return;
-      const pt = proj.fromLatLngToDivPixel(new google.maps.LatLng(this.position.lat, this.position.lng));
-      this.div.style.left = (pt.x - this.div.offsetWidth/2) + 'px';
-      this.div.style.top = (pt.y - 10) + 'px';
-    }
-    onRemove() {
-      if (this.div.parentNode) this.div.parentNode.removeChild(this.div);
-    }
-  }
-  window.RouteLabelOverlay = RouteLabelOverlay;
-
-  map = new google.maps.Map(document.getElementById('map'), {
-    zoom: 10,
-    center: { lat: 6.88, lng: 79.99 },
-    styles: GREY_STYLE,
-    disableDefaultUI: false,
-    streetViewControl: false,
-    mapTypeControl: false
-  });
-  infoWindow = new google.maps.InfoWindow();
-
-  const bounds = new google.maps.LatLngBounds();
-  const totals = Object.keys(SITES).map(k => stats[k].total);
-  const max = Math.max(...totals, 1);
-
-  Object.keys(SITES).forEach(key => {
-    const meta = SITES[key];
-    const s = stats[key];
-    const scale = 10 + (s.total / max) * 18; // marker radius scales with stock
-    const color = s.riskCount > 0 ? '#B84A3E' : '#3A6EA5';
-
-    const marker = new google.maps.Marker({
-      position: { lat: meta.lat, lng: meta.lng },
-      map: map,
-      title: meta.label,
-      icon: {
-        path: google.maps.SymbolPath.CIRCLE,
-        scale: scale,
-        fillColor: color,
-        fillOpacity: 0.85,
-        strokeColor: '#FAF8F4',
-        strokeWeight: 2
-      }
-    });
-
-    const statusHtml = s.riskCount > 0
-      ? `<span style="color:#B84A3E;font-weight:700;">${s.riskCount} Cost Risk item${s.riskCount===1?'':'s'}</span>`
-      : `<span style="color:#3A6EA5;">No cost-risk items</span>`;
-
-    const content = `<div class="iw">
-      <div class="iw-name">${meta.label}</div>
-      <div class="iw-ifs">${meta.ifs}</div>
-      <div class="iw-row"><span>Total stock</span><b>${fmt(s.total)} units</b></div>
-      <div class="iw-row"><span>Line items</span><b>${s.items}</b></div>
-      <div class="iw-row"><span>Oldest container</span><b>${s.maxAge} day${s.maxAge===1?'':'s'}</b></div>
-      <div class="iw-row">${statusHtml}</div>
-      <a href="detail.html#${meta.anchor}">View full detail →</a>
-    </div>`;
-
-    marker.addListener('mouseover', () => {
-      infoWindow.setContent(content);
-      infoWindow.open(map, marker);
-    });
-    marker.addListener('mouseout', () => {
-      infoWindow.close();
-    });
-    marker.addListener('click', () => {
-      infoWindow.setContent(content);
-      infoWindow.open(map, marker);
-    });
-
-    markers[key] = { marker, content };
-    bounds.extend(marker.getPosition());
-  });
-
-  map.fitBounds(bounds, 60);
-
-  // Route lines with real distance/time labels
-  const ROUTES = [
-    { from: "Yard", to: "Munagama WH", text: "~54 km · ~88 min est." },
-    { from: "Munagama WH", to: "Plant WH", text: "~4 km · ~7 min est." }
+function colorDot(colorName){
+  const c = (colorName||'').toUpperCase();
+  const map = [
+    [/RED|RCR|RC-RED/, '#B84A3E'], [/COPPER/, '#C9862A'], [/BLUE/, '#3A6EA5'],
+    [/GREEN/, '#4B8B5E'], [/BLACK|BLK/, '#2A2A2A'], [/GREY|GRY|GRAY/, '#8A8F98'],
+    [/WHITE|WHT/, '#C9C4B8'], [/YEL/, '#D4B106'],
   ];
-  ROUTES.forEach(r => {
-    const p1 = { lat: SITES[r.from].lat, lng: SITES[r.from].lng };
-    const p2 = { lat: SITES[r.to].lat, lng: SITES[r.to].lng };
-    new google.maps.Polyline({
-      path: [p1, p2],
-      geodesic: true,
-      strokeColor: '#3A6EA5',
-      strokeOpacity: 0.7,
-      strokeWeight: 2,
-      icons: [{ icon: { path: 'M 0,-1 0,1', strokeOpacity: 1, scale: 3 }, offset: '0', repeat: '12px' }],
-      map: map
-    });
-    const mid = { lat: (p1.lat+p2.lat)/2, lng: (p1.lng+p2.lng)/2 };
-    const labelDiv = document.createElement('div');
-    labelDiv.style.cssText = 'background:#0B1D33;color:#FAF8F4;padding:3px 8px;font-size:11px;font-family:Consolas,monospace;white-space:nowrap;border-radius:2px;box-shadow:0 2px 6px rgba(0,0,0,0.3);';
-    labelDiv.textContent = r.text;
-    new RouteLabelOverlay(mid, labelDiv, map);
-  });
-
-  // "On-site" note for Plant <-> 180/C (negligible distance)
-  const onSiteMid = {
-    lat: (SITES["Plant WH"].lat + SITES["180/C WH"].lat)/2,
-    lng: (SITES["Plant WH"].lng + SITES["180/C WH"].lng)/2
-  };
-  const onSiteDiv = document.createElement('div');
-  onSiteDiv.style.cssText = 'background:#C9862A;color:#0B1D33;padding:3px 8px;font-size:11px;font-weight:700;white-space:nowrap;border-radius:2px;box-shadow:0 2px 6px rgba(0,0,0,0.3);';
-  onSiteDiv.textContent = 'On-site · negligible';
-  new RouteLabelOverlay(onSiteMid, onSiteDiv, map);
-
-  renderCards(stats, (key) => {
-    const m = markers[key];
-    if (!m) return;
-    map.panTo(m.marker.getPosition());
-    map.setZoom(14);
-    infoWindow.setContent(m.content);
-    infoWindow.open(map, m.marker);
-  });
+  for (const [re, c2] of map) if (re.test(c)) return c2;
+  return '#B0B0B0';
 }
 
-async function loadDataThenMap(){
+function formatProvenance(source, latestDate){
+  const el = document.getElementById('provenance');
+  if (!source) {
+    el.innerHTML = `Data as at <b>${latestDate || '—'}</b>. Exact email receipt time not yet available for this date — the source-tracking update will apply from the next parsed day onward.`;
+    return;
+  }
+  const dt = new Date(source.receivedAt);
+  const when = dt.toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
+  const verifiedNote = source.verified
+    ? ''
+    : `<span class="unverified">(Drive save time — original email timestamp unavailable for this date)</span>`;
+  el.innerHTML = `📧 Data extracted from <b>${source.sender}</b>'s email — <b>${source.fileName}</b>, received <b>${when}</b>. ${verifiedNote}`;
+}
+
+function renderSummary(s){
+  const el = document.getElementById('summaryStrip');
+  el.innerHTML = `
+    <div class="stat"><div class="num">${fmt(s.totalUnitsLatest)}</div><div class="label">Total units, all warehouses</div></div>
+    <div class="stat good"><div class="num" id="s-new">—</div><div class="label">New shipment containers today</div></div>
+    <div class="stat warn"><div class="num">${fmt(s.agingCount)}</div><div class="label">Aging 14+ days</div></div>
+    <div class="stat risk"><div class="num">${fmt(s.costRiskCount)}</div><div class="label">Cost risk — Yard</div></div>
+  `;
+}
+
+function renderLegend(locationsPresent){
+  const el = document.getElementById('legend');
+  el.innerHTML = LOC_ORDER.filter(l => locationsPresent.has(l)).map(l => `
+    <div class="legend-item"><span class="legend-swatch" style="background:${LOC_COLORS[l]}"></span>${l}</div>
+  `).join('');
+}
+
+function renderModelRows(modelBreakdown){
+  const el = document.getElementById('modelRows');
+  if (!modelBreakdown.length){ el.innerHTML = '<div class="empty-note">No model data yet.</div>'; return; }
+
+  const locationsPresent = new Set();
+  modelBreakdown.forEach(m => Object.keys(m.byLocation).forEach(l => locationsPresent.add(l)));
+  renderLegend(locationsPresent);
+
+  el.innerHTML = modelBreakdown.map(m => {
+    const segs = LOC_ORDER.filter(l => m.byLocation[l]).map(l => {
+      const pct = (m.byLocation[l] / m.total * 100).toFixed(1);
+      return `<div class="stack-seg" style="width:${pct}%; background:${LOC_COLORS[l]};" title="${l}: ${fmt(m.byLocation[l])}"></div>`;
+    }).join('');
+    const breakdownText = LOC_ORDER.filter(l => m.byLocation[l])
+      .map(l => `${l}: ${fmt(m.byLocation[l])}`).join('  ·  ');
+    return `
+      <div class="model-row">
+        <div class="model-top">
+          <div class="model-name"><span class="model-dot" style="background:${colorDot(m.color)}"></span>${m.model} — ${m.color}</div>
+          <div class="model-total">${fmt(m.total)} units</div>
+        </div>
+        <div class="stack-bar">${segs}</div>
+        <div class="model-breakdown-text">${breakdownText}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderShipments(newShipments){
+  const el = document.getElementById('shipmentsTable');
+  document.getElementById('s-new').textContent = fmt(newShipments.length);
+  if (!newShipments.length){ el.innerHTML = '<div class="empty-note">No new shipments recorded today — nothing arrived that wasn\\'t already in yesterday\\'s count.</div>'; return; }
+  el.innerHTML = `
+    <table>
+      <thead><tr><th><span class="new-tag">NEW</span></th><th>Model</th><th>Color</th><th>W/Order</th><th>Container</th><th>Location</th></tr></thead>
+      <tbody>
+        ${newShipments.map(s => `
+          <tr>
+            <td></td>
+            <td>${s.category}</td>
+            <td><span class="model-dot" style="display:inline-block;background:${colorDot(s.color)};width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:middle;"></span>${s.color}</td>
+            <td class="mono">${s.wOrder || '—'}</td>
+            <td class="mono">${s.container || '—'}</td>
+            <td>${s.location}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+async function load(){
   try{
     const res = await fetch(API_URL);
     const data = await res.json();
     document.getElementById('dateLabel').innerHTML = 'Latest stock date <strong>' + (data.summary.latestDate || '—') + '</strong>';
-    window.__stats = buildStats(data.byLocation || {}, data.ageList || []);
-    if (window.google && window.google.maps) initMapWithData(window.__stats);
+    formatProvenance(data.summary.source, data.summary.latestDate);
+
+    const sourceLine = data.summary.source
+      ? `Source: ${data.summary.source.sender}, ${data.summary.source.fileName}`
+      : `Source: as at ${data.summary.latestDate}`;
+    document.getElementById('modelSource').textContent = sourceLine;
+    document.getElementById('shipSource').textContent = sourceLine;
+
+    renderSummary(data.summary);
+    renderModelRows(data.modelBreakdown || []);
+    renderShipments(data.newShipments || []);
   }catch(err){
     document.getElementById('dateLabel').textContent = 'Could not load data';
+    document.getElementById('provenance').textContent = 'Could not load source information.';
     console.error(err);
   }
 }
-
-window.gmapsCallback = function() {
-  if (window.__stats) initMapWithData(window.__stats);
-  else window.__mapsReady = true;
-};
-
-loadDataThenMap().then(() => {
-  if (window.__mapsReady && window.__stats) initMapWithData(window.__stats);
-});
+load();
 </script>
-
-<script>
-  if (MAPS_API_KEY && MAPS_API_KEY.indexOf('PASTE_') === -1) {
-    var s = document.createElement('script');
-    s.src = 'https://maps.googleapis.com/maps/api/js?key=' + MAPS_API_KEY + '&callback=gmapsCallback';
-    s.async = true;
-    document.head.appendChild(s);
-  } else {
-    document.getElementById('map').innerHTML = '<div class="map-fallback">Add your Google Maps API key in the script (MAPS_API_KEY) to load the live map.</div>';
-  }
-</script>
-
 </body>
 </html>
