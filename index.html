@@ -7,6 +7,7 @@
 <style>
   :root{
     --navy:#0B1D33;
+    --navy-2:#0E2440;
     --paper:#FAF8F4;
     --paper-dim:#EFEBE3;
     --steel:#3A6EA5;
@@ -15,6 +16,7 @@
     --ink:#0B1D33;
     --ink-dim:#5B6B80;
     --line:rgba(11,29,51,0.14);
+    --grid-line:rgba(127,166,204,0.09);
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
@@ -23,70 +25,111 @@
     color:var(--paper);
     font-family:'Segoe UI','Inter',system-ui,-apple-system,sans-serif;
     line-height:1.4;
+    position:relative;
+    overflow-x:hidden;
   }
   a{color:inherit;text-decoration:none;}
 
-  @media (prefers-reduced-motion: no-preference){
-    @keyframes riseIn{
-      from{opacity:0;transform:translateY(14px);}
-      to{opacity:1;transform:translateY(0);}
-    }
-    @keyframes pulseDot{
-      0%,100%{opacity:1;}
-      50%{opacity:0.35;}
-    }
-    header{animation:riseIn 0.6s ease both;}
-    .lede{animation:riseIn 0.6s ease 0.1s both;}
-    .mod{animation:riseIn 0.55s ease both;}
-    .mod:nth-child(1){animation-delay:0.15s;}
-    .mod:nth-child(2){animation-delay:0.22s;}
-    .mod:nth-child(3){animation-delay:0.29s;}
-    .mod:nth-child(4){animation-delay:0.36s;}
-    .mod:nth-child(5){animation-delay:0.43s;}
-    .external{animation:riseIn 0.6s ease 0.55s both;}
+  .grid-bg{
+    position:fixed; inset:0; z-index:0; pointer-events:none;
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size:48px 48px;
+    opacity:0;
   }
+  .grid-bg svg{position:absolute; inset:0; width:100%; height:100%;}
+  .trace{fill:none; stroke:var(--steel); stroke-width:1; opacity:0.16;}
 
-  .live-dot{
-    display:inline-block;width:6px;height:6px;border-radius:50%;
-    background:var(--steel-light);margin-right:6px;
-    animation:pulseDot 1.8s ease-in-out infinite;
+  .wrap{max-width:1180px;margin:0 auto;padding:0 28px 80px;position:relative;z-index:1;}
+
+  .boot{
+    position:fixed; inset:0; z-index:50;
+    background:var(--navy);
+    display:flex; align-items:center; justify-content:center;
+    flex-direction:column;
   }
-
-  .wrap{max-width:1180px;margin:0 auto;padding:0 28px 80px;}
+  .boot-wordmark{
+    font-size:13px; letter-spacing:0.3em; color:var(--steel-light);
+    opacity:0; font-weight:600;
+  }
+  .boot-line{
+    position:absolute; left:0; right:0; height:2px;
+    background:linear-gradient(90deg, transparent, var(--steel-light), transparent);
+    box-shadow:0 0 12px 2px rgba(127,166,204,0.5);
+  }
+  .boot-status{
+    margin-top:18px; font-size:11px; color:rgba(250,248,244,0.4);
+    letter-spacing:0.08em; opacity:0; font-family:'Consolas',monospace;
+  }
 
   header{
-    padding:56px 28px 32px;
+    padding:44px 28px 30px;
     max-width:1180px;
     margin:0 auto;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    flex-wrap:wrap;
+    gap:16px;
     border-bottom:1px solid rgba(250,248,244,0.14);
+    position:relative; z-index:1;
   }
-  .brand{font-size:13px;letter-spacing:0.02em;color:var(--steel-light);margin-bottom:8px;}
-  h1{font-size:38px;font-weight:600;margin:0 0 10px;letter-spacing:-0.01em;}
-  .lede{font-size:15px;color:rgba(250,248,244,0.6);max-width:520px;}
+  .brand{font-size:13px;letter-spacing:0.02em;color:var(--steel-light);margin-bottom:6px;}
+  h1{
+    font-size:34px;
+    font-weight:600;
+    margin:0;
+    letter-spacing:-0.01em;
+    font-family:'Consolas','SFMono-Regular',monospace;
+    white-space:pre;
+  }
+  .flap-char{display:inline-block; min-width:0.62ch;}
+  .updated{
+    font-size:13px;
+    color:rgba(250,248,244,0.55);
+    text-align:right;
+  }
+  .updated strong{color:var(--paper);font-weight:600;}
 
   .modules{
     display:grid;
     grid-template-columns:repeat(3,1fr);
     gap:1px;
     background:rgba(250,248,244,0.14);
-    margin:44px 0;
+    margin:40px 0;
   }
   @media (max-width:800px){.modules{grid-template-columns:1fr;}}
 
   .mod{
-    background:var(--navy);
+    background:var(--navy-2);
     padding:30px 28px;
     display:flex;
     flex-direction:column;
     min-height:150px;
-    transition:transform 0.25s ease, background 0.25s ease;
+    position:relative;
+    overflow:hidden;
+    transition:transform 0.3s cubic-bezier(.2,.8,.2,1), box-shadow 0.3s ease;
   }
-  .mod.link:hover{transform:translateY(-3px);}
+  .mod::before{
+    content:'';
+    position:absolute; top:0; left:-60%; width:40%; height:100%;
+    background:linear-gradient(90deg, transparent, rgba(127,166,204,0.08), transparent);
+    transform:skewX(-15deg);
+    transition:left 0.6s ease;
+    pointer-events:none;
+  }
+  .mod.link:hover{
+    transform:translateY(-4px);
+    box-shadow:0 12px 28px -8px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(127,166,204,0.3);
+  }
+  .mod.link:hover::before{ left:120%; }
   .mod .status{
     font-size:11px;
     letter-spacing:0.02em;
     color:var(--steel-light);
     margin-bottom:14px;
+    display:flex; align-items:center;
   }
   .mod.soon .status{color:rgba(250,248,244,0.35);}
   .mod h2{font-size:19px;font-weight:600;margin:0 0 8px;}
@@ -98,10 +141,10 @@
     font-size:13px;
     font-weight:600;
     color:var(--paper);
+    display:flex; align-items:center; gap:6px;
+    transition:gap 0.25s ease;
   }
-  .mod.link:hover{background:var(--navy);}
-  a.mod.link{cursor:pointer;}
-  a.mod.link:hover h2{color:var(--steel-light);}
+  .mod.link:hover .go{ gap:11px; }
 
   .external{
     margin-top:44px;
@@ -113,62 +156,103 @@
   @media (max-width:700px){.ext-row{flex-direction:column;}}
   .ext-item{
     flex:1;
-    background:var(--navy);
+    background:var(--navy-2);
     padding:22px 24px;
     display:flex;
     justify-content:space-between;
     align-items:center;
     transition:background 0.25s ease;
   }
-  .ext-item:hover{background:rgba(58,110,165,0.08);}
+  .ext-item:hover{background:rgba(58,110,165,0.1);}
   .ext-item span{font-size:14px;font-weight:600;}
   .ext-item small{display:block;font-size:12px;color:rgba(250,248,244,0.5);margin-top:4px;font-weight:400;}
-  .ext-item .arrow{color:var(--steel-light);font-size:18px;}
-  a.ext-item:hover span{color:var(--steel-light);}
+  .ext-item .arrow{color:var(--steel-light);font-size:18px;transition:transform 0.25s ease;}
+  .ext-item:hover .arrow{transform:translate(3px,-3px);}
+  .ext-item:hover span{color:var(--steel-light);}
 
-  footer{max-width:1180px;margin:0 auto;padding:20px 28px 0;font-size:12px;color:rgba(250,248,244,0.4);}
+  footer{max-width:1180px;margin:0 auto;padding:20px 28px 0;font-size:12px;color:rgba(250,248,244,0.4);position:relative;z-index:1;}
+
+  .reveal{opacity:0; transform:translateY(16px);}
+  @media (prefers-reduced-motion: no-preference){
+    .reveal.in{
+      animation:riseIn 0.6s cubic-bezier(.2,.8,.2,1) both;
+    }
+    @keyframes riseIn{
+      from{opacity:0;transform:translateY(16px);}
+      to{opacity:1;transform:translateY(0);}
+    }
+    @keyframes pulseGlow{
+      0%,100%{box-shadow:0 0 0 0 rgba(127,166,204,0.55);}
+      50%{box-shadow:0 0 0 5px rgba(127,166,204,0);}
+    }
+    .live-dot{animation:pulseGlow 1.8s ease-in-out infinite;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .reveal{opacity:1; transform:none;}
+    .boot{display:none;}
+    .grid-bg{opacity:1 !important;}
+  }
+  .live-dot{
+    display:inline-block;width:6px;height:6px;border-radius:50%;
+    background:var(--steel-light);margin-right:6px;
+  }
 </style>
 </head>
 <body>
 
+<div class="grid-bg" id="gridBg">
+  <svg viewBox="0 0 1180 700" preserveAspectRatio="none">
+    <path class="trace" id="trace1" d="M 0,140 L 300,140 L 300,60 L 620,60" />
+    <path class="trace" id="trace2" d="M 1180,300 L 860,300 L 860,420 L 300,420 L 300,500" />
+  </svg>
+</div>
+
+<div class="boot" id="boot">
+  <div class="boot-line" id="bootLine" style="top:50%;"></div>
+  <div class="boot-wordmark" id="bootWord">TVS LANKA · HORANA</div>
+  <div class="boot-status" id="bootStatus">INITIALIZING MIS...</div>
+</div>
+
 <header>
-  <div class="brand">TVS LANKA · HORANA ASSEMBLY PLANT</div>
-  <h1>Management Information System</h1>
-  <div class="lede">Live stock, delivery, production, quality and cost tracking for the Horana plant, in one place.</div>
+  <div>
+    <div class="brand reveal" id="brandLine">TVS LANKA · HORANA ASSEMBLY PLANT</div>
+    <h1 id="titleFlap"></h1>
+  </div>
+  <div class="updated reveal" id="updatedLine">Live plant data, unified</div>
 </header>
 
 <div class="wrap">
 
   <div class="modules">
-    <a class="mod link" href="stores/index.html">
+    <a class="mod link reveal" href="stores/index.html">
       <div class="status"><span class="live-dot"></span>LIVE</div>
       <h2>Stores</h2>
       <p>Container-level stock tracking, warehouse location, and aging against the 14-day Spectra Yard threshold.</p>
-      <div class="go">Open →</div>
+      <div class="go">Open <span>&rarr;</span></div>
     </a>
-    <div class="mod soon">
+    <div class="mod soon reveal">
       <div class="status">IN PROGRESS</div>
       <h2>Delivery</h2>
       <p>Dealer delivery status, weekly requested vs. delivered quantities, and pending delivery tracking.</p>
     </div>
-    <div class="mod soon">
+    <div class="mod soon reveal">
       <div class="status">PLANNED</div>
       <h2>Production</h2>
       <p>Batch production plans, daily assembly output, and model-wise build tracking.</p>
     </div>
-    <div class="mod soon">
+    <div class="mod soon reveal">
       <div class="status">PLANNED</div>
       <h2>Quality</h2>
       <p>Non-conformance tracking, corrective actions, and quality objective monitoring.</p>
     </div>
-    <div class="mod soon">
+    <div class="mod soon reveal">
       <div class="status">PLANNED</div>
       <h2>Costing</h2>
       <p>Capital project tracking and cost monitoring across ongoing plant initiatives.</p>
     </div>
   </div>
 
-  <div class="external">
+  <div class="external reveal">
     <div class="label">Other plant systems</div>
     <div class="ext-row">
       <a class="ext-item" href="https://denuwantvsl-max.github.io/tvs-iso-dashboard/index.html" target="_blank" rel="noopener">
@@ -185,5 +269,109 @@
 </div>
 
 <footer>TVS Lanka Horana Assembly Plant — Management Information System</footer>
+
+<script>
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const TITLE = "Management Information System";
+
+function setupTitleStatic(){
+  document.getElementById('titleFlap').textContent = TITLE;
+}
+
+function splitFlapReveal(el, text, onDone){
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789      ";
+  el.innerHTML = '';
+  const spans = [...text].map(ch => {
+    const s = document.createElement('span');
+    s.className = 'flap-char';
+    s.textContent = ch === ' ' ? '\u00A0' : ch;
+    el.appendChild(s);
+    return { el: s, target: ch };
+  });
+  let completed = 0;
+  spans.forEach((sp, i) => {
+    let ticks = 6 + Math.floor(Math.random()*5);
+    const delay = i * 22;
+    setTimeout(() => {
+      const iv = setInterval(() => {
+        if (ticks <= 0) {
+          clearInterval(iv);
+          sp.el.textContent = sp.target === ' ' ? '\u00A0' : sp.target;
+          completed++;
+          if (completed === spans.length && onDone) onDone();
+          return;
+        }
+        sp.el.textContent = sp.target === ' ' ? '\u00A0' : chars[Math.floor(Math.random()*chars.length)];
+        ticks--;
+      }, 28);
+    }, delay);
+  });
+}
+
+function revealSequence(){
+  const els = document.querySelectorAll('.reveal');
+  els.forEach((el, i) => {
+    setTimeout(() => el.classList.add('in'), i * 70);
+  });
+  const grid = document.getElementById('gridBg');
+  grid.style.transition = 'opacity 1.2s ease';
+  requestAnimationFrame(() => { grid.style.opacity = '1'; });
+
+  [document.getElementById('trace1'), document.getElementById('trace2')].forEach((path, i) => {
+    if (!path) return;
+    const len = path.getTotalLength();
+    path.style.strokeDasharray = len;
+    path.style.strokeDashoffset = len;
+    path.getBoundingClientRect();
+    path.style.transition = 'stroke-dashoffset 1.8s ease ' + (i*0.3) + 's';
+    requestAnimationFrame(() => { path.style.strokeDashoffset = '0'; });
+  });
+
+  setTimeout(() => splitFlapReveal(document.getElementById('titleFlap'), TITLE), 150);
+}
+
+function runBoot(){
+  const boot = document.getElementById('boot');
+  const line = document.getElementById('bootLine');
+  const word = document.getElementById('bootWord');
+  const status = document.getElementById('bootStatus');
+
+  line.style.transition = 'top 0.9s cubic-bezier(.4,0,.2,1)';
+  word.style.transition = 'opacity 0.4s ease';
+  status.style.transition = 'opacity 0.4s ease';
+
+  requestAnimationFrame(() => {
+    line.style.top = '46%';
+    word.style.opacity = '1';
+  });
+  setTimeout(() => { status.style.opacity = '1'; }, 300);
+  setTimeout(() => { line.style.top = '0%'; }, 700);
+
+  setTimeout(() => {
+    boot.style.transition = 'opacity 0.5s ease';
+    boot.style.opacity = '0';
+    setTimeout(() => {
+      boot.style.display = 'none';
+      revealSequence();
+    }, 500);
+  }, 1150);
+}
+
+if (reduceMotion) {
+  document.getElementById('boot').style.display = 'none';
+  document.getElementById('gridBg').style.opacity = '1';
+  document.querySelectorAll('.reveal').forEach(el => el.classList.add('in'));
+  setupTitleStatic();
+} else {
+  runBoot();
+}
+
+document.addEventListener('mousemove', (e) => {
+  if (reduceMotion) return;
+  const x = (e.clientX / window.innerWidth - 0.5) * 8;
+  const y = (e.clientY / window.innerHeight - 0.5) * 8;
+  document.getElementById('gridBg').style.transform = `translate(${x}px, ${y}px)`;
+});
+</script>
 </body>
 </html>
