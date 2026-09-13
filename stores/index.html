@@ -242,7 +242,7 @@ function renderModelRows(modelBreakdown){
 function renderShipments(newShipments){
   const el = document.getElementById('shipmentsTable');
   document.getElementById('s-new').textContent = fmt(newShipments.length);
-  if (!newShipments.length){ el.innerHTML = '<div class="empty-note">No new shipments recorded today — nothing arrived that wasn\\'t already in yesterday\\'s count.</div>'; return; }
+  if (!newShipments.length){ el.innerHTML = '<div class="empty-note">No new shipments recorded today \u2014 nothing arrived that was not already in yesterday\u2019s count.</div>'; return; }
   el.innerHTML = `
     <table>
       <thead><tr><th><span class="new-tag">NEW</span></th><th>Model</th><th>Color</th><th>W/Order</th><th>Container</th><th>Location</th></tr></thead>
