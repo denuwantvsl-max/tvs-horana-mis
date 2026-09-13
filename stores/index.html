@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TVS Lanka — Stores Warehouses</title>
+<title>TVS Lanka — Stores Map</title>
 <style>
   :root{
     --navy:#0B1D33;
@@ -27,10 +27,8 @@
     font-family:'Segoe UI','Inter',system-ui,-apple-system,sans-serif;
     font-variant-numeric:tabular-nums;
     line-height:1.4;
-    overflow-x:hidden;
   }
   a{color:inherit;}
-
   .grid-bg{
     position:fixed; inset:0; z-index:0; pointer-events:none;
     background-image:
@@ -38,336 +36,243 @@
       linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
     background-size:48px 48px;
   }
-
   .wrap{max-width:1180px;margin:0 auto;padding:0 28px 80px;position:relative;z-index:1;}
 
   header{
-    padding:40px 28px 26px;
-    max-width:1180px;
-    margin:0 auto;
-    display:flex;
-    justify-content:space-between;
-    align-items:flex-end;
-    flex-wrap:wrap;
-    gap:16px;
-    border-bottom:1px solid rgba(250,248,244,0.14);
-    position:relative; z-index:1;
+    padding:40px 28px 26px; max-width:1180px; margin:0 auto;
+    display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:16px;
+    border-bottom:1px solid rgba(250,248,244,0.14); position:relative; z-index:1;
   }
   .brand{font-size:13px;letter-spacing:0.02em;color:var(--steel-light);margin-bottom:6px;}
   .brand a{color:inherit;text-decoration:none;}
   h1{font-size:32px;font-weight:600;margin:0;letter-spacing:-0.01em;}
   .updated{font-size:13px;color:rgba(250,248,244,0.55);text-align:right;}
-  .updated strong{color:var(--paper);font-weight:600;}
   .live-badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;letter-spacing:0.02em;color:var(--steel-light);}
   .live-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--steel-light);}
-  @media (prefers-reduced-motion: no-preference){
-    @keyframes pulseGlow{0%,100%{box-shadow:0 0 0 0 rgba(127,166,204,0.55);}50%{box-shadow:0 0 0 5px rgba(127,166,204,0);}}
-    .live-badge .dot{animation:pulseGlow 1.8s ease-in-out infinite;}
-  }
+  @keyframes pulseGlow{0%,100%{box-shadow:0 0 0 0 rgba(127,166,204,0.55);}50%{box-shadow:0 0 0 5px rgba(127,166,204,0);}}
+  .live-badge .dot{animation:pulseGlow 1.8s ease-in-out infinite;}
 
-  /* ---- Slim summary strip ---- */
-  .summary{display:flex;gap:0;margin:24px 0 8px;border-bottom:1px solid rgba(250,248,244,0.14);flex-wrap:wrap;}
-  .summary .stat{padding:16px 28px 16px 0;margin-right:28px;}
-  .summary .num{font-size:26px;font-weight:600;letter-spacing:-0.02em;}
-  .summary .label{font-size:12px;color:rgba(250,248,244,0.5);margin-top:2px;}
-  .summary .stat.warn .num{color:var(--amber);}
-  .summary .stat.risk .num{color:var(--rust);}
+  .map-panel{background:var(--paper);color:var(--ink);margin-top:28px;padding:30px;position:relative;}
+  .map-panel h2{font-size:15px;margin:0 0 4px;color:var(--navy);}
+  .map-panel .sub{font-size:13px;color:var(--ink-dim);margin-bottom:6px;}
+  .map-note{font-size:11px;color:var(--ink-dim);margin-bottom:18px;}
 
-  /* ---- Warehouse zone hero ---- */
-  .zones-title{font-size:14px;color:rgba(250,248,244,0.55);margin:36px 0 16px;letter-spacing:0.02em;}
-  .zones{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(250,248,244,0.14);}
-  @media (max-width:900px){.zones{grid-template-columns:repeat(2,1fr);}}
-  @media (max-width:520px){.zones{grid-template-columns:1fr;}}
-  .zone{
-    background:var(--navy-2);
-    padding:26px 22px;
-    cursor:pointer;
-    position:relative;
-    overflow:hidden;
-    transition:transform 0.3s cubic-bezier(.2,.8,.2,1), box-shadow 0.3s ease;
-  }
-  .zone::before{
-    content:'';position:absolute;top:0;left:-60%;width:40%;height:100%;
-    background:linear-gradient(90deg,transparent,rgba(127,166,204,0.1),transparent);
-    transform:skewX(-15deg);transition:left 0.6s ease;pointer-events:none;
-  }
-  .zone:hover{transform:translateY(-4px);box-shadow:0 12px 28px -8px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(127,166,204,0.3);}
-  .zone:hover::before{left:120%;}
-  .zone .idx{font-size:11px;color:var(--steel-light);letter-spacing:0.08em;margin-bottom:10px;font-family:'Consolas',monospace;}
-  .zone .name{font-size:16px;font-weight:600;margin-bottom:4px;}
-  .zone .ifs{font-size:11px;color:rgba(250,248,244,0.4);font-family:'Consolas',monospace;margin-bottom:18px;}
-  .zone .qty{font-size:38px;font-weight:600;letter-spacing:-0.02em;line-height:1;}
-  .zone .qty-label{font-size:11px;color:rgba(250,248,244,0.45);margin-top:4px;}
-  .zone .bar-track{height:4px;background:rgba(250,248,244,0.1);margin-top:16px;}
-  .zone .bar-fill{height:100%;background:var(--steel-light);width:0%;transition:width 1.1s cubic-bezier(.2,.8,.2,1);}
-  .zone .go{margin-top:14px;font-size:12px;color:var(--steel-light);display:flex;align-items:center;gap:5px;transition:gap 0.25s ease;}
-  .zone:hover .go{gap:10px;}
+  .map-svg{width:100%;height:auto;display:block;}
+  .route-line{stroke:var(--steel);stroke-width:1.5;stroke-dasharray:5 4;fill:none;}
+  .route-label{font-size:12px;fill:var(--ink-dim);font-family:'Consolas',monospace;}
+  .leader-line{stroke:var(--ink-dim);stroke-width:1;stroke-dasharray:3 3;fill:none;opacity:0.5;}
+  .inset-box{fill:var(--paper-dim);stroke:var(--line);stroke-width:1;}
+  .inset-title{font-size:11px;fill:var(--ink-dim);letter-spacing:0.04em;}
+  .region-label{font-size:11px;fill:var(--ink-dim);letter-spacing:0.03em;}
 
-  /* ---- Detail sections ---- */
-  .zone-detail{
-    background:var(--paper);
-    color:var(--ink);
-    margin-top:28px;
-    padding:0;
-    scroll-margin-top:24px;
-  }
-  .zone-detail-head{
-    padding:26px 30px 18px;
-    display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;
-    border-bottom:1px solid var(--line);
-  }
-  .zone-detail-head h2{font-size:19px;margin:0;color:var(--navy);}
-  .zone-detail-head .meta{font-size:13px;color:var(--ink-dim);}
-  .zone-detail-head .meta strong{color:var(--navy);}
+  .pin{cursor:pointer;}
+  .pin circle.dot{fill:var(--steel);stroke:var(--paper);stroke-width:2;transition:r 0.2s ease, fill 0.2s ease;}
+  .pin.risk circle.dot{fill:var(--rust);}
+  .pin:hover circle.dot{r:11;}
+  .pin-label{font-size:12.5px;font-weight:600;fill:var(--ink);pointer-events:none;}
+  .pin-sub{font-size:10.5px;fill:var(--ink-dim);pointer-events:none;}
 
-  table{width:100%;border-collapse:collapse;font-size:13px;}
-  thead th{
-    text-align:left;font-weight:600;color:var(--ink-dim);font-size:11px;
-    padding:12px 14px;border-bottom:1px solid var(--line);
-    position:sticky;top:0;background:var(--paper);
+  .tooltip{
+    position:absolute; background:var(--navy); color:var(--paper);
+    padding:16px 18px; min-width:220px; pointer-events:none;
+    opacity:0; transform:translateY(6px); transition:opacity 0.18s ease, transform 0.18s ease;
+    box-shadow:0 14px 32px -10px rgba(0,0,0,0.5); z-index:20; font-size:13px;
   }
-  thead th.num{text-align:right;}
-  tbody td{padding:9px 14px;border-bottom:1px solid var(--line);}
-  tbody td.num{text-align:right;font-weight:600;}
-  tbody td.mono{font-family:'Consolas','SFMono-Regular',monospace;font-size:12.5px;color:var(--ink-dim);}
-  tbody tr:hover{background:var(--paper-dim);}
-  .cat-tag{font-size:11px;color:var(--steel);font-weight:600;}
-  .yard-tag{font-size:10px;color:var(--amber);font-weight:600;letter-spacing:0.03em;background:rgba(201,134,42,0.12);padding:2px 6px;border-radius:2px;}
-  .table-scroll{max-height:420px;overflow-y:auto;}
+  .tooltip.show{opacity:1; transform:translateY(0); pointer-events:auto;}
+  .tooltip .t-name{font-size:14px;font-weight:600;margin-bottom:2px;}
+  .tooltip .t-ifs{font-size:10.5px;color:var(--steel-light);font-family:'Consolas',monospace;margin-bottom:10px;}
+  .tooltip .t-row{display:flex;justify-content:space-between;padding:4px 0;border-top:1px solid rgba(250,248,244,0.12);font-size:12.5px;}
+  .tooltip .t-row:first-of-type{border-top:none;}
+  .tooltip .t-row span:last-child{font-weight:600;}
+  .tooltip .t-link{display:block;margin-top:12px;font-size:12px;color:var(--steel-light);text-decoration:none;font-weight:600;}
+  .tooltip .t-status{display:inline-block;margin-top:8px;font-size:10.5px;padding:2px 7px;letter-spacing:0.02em;}
+  .tooltip .t-status.ok{background:rgba(127,166,204,0.18);color:var(--steel-light);}
+  .tooltip .t-status.risk{background:rgba(184,74,62,0.2);color:#e8998f;}
 
-  @media (prefers-reduced-motion: no-preference){
-    .zone{animation:riseIn 0.55s cubic-bezier(.2,.8,.2,1) both;}
-    .zone:nth-child(1){animation-delay:0.05s;}
-    .zone:nth-child(2){animation-delay:0.12s;}
-    .zone:nth-child(3){animation-delay:0.19s;}
-    .zone:nth-child(4){animation-delay:0.26s;}
-    @keyframes riseIn{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
-    .table-reveal tbody tr{opacity:0;animation:rowIn 0.35s ease forwards;}
-    @keyframes rowIn{from{opacity:0;transform:translateX(-6px);}to{opacity:1;transform:translateX(0);}}
-    .zone-detail{opacity:0;transform:translateY(20px);transition:opacity 0.6s ease, transform 0.6s cubic-bezier(.2,.8,.2,1);}
-    .zone-detail.in{opacity:1;transform:translateY(0);}
-  }
+  .legend{display:flex;gap:24px;margin-top:18px;flex-wrap:wrap;}
+  .legend-item{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-dim);}
+  .legend-dot{width:10px;height:10px;border-radius:50%;background:var(--steel);}
+  .legend-dot.risk{background:var(--rust);}
 
-  .trend-panel{background:var(--paper);color:var(--ink);margin-top:28px;padding:28px 30px;}
-  .trend-panel h2{font-size:15px;margin:0 0 4px;color:var(--navy);}
-  .trend-panel .sub{font-size:13px;color:var(--ink-dim);margin-bottom:20px;}
-  .trend-wrap svg{width:100%;height:160px;display:block;}
-  .trend-axis text{font-size:10px;fill:var(--ink-dim);}
+  .cards-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(250,248,244,0.14);margin-top:0;}
+  @media (max-width:900px){.cards-row{grid-template-columns:repeat(2,1fr);}}
+  .wcard{background:var(--navy-2);padding:22px 20px;}
+  .wcard .wname{font-size:13px;font-weight:600;margin-bottom:4px;}
+  .wcard .wqty{font-size:26px;font-weight:600;letter-spacing:-0.02em;}
+  .wcard .wlabel{font-size:11px;color:rgba(250,248,244,0.5);margin-top:2px;}
 
-  .empty-note{color:var(--ink-dim);font-size:13px;padding:24px 30px;}
   footer{max-width:1180px;margin:0 auto;padding:24px 28px 0;font-size:12px;color:rgba(250,248,244,0.4);position:relative;z-index:1;}
 </style>
 </head>
 <body>
 
-<div class="grid-bg" id="gridBg"></div>
+<div class="grid-bg"></div>
 
 <header>
   <div>
-    <div class="brand"><a href="../index.html">TVS LANKA HORANA MIS</a> · STORES</div>
-    <h1>Warehouse Stock</h1>
+    <div class="brand"><a href="../index.html">TVS LANKA HORANA MIS</a> · STORES · <a href="detail.html">Full Detail</a></div>
+    <h1>Warehouse Map</h1>
   </div>
-  <div class="updated" id="updatedLabel">Loading…</div>
+  <div class="updated"><span class="live-badge"><span class="dot"></span>LIVE</span> &nbsp;<span id="dateLabel">Loading…</span></div>
 </header>
 
 <div class="wrap">
 
-  <div class="summary" id="summaryStrip">
-    <div class="stat"><div class="num" id="s-total">—</div><div class="label">Total units, all warehouses</div></div>
-    <div class="stat"><div class="num" id="s-pending">—</div><div class="label">Containers pending</div></div>
-    <div class="stat warn"><div class="num" id="s-aging">—</div><div class="label">Aging 14+ days</div></div>
-    <div class="stat risk"><div class="num" id="s-risk">—</div><div class="label">Cost risk — Yard</div></div>
-  </div>
+  <div class="cards-row" id="cardsRow"></div>
 
-  <div class="zones-title">Four warehouses — click any zone to jump to its detail</div>
-  <div class="zones" id="zones"></div>
+  <div class="map-panel">
+    <h2>Four warehouses, real geography</h2>
+    <div class="sub">Positions are proportional to actual coordinates. Spectra Yard sits ~40 km from the Horana cluster — the inset below zooms into the three co-located sites for readability.</div>
+    <div class="map-note">Distances/times are road-distance estimates from real coordinates (not live traffic routing) — treat as approximate.</div>
 
-  <div id="zoneDetails"></div>
+    <svg class="map-svg" viewBox="0 0 900 640" id="mapSvg">
+      <text x="60" y="50" class="region-label">COLOMBO / WATTALA AREA</text>
+      <text x="560" y="470" class="region-label">HORANA - PORUWADANDA</text>
 
-  <div class="trend-panel">
-    <h2>Daily stock trend</h2>
-    <div class="sub">Total units recorded per day, across all warehouses</div>
-    <div class="trend-wrap" id="trendChart"></div>
+      <line x1="90" y1="90" x2="620" y2="440" class="route-line"/>
+      <text x="300" y="255" class="route-label" text-anchor="middle">~54 km road · ~87 min est.</text>
+
+      <line x1="785" y1="529" x2="700" y2="470" class="leader-line"/>
+
+      <g class="pin" data-loc="Yard" transform="translate(90,90)">
+        <circle class="dot" r="9"/>
+        <text x="14" y="4" class="pin-label">Spectra Yard</text>
+        <text x="14" y="19" class="pin-sub">Container storage · Colombo area</text>
+      </g>
+
+      <rect x="360" y="470" width="510" height="150" rx="2" class="inset-box"/>
+      <text x="376" y="494" class="inset-title">HORANA CLUSTER - ZOOMED FOR READABILITY, NOT TO SCALE</text>
+
+      <line x1="440" y1="560" x2="590" y2="560" class="route-line"/>
+      <text x="515" y="550" class="route-label" text-anchor="middle" font-size="10.5">~4 km · ~7 min</text>
+
+      <line x1="590" y1="560" x2="590" y2="600" class="route-line"/>
+      <text x="640" y="583" class="route-label" font-size="10.5">~5 km · ~7 min</text>
+
+      <g class="pin" data-loc="Plant WH" transform="translate(440,560)">
+        <circle class="dot" r="9"/>
+        <text x="14" y="4" class="pin-label">Plant Warehouse</text>
+        <text x="14" y="19" class="pin-sub">Inside Assembly Complex</text>
+      </g>
+
+      <g class="pin" data-loc="180/C WH" transform="translate(590,560)">
+        <circle class="dot" r="9"/>
+        <text x="14" y="4" class="pin-label">180/C Warehouse</text>
+        <text x="14" y="19" class="pin-sub">Adjacent to Assembly Complex</text>
+      </g>
+
+      <g class="pin" data-loc="Munagama WH" transform="translate(590,600)">
+        <circle class="dot" r="9"/>
+        <text x="14" y="17" class="pin-label">Munagama Warehouse</text>
+        <text x="14" y="32" class="pin-sub">Near Keth Bima, Horana town</text>
+      </g>
+    </svg>
+
+    <div class="legend">
+      <div class="legend-item"><span class="legend-dot"></span>Normal stock level</div>
+      <div class="legend-item"><span class="legend-dot risk"></span>Has Cost Risk items (14+ days, Yard)</div>
+    </div>
   </div>
 
 </div>
 
-<footer>Sourced from Shantha's daily Stores stock email, parsed automatically. Warehouse codes per Shantha's IFS location mapping.</footer>
+<div class="tooltip" id="tooltip"></div>
+
+<footer>Warehouse coordinates from Google Places data. Distances are estimated from real coordinates using typical Sri Lankan road-distance modeling — not live traffic routing.</footer>
 
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbzJFWD_AQc8UwEkVHcb3q9lDmzoMcO-fq9qDX3wIEAoUi8gIZN09Uxbbjfj3Z30spjjpw/exec";
 
-const ZONE_ORDER = [
-  { key: "Plant WH",     label: "Plant Warehouse",   ifs: "BOX / TWBOX" },
-  { key: "180/C WH",     label: "180/C Warehouse",   ifs: "BOX-180C / TWBOX-180C" },
-  { key: "Munagama WH",  label: "Munagama Warehouse",ifs: "BOX-MUN / TWBOX-MUN" },
-  { key: "Yard",         label: "Spectra Yard",      ifs: "BOXWH / TWBOXWH" }
-];
+const ZONE_META = {
+  "Yard": { label: "Spectra Yard", ifs: "BOXWH / TWBOXWH", detailAnchor: "zone-3" },
+  "Plant WH": { label: "Plant Warehouse", ifs: "BOX / TWBOX", detailAnchor: "zone-0" },
+  "180/C WH": { label: "180/C Warehouse", ifs: "BOX-180C / TWBOX-180C", detailAnchor: "zone-1" },
+  "Munagama WH": { label: "Munagama Warehouse", ifs: "BOX-MUN / TWBOX-MUN", detailAnchor: "zone-2" }
+};
 
 function fmt(n){ return Number(n).toLocaleString('en-US'); }
-const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-function countUp(el, target, duration=900){
-  if(reduceMotion){ el.textContent = fmt(target); return; }
-  const start = performance.now();
-  function tick(now){
-    const p = Math.min(1, (now-start)/duration);
-    const eased = 1 - Math.pow(1-p, 3);
-    el.textContent = fmt(Math.round(target*eased));
-    if(p<1) requestAnimationFrame(tick);
-  }
-  requestAnimationFrame(tick);
-}
-
-function renderSummary(s){
-  countUp(document.getElementById('s-total'), s.totalUnitsLatest);
-  countUp(document.getElementById('s-pending'), s.containersPending);
-  countUp(document.getElementById('s-aging'), s.agingCount);
-  countUp(document.getElementById('s-risk'), s.costRiskCount);
-  document.getElementById('updatedLabel').innerHTML =
-    '<span class="live-badge"><span class="dot"></span>LIVE</span> &nbsp;Latest stock date <strong>' + (s.latestDate || '—') + '</strong>';
-}
-
-function renderZones(byLocation){
-  const el = document.getElementById('zones');
-  const totals = ZONE_ORDER.map(z => {
-    const rows = byLocation[z.key] || [];
-    return { ...z, total: rows.reduce((s,r)=>s+r.qty,0), count: rows.length };
-  });
-  const max = Math.max(...totals.map(t=>t.total), 1);
-
-  el.innerHTML = totals.map((z,i) => `
-    <div class="zone" data-target="zone-${i}">
-      <div class="idx">ZONE ${String(i+1).padStart(2,'0')}</div>
-      <div class="name">${z.label}</div>
-      <div class="ifs">${z.ifs}</div>
-      <div class="qty" data-final="${z.total}">0</div>
-      <div class="qty-label">units · ${z.count} line item${z.count===1?'':'s'}</div>
-      <div class="bar-track"><div class="bar-fill" data-w="${(z.total/max*100).toFixed(1)}"></div></div>
-      <div class="go">View detail <span>&rarr;</span></div>
-    </div>
-  `).join('');
-
-  el.querySelectorAll('.zone').forEach(z => {
-    z.addEventListener('click', () => {
-      document.getElementById(z.dataset.target).scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
-    });
-  });
-
-  setTimeout(() => {
-    el.querySelectorAll('.qty').forEach(q => countUp(q, Number(q.dataset.final), 1100));
-    el.querySelectorAll('.bar-fill').forEach(b => { b.style.width = b.dataset.w + '%'; });
-  }, reduceMotion ? 0 : 500);
-}
-
-function renderZoneDetails(byLocation){
-  const el = document.getElementById('zoneDetails');
-  el.innerHTML = ZONE_ORDER.map((z, i) => {
-    const rows = (byLocation[z.key] || []).slice().sort((a,b) => {
-      if (a.category !== b.category) return a.category.localeCompare(b.category);
-      return b.qty - a.qty;
-    });
+function buildStats(byLocation, ageList) {
+  const stats = {};
+  Object.keys(ZONE_META).forEach(key => {
+    const rows = byLocation[key] || [];
     const total = rows.reduce((s,r)=>s+r.qty,0);
+    const items = rows.length;
+    const ages = ageList.filter(a => a.location === key);
+    const maxAge = ages.length ? Math.max(...ages.map(a=>a.ageDays)) : 0;
+    const riskCount = ages.filter(a => a.status.indexOf('Cost Risk') !== -1).length;
+    stats[key] = { total, items, maxAge, riskCount };
+  });
+  return stats;
+}
 
-    const rowsHtml = rows.length ? rows.map((r,ri) => `
-      <tr style="animation-delay:${Math.min(ri*0.02,0.5)}s">
-        <td><span class="cat-tag">${r.category}</span></td>
-        <td>${r.model}</td>
-        <td>${r.color}</td>
-        <td class="mono">${r.wOrder || '—'}</td>
-        <td class="mono">${r.container || (r.rowType === 'YardSubtotal' ? '<span class="yard-tag">YARD STOCK</span>' : '—')}</td>
-        <td class="num">${fmt(r.qty)}</td>
-      </tr>
-    `).join('') : '';
-
-    return `
-      <div class="zone-detail" id="zone-${i}">
-        <div class="zone-detail-head">
-          <h2>${z.label}</h2>
-          <div class="meta"><strong>${fmt(total)}</strong> units across <strong>${rows.length}</strong> line items</div>
-        </div>
-        ${rows.length ? `
-        <div class="table-scroll">
-          <table class="table-reveal">
-            <thead>
-              <tr><th>Category</th><th>Model</th><th>Color</th><th>W/Order</th><th>Container</th><th class="num">Qty</th></tr>
-            </thead>
-            <tbody>${rowsHtml}</tbody>
-          </table>
-        </div>` : `<div class="empty-note">No stock currently recorded at this location.</div>`}
-      </div>
-    `;
+function renderCards(stats) {
+  const el = document.getElementById('cardsRow');
+  el.innerHTML = Object.keys(ZONE_META).map(key => {
+    const s = stats[key];
+    return `<div class="wcard">
+      <div class="wname">${ZONE_META[key].label}</div>
+      <div class="wqty">${fmt(s.total)}</div>
+      <div class="wlabel">units · ${s.items} line item${s.items===1?'':'s'}</div>
+    </div>`;
   }).join('');
-
-  if (!reduceMotion && 'IntersectionObserver' in window) {
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('in');
-          io.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.15 });
-    document.querySelectorAll('.zone-detail').forEach(d => io.observe(d));
-  } else {
-    document.querySelectorAll('.zone-detail').forEach(d => d.classList.add('in'));
-  }
 }
 
-function renderTrend(rows){
-  const el = document.getElementById('trendChart');
-  if(rows.length < 2){ el.innerHTML = '<div class="empty-note">Need at least two days of data for a trend.</div>'; return; }
-  const W = 1120, H = 160, padL = 40, padB = 24, padT = 10;
-  const vals = rows.map(r=>r.total);
-  const max = Math.max(...vals), min = Math.min(...vals);
-  const span = (max - min) || 1;
-  const x = i => padL + (i/(rows.length-1)) * (W - padL - 10);
-  const y = v => padT + (1 - (v-min)/span) * (H - padT - padB);
-  const points = rows.map((r,i)=>`${x(i)},${y(r.total)}`).join(' ');
-  const dots = rows.map((r,i)=>`<circle cx="${x(i)}" cy="${y(r.total)}" r="3" fill="#3A6EA5"/>`).join('');
-  const labels = rows.map((r,i)=> i % Math.ceil(rows.length/7) === 0 || i===rows.length-1
-      ? `<text x="${x(i)}" y="${H-6}" text-anchor="middle">${r.date.slice(5)}</text>` : '').join('');
-  el.innerHTML = `
-    <svg viewBox="0 0 ${W} ${H}" class="trend-axis">
-      <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H-padB}" stroke="#0B1D33" stroke-opacity="0.14"/>
-      <line x1="${padL}" y1="${H-padB}" x2="${W-10}" y2="${H-padB}" stroke="#0B1D33" stroke-opacity="0.14"/>
-      <polyline id="trendLine" points="${points}" fill="none" stroke="#3A6EA5" stroke-width="2"/>
-      <g id="trendDots" opacity="${reduceMotion?1:0}">${dots}</g>
-      ${labels}
-    </svg>`;
-  const line = document.getElementById('trendLine');
-  if (!reduceMotion) {
-    const len = line.getTotalLength();
-    line.style.strokeDasharray = len;
-    line.style.strokeDashoffset = len;
-    line.getBoundingClientRect();
-    line.style.transition = 'stroke-dashoffset 1.1s cubic-bezier(.2,.8,.2,1)';
-    requestAnimationFrame(() => { line.style.strokeDashoffset = '0'; });
-    setTimeout(() => {
-      const dotsEl = document.getElementById('trendDots');
-      dotsEl.style.transition = 'opacity 0.4s ease';
-      dotsEl.setAttribute('opacity','1');
-    }, 1000);
-  }
+function markRiskPins(stats) {
+  document.querySelectorAll('.pin').forEach(pin => {
+    const key = pin.dataset.loc;
+    if (stats[key] && stats[key].riskCount > 0) pin.classList.add('risk');
+  });
 }
 
-document.addEventListener('mousemove', (e) => {
-  if (reduceMotion) return;
-  const x = (e.clientX / window.innerWidth - 0.5) * 6;
-  const y = (e.clientY / window.innerHeight - 0.5) * 6;
-  document.getElementById('gridBg').style.transform = `translate(${x}px, ${y}px)`;
-});
+function setupTooltips(stats) {
+  const tooltip = document.getElementById('tooltip');
+  document.querySelectorAll('.pin').forEach(pin => {
+    const key = pin.dataset.loc;
+    const meta = ZONE_META[key];
+    const s = stats[key];
+    if (!meta || !s) return;
+
+    function show() {
+      const statusClass = s.riskCount > 0 ? 'risk' : 'ok';
+      const statusText = s.riskCount > 0 ? `${s.riskCount} Cost Risk item${s.riskCount===1?'':'s'}` : 'No cost-risk items';
+      tooltip.innerHTML = `
+        <div class="t-name">${meta.label}</div>
+        <div class="t-ifs">${meta.ifs}</div>
+        <div class="t-row"><span>Total stock</span><span>${fmt(s.total)} units</span></div>
+        <div class="t-row"><span>Line items</span><span>${s.items}</span></div>
+        <div class="t-row"><span>Oldest container</span><span>${s.maxAge} day${s.maxAge===1?'':'s'}</span></div>
+        <span class="t-status ${statusClass}">${statusText}</span>
+        <a class="t-link" href="detail.html#${meta.detailAnchor}">View full detail →</a>
+      `;
+      positionTooltip();
+      tooltip.classList.add('show');
+    }
+    function positionTooltip() {
+      const pinRect = pin.getBoundingClientRect();
+      tooltip.style.left = (pinRect.right + window.scrollX + 12) + 'px';
+      tooltip.style.top = (pinRect.top + window.scrollY - 8) + 'px';
+    }
+    function hide() { tooltip.classList.remove('show'); }
+
+    pin.addEventListener('mouseenter', show);
+    pin.addEventListener('mousemove', positionTooltip);
+    pin.addEventListener('mouseleave', hide);
+    pin.addEventListener('click', () => { window.location.href = `detail.html#${meta.detailAnchor}`; });
+  });
+}
 
 async function load(){
   try{
     const res = await fetch(API_URL);
     const data = await res.json();
-    renderSummary(data.summary);
-    renderZones(data.byLocation || {});
-    renderZoneDetails(data.byLocation || {});
-    renderTrend(data.dailyTotals || []);
+    document.getElementById('dateLabel').innerHTML = 'Latest stock date <strong>' + (data.summary.latestDate || '—') + '</strong>';
+    const stats = buildStats(data.byLocation || {}, data.ageList || []);
+    renderCards(stats);
+    markRiskPins(stats);
+    setupTooltips(stats);
   }catch(err){
-    document.getElementById('updatedLabel').textContent = 'Could not load data — check API_URL is set';
+    document.getElementById('dateLabel').textContent = 'Could not load data';
     console.error(err);
   }
 }
