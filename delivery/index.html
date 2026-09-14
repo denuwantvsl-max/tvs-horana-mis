@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TVS Lanka — Delivery Overview</title>
+<style>
+  :root{
+    --navy:#0B1D33;
+    --navy-2:#0E2440;
+    --paper:#FAF8F4;
+    --paper-dim:#EFEBE3;
+    --steel:#3A6EA5;
+    --steel-light:#7FA6CC;
+    --amber:#C9862A;
+    --rust:#B84A3E;
+    --violet:#6B5B95;
+    --ink:#0B1D33;
+    --ink-dim:#5B6B80;
+    --line:rgba(11,29,51,0.14);
+    --grid-line:rgba(127,166,204,0.09);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--navy); color:var(--paper);
+    font-family:'Segoe UI','Inter',system-ui,-apple-system,sans-serif;
+    font-variant-numeric:tabular-nums; line-height:1.4;
+  }
+  a{color:inherit;}
+  .grid-bg{
+    position:fixed; inset:0; z-index:0; pointer-events:none;
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size:48px 48px;
+  }
+  .wrap{max-width:1180px;margin:0 auto;padding:0 28px 80px;position:relative;z-index:1;}
+  header{
+    padding:40px 28px 26px; max-width:1180px; margin:0 auto;
+    display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:16px;
+    position:relative; z-index:1;
+  }
+  .tabbar{
+    max-width:1180px; margin:0 auto; padding:0 28px;
+    display:flex; gap:4px; border-bottom:1px solid rgba(250,248,244,0.14); position:relative; z-index:1;
+  }
+  .tabbar a{
+    padding:13px 18px; font-size:13px; font-weight:600; color:rgba(250,248,244,0.5);
+    border-bottom:2px solid transparent; margin-bottom:-1px;
+    transition:color 0.2s ease, border-color 0.2s ease; text-decoration:none;
+  }
+  .tabbar a:hover{ color:rgba(250,248,244,0.85); }
+  .tabbar a.active{ color:var(--paper); border-bottom-color:var(--steel-light); }
+  .brand{font-size:13px;letter-spacing:0.02em;color:var(--steel-light);margin-bottom:6px;}
+  .brand a{color:inherit;text-decoration:none;}
+  h1{font-size:32px;font-weight:600;margin:0;letter-spacing:-0.01em;}
+  .updated{font-size:13px;color:rgba(250,248,244,0.55);text-align:right;}
+  .live-badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;letter-spacing:0.02em;color:var(--steel-light);}
+  .live-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--steel-light);}
+  @keyframes pulseGlow{0%,100%{box-shadow:0 0 0 0 rgba(127,166,204,0.55);}50%{box-shadow:0 0 0 5px rgba(127,166,204,0);}}
+  .live-badge .dot{animation:pulseGlow 1.8s ease-in-out infinite;}
+
+  /* ---- Provenance banner ---- */
+  .provenance{
+    margin-top:26px; padding:14px 20px; background:var(--navy-2);
+    border-left:3px solid var(--steel-light);
+    font-size:12.5px; color:rgba(250,248,244,0.75); display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  }
+  .provenance b{color:var(--paper);}
+  .provenance .unverified{color:var(--amber);}
+  .source-tag{
+    font-size:11px; color:var(--ink-dim); margin:10px 0 18px; font-style:italic;
+  }
+
+  .summary{display:flex;gap:0;margin:20px 0 8px;border-bottom:1px solid rgba(250,248,244,0.14);flex-wrap:wrap;}
+  .summary .stat{padding:16px 28px 16px 0;margin-right:28px;}
+  .summary .num{font-size:26px;font-weight:600;letter-spacing:-0.02em;}
+  .summary .label{font-size:12px;color:rgba(250,248,244,0.5);margin-top:2px;}
+  .summary .stat.warn .num{color:var(--amber);}
+  .summary .stat.risk .num{color:var(--rust);}
+  .summary .stat.good .num{color:var(--steel-light);}
+
+  .panel{background:var(--paper);color:var(--ink);margin-top:28px;padding:28px 30px;}
+  .panel h2{font-size:15px;margin:0 0 4px;color:var(--navy);display:flex;align-items:center;gap:10px;}
+  .cat-pill{font-size:10px;font-weight:700;letter-spacing:0.03em;padding:2px 8px;border-radius:2px;color:var(--paper);}
+  .panel .sub{font-size:13px;color:var(--ink-dim);margin-bottom:4px;}
+
+  table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  thead th{text-align:right;font-weight:600;color:var(--ink-dim);font-size:10.5px;padding:10px 10px 10px 0;border-bottom:1px solid var(--line);white-space:nowrap;}
+  thead th:first-child,thead th:nth-child(2){text-align:left;}
+  tbody td{padding:8px 10px 8px 0;border-bottom:1px solid var(--line);text-align:right;font-family:'Consolas','SFMono-Regular',monospace;}
+  tbody td:first-child,tbody td:nth-child(2){text-align:left;font-family:inherit;}
+  tbody tr:hover{background:rgba(58,110,165,0.04);}
+  .model-name{font-weight:600;}
+  .color-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:middle;border:1px solid rgba(0,0,0,0.15);}
+  td.pending-cell.has-pending{color:var(--rust);font-weight:600;}
+  td.plan-cell.has-plan{color:var(--steel);font-weight:600;}
+  .empty-note{color:var(--ink-dim);font-size:13px;padding:16px 0;}
+
+  .nav-cards{display:grid;grid-template-columns:1fr;gap:1px;background:rgba(250,248,244,0.14);margin-top:28px;}
+  .nav-card{background:var(--navy-2);padding:22px 24px;transition:background 0.2s ease;text-decoration:none;display:block;}
+  .nav-card:hover{background:#12294a;}
+  .nav-card .nc-title{font-size:15px;font-weight:600;margin-bottom:4px;}
+  .nav-card .nc-sub{font-size:12.5px;color:rgba(250,248,244,0.55);}
+
+  footer{max-width:1180px;margin:0 auto;padding:24px 28px 0;font-size:12px;color:rgba(250,248,244,0.4);position:relative;z-index:1;}
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+
+<header>
+  <div>
+    <div class="brand"><a href="../index.html">TVS LANKA HORANA MIS</a> · DELIVERY</div>
+    <h1>Delivery Overview</h1>
+  </div>
+  <div class="updated"><span class="live-badge"><span class="dot"></span>LIVE</span> &nbsp;<span id="dateLabel">Loading…</span></div>
+</header>
+
+<div class="tabbar">
+  <a class="active" href="index.html">Overview</a>
+</div>
+
+<div class="wrap">
+
+  <div class="provenance" id="provenance">Loading source information…</div>
+
+  <div class="summary" id="summaryStrip"></div>
+
+  <div id="categoryPanels"></div>
+
+  <div class="nav-cards">
+    <a class="nav-card" href="../index.html">
+      <div class="nc-title">← Back to MIS Hub</div>
+      <div class="nc-sub">Stores, Production, Quality, Costing</div>
+    </a>
+  </div>
+
+</div>
+
+<footer>All figures on this page are computed live from the Delivery Raw sheet, itself built from Piyumal's daily Stock &amp; Delivery Status email. Metric labels are normalized from the source file's date-stamped column headers (e.g. "Delivered Qty - 10/09/2026") into stable fields, so the same field lines up day over day.</footer>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbzJFWD_AQc8UwEkVHcb3q9lDmzoMcO-fq9qDX3wIEAoUi8gIZN09Uxbbjfj3Z30spjjpw/exec?module=delivery";
+
+const CATEGORY_META = {
+  "Summary": { label: "2-Wheeler — Summary", color: "#3A6EA5" },
+  "IQUBE":   { label: "IQUBE (Electric)",     color: "#C9862A" },
+  "3W":      { label: "3-Wheeler",            color: "#B84A3E" }
+};
+const CATEGORY_ORDER = ["Summary", "IQUBE", "3W"];
+
+function fmt(n){ return Number(n||0).toLocaleString('en-US'); }
+
+function colorDot(colorName){
+  const c = (colorName||'').toUpperCase();
+  const map = [
+    [/RED|RCR|RC-RED/, '#B84A3E'], [/COPPER/, '#C9862A'], [/BLUE/, '#3A6EA5'],
+    [/GREEN/, '#4B8B5E'], [/BLACK|BLK/, '#2A2A2A'], [/GREY|GRY|GRAY/, '#8A8F98'],
+    [/WHITE|WHT|P WHITE/, '#C9C4B8'], [/YEL/, '#D4B106'], [/TITAMIUM|TITANIUM/, '#8A8F98'],
+  ];
+  for (const [re, c2] of map) if (re.test(c)) return c2;
+  return '#B0B0B0';
+}
+
+function formatProvenance(source, latestDate){
+  const el = document.getElementById('provenance');
+  if (!source) {
+    el.innerHTML = `Data as at <b>${latestDate || '—'}</b>. Source-tracking unavailable for this date.`;
+    return;
+  }
+  const dt = new Date(source.receivedAt);
+  const when = isNaN(dt) ? source.receivedAt : dt.toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
+  const verifiedNote = source.verified
+    ? ''
+    : `<span class="unverified">(Drive save time — original email timestamp unavailable for this date)</span>`;
+  el.innerHTML = `📧 Data extracted from <b>${source.sender || 'Piyumal'}</b>'s email — <b>${source.fileName}</b>, received <b>${when}</b>. ${verifiedNote}`;
+}
+
+function renderSummary(s){
+  const el = document.getElementById('summaryStrip');
+  const t = s.totals || {};
+  el.innerHTML = `
+    <div class="stat good"><div class="num">${fmt(t.delivered)}</div><div class="label">Delivered — latest day</div></div>
+    <div class="stat"><div class="num">${fmt(t.deliveryPlan)}</div><div class="label">Planned — next day</div></div>
+    <div class="stat warn"><div class="num">${fmt(t.pending)}</div><div class="label">Pending delivery</div></div>
+    <div class="stat"><div class="num">${fmt(t.balancedNewOrders)}</div><div class="label">Balanced stock — new orders</div></div>
+    <div class="stat"><div class="num">${fmt(t.balancedNotAssembled)}</div><div class="label">Balanced stock — not assembled</div></div>
+  `;
+}
+
+function renderCategoryTable(rows){
+  if (!rows.length) return '<div class="empty-note">No data for this section on the latest date.</div>';
+  const sorted = rows.slice().sort((a,b) => (b.metrics.pending||0) - (a.metrics.pending||0));
+  return `
+    <table>
+      <thead>
+        <tr>
+          <th>Model</th><th>Color</th>
+          <th>Delivered</th><th>Plan (next day)</th><th>Pending</th>
+          <th>Bal. New Orders</th><th>Bal. Not Assembled</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${sorted.map(r => {
+          const m = r.metrics || {};
+          const pending = m.pending || 0;
+          const plan = m.deliveryPlan || 0;
+          return `
+            <tr>
+              <td class="model-name">${r.model}</td>
+              <td><span class="color-dot" style="background:${colorDot(r.color)}"></span>${r.color}</td>
+              <td>${fmt(m.delivered)}</td>
+              <td class="plan-cell${plan ? ' has-plan' : ''}">${fmt(plan)}</td>
+              <td class="pending-cell${pending ? ' has-pending' : ''}">${fmt(pending)}</td>
+              <td>${fmt(m.balancedNewOrders)}</td>
+              <td>${fmt(m.balancedNotAssembled)}</td>
+            </tr>
+          `;
+        }).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+function renderCategoryPanels(byCategory){
+  const el = document.getElementById('categoryPanels');
+  el.innerHTML = CATEGORY_ORDER.map(cat => {
+    const meta = CATEGORY_META[cat];
+    const rows = (byCategory && byCategory[cat]) || [];
+    return `
+      <div class="panel">
+        <h2><span class="cat-pill" style="background:${meta.color}">${cat}</span>${meta.label}</h2>
+        <div class="sub">Every model + color combination reported for this section on the latest date.</div>
+        <div class="source-tag">${rows.length} line${rows.length === 1 ? '' : 's'}</div>
+        ${renderCategoryTable(rows)}
+      </div>
+    `;
+  }).join('');
+}
+
+async function load(){
+  try{
+    const res = await fetch(API_URL);
+    const data = await res.json();
+    document.getElementById('dateLabel').innerHTML = 'Latest report date <strong>' + (data.summary.latestDate || '—') + '</strong>';
+    formatProvenance(data.summary.source, data.summary.latestDate);
+    renderSummary(data.summary);
+    renderCategoryPanels(data.byCategory || {});
+  }catch(err){
+    document.getElementById('dateLabel').textContent = 'Could not load data';
+    document.getElementById('provenance').textContent = 'Could not load source information.';
+    document.getElementById('categoryPanels').innerHTML = '<div class="empty-note">Could not load Delivery data. Check that the API deployment is live and reachable.</div>';
+    console.error(err);
+  }
+}
+load();
+</script>
+</body>
+</html>
