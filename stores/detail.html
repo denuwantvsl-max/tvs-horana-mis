@@ -50,14 +50,30 @@
     align-items:flex-end;
     flex-wrap:wrap;
     gap:16px;
-    border-bottom:1px solid rgba(250,248,244,0.14);
     position:relative; z-index:1;
   }
+  .tabbar{
+    max-width:1180px; margin:0 auto; padding:0 28px;
+    display:flex; gap:4px; border-bottom:1px solid rgba(250,248,244,0.14); position:relative; z-index:1;
+  }
+  .tabbar a{
+    padding:13px 18px; font-size:13px; font-weight:600; color:rgba(250,248,244,0.5);
+    border-bottom:2px solid transparent; margin-bottom:-1px;
+    transition:color 0.2s ease, border-color 0.2s ease; text-decoration:none;
+  }
+  .tabbar a:hover{ color:rgba(250,248,244,0.85); }
+  .tabbar a.active{ color:var(--paper); border-bottom-color:var(--steel-light); }
   .brand{font-size:13px;letter-spacing:0.02em;color:var(--steel-light);margin-bottom:6px;}
   .brand a{color:inherit;text-decoration:none;}
   h1{font-size:32px;font-weight:600;margin:0;letter-spacing:-0.01em;}
   .updated{font-size:13px;color:rgba(250,248,244,0.55);text-align:right;}
   .updated strong{color:var(--paper);font-weight:600;}
+  .date-select{
+    margin-top:8px; padding:6px 10px; background:var(--navy-2); color:var(--paper);
+    border:1px solid rgba(250,248,244,0.2); font-size:12.5px; font-family:inherit;
+    cursor:pointer;
+  }
+  .date-select:hover{ border-color:var(--steel-light); }
   .live-badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;letter-spacing:0.02em;color:var(--steel-light);}
   .live-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--steel-light);}
   @media (prefers-reduced-motion: no-preference){
@@ -164,11 +180,20 @@
 
 <header>
   <div>
-    <div class="brand"><a href="../index.html">TVS LANKA HORANA MIS</a> · STORES · <a href="index.html">Overview</a> · <a href="map.html">Map</a></div>
+    <div class="brand"><a href="../index.html">TVS LANKA HORANA MIS</a> · STORES</div>
     <h1>Warehouse Stock — Full Detail</h1>
   </div>
-  <div class="updated" id="updatedLabel">Loading…</div>
+  <div>
+    <div class="updated" id="updatedLabel">Loading…</div>
+    <select class="date-select" id="dateSelect"><option>Loading dates…</option></select>
+  </div>
 </header>
+
+<div class="tabbar">
+  <a href="index.html">Overview</a>
+  <a href="map.html">Map</a>
+  <a class="active" href="detail.html">Full Detail</a>
+</div>
 
 <div class="wrap">
 
@@ -377,6 +402,37 @@ document.addEventListener('mousemove', (e) => {
   document.getElementById('gridBg').style.transform = `translate(${x}px, ${y}px)`;
 });
 
+function populateDateSelect(availableDates, latestDate, onSelect){
+  const el = document.getElementById('dateSelect');
+  const dates = (availableDates && availableDates.length) ? availableDates.slice().reverse() : [latestDate];
+  el.innerHTML = dates.map(d => `<option value="${d}" ${d===latestDate?'selected':''}>${d}${d===latestDate?' (latest)':''}</option>`).join('');
+  el.addEventListener('change', () => onSelect(el.value));
+}
+
+async function loadForDate(dateStr, isLatest, fallbackByLocation){
+  document.getElementById('updatedLabel').innerHTML = 'Loading ' + dateStr + '…';
+  if (isLatest) {
+    renderZones(fallbackByLocation || {});
+    renderZoneDetails(fallbackByLocation || {});
+    document.getElementById('updatedLabel').innerHTML = 'Viewing <strong>' + dateStr + '</strong> (latest)';
+    return;
+  }
+  try {
+    const res = await fetch(API_URL + '?date=' + encodeURIComponent(dateStr));
+    const data = await res.json();
+    if (data.selectedDateByLocation) {
+      renderZones(data.selectedDateByLocation);
+      renderZoneDetails(data.selectedDateByLocation);
+      document.getElementById('updatedLabel').innerHTML = 'Viewing <strong>' + dateStr + '</strong> (historical snapshot)';
+    } else {
+      document.getElementById('updatedLabel').textContent = 'No data available for ' + dateStr;
+    }
+  } catch (err) {
+    document.getElementById('updatedLabel').textContent = 'Could not load ' + dateStr;
+    console.error(err);
+  }
+}
+
 async function load(){
   try{
     const res = await fetch(API_URL);
@@ -385,6 +441,9 @@ async function load(){
     renderZones(data.byLocation || {});
     renderZoneDetails(data.byLocation || {});
     renderTrend(data.dailyTotals || []);
+    populateDateSelect(data.availableDates, data.summary.latestDate, (selected) => {
+      loadForDate(selected, selected === data.summary.latestDate, data.byLocation);
+    });
   }catch(err){
     document.getElementById('updatedLabel').textContent = 'Could not load data — check API_URL is set';
     console.error(err);
