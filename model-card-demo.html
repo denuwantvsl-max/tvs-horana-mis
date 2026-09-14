@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TVS Lanka — Model Card Demo (Jupiter Copper)</title>
+<style>
+  :root{
+    --navy:#0B1D33; --navy-2:#0E2440; --paper:#FAF8F4;
+    --steel:#3A6EA5; --steel-light:#7FA6CC; --ink-dim:#5B6B80;
+    --grid-line:rgba(127,166,204,0.09);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--navy); color:var(--paper);
+    font-family:'Segoe UI','Inter',system-ui,-apple-system,sans-serif;
+    min-height:100vh; display:flex; align-items:center; justify-content:center;
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size:48px 48px;
+  }
+  .card{ width:400px; background:var(--navy-2); box-shadow:0 24px 60px -20px rgba(0,0,0,0.6); }
+  .stage{ position:relative; width:100%; height:260px; overflow:hidden; }
+  .stage::before{
+    content:''; position:absolute; inset:0;
+    background:radial-gradient(ellipse 70% 60% at 50% 55%, rgba(127,166,204,0.14), transparent 70%);
+  }
+  .stage img{
+    position:absolute; inset:0; width:100%; height:100%; object-fit:contain;
+    opacity:0; transition:opacity 0.9s ease; padding:24px;
+  }
+  .stage img.active{ opacity:1; }
+  .info{ padding:20px 24px 24px; }
+  .badge{ font-size:10.5px; letter-spacing:0.06em; color:var(--steel-light); margin-bottom:8px; display:flex; align-items:center; gap:6px;}
+  .badge .dot{ width:6px; height:6px; border-radius:50%; background:var(--steel-light); }
+  h1{ font-size:19px; font-weight:600; margin:0 0 3px; }
+  .color-row{ display:flex; align-items:center; gap:8px; font-size:13px; color:rgba(250,248,244,0.6); margin-bottom:14px; }
+  .swatch{ width:12px; height:12px; border-radius:50%; background:#B08D7A; border:1px solid rgba(255,255,255,0.3); }
+  .dots{ display:flex; gap:6px; }
+  .dots span{ width:6px; height:6px; border-radius:50%; background:rgba(250,248,244,0.25); transition:background 0.3s ease; }
+  .dots span.active{ background:var(--steel-light); }
+  .note{ margin-top:14px; padding-top:12px; border-top:1px solid rgba(250,248,244,0.12); font-size:11px; color:var(--ink-dim); }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="stage" id="stage">
+    <img class="active" src="assets/models/jupiter-side.png" alt="Jupiter Copper side">
+    <img src="assets/models/jupiter-3q.png" alt="Jupiter Copper 3/4">
+    <img src="assets/models/jupiter-front.png" alt="Jupiter Copper front">
+  </div>
+  <div class="info">
+    <div class="badge"><span class="dot"></span>MODEL CARD — DEMO</div>
+    <h1>TVS Jupiter 110</h1>
+    <div class="color-row"><span class="swatch"></span>Copper</div>
+    <div class="dots" id="dots"></div>
+    <div class="note">Real photos, background removed — no rider, no scene. Supplied directly, not sourced from the web.</div>
+  </div>
+</div>
+
+<script>
+const imgs = document.querySelectorAll('.stage img');
+const dotsEl = document.getElementById('dots');
+imgs.forEach((_, i) => { const d = document.createElement('span'); if(i===0) d.classList.add('active'); dotsEl.appendChild(d); });
+const dots = dotsEl.querySelectorAll('span');
+let idx = 0;
+setInterval(() => {
+  imgs[idx].classList.remove('active'); dots[idx].classList.remove('active');
+  idx = (idx+1) % imgs.length;
+  imgs[idx].classList.add('active'); dots[idx].classList.add('active');
+}, 2800);
+</script>
+</body>
+</html>
