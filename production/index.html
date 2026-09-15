@@ -191,15 +191,39 @@ footer{max-width:1220px;margin:0 auto;padding:20px 24px 0;font-size:11.5px;color
 
   <div class="panel glass">
     <div class="panel-head">
-      <h2>Production by Model — Daily / Weekly / Monthly / Yearly</h2>
-      <div class="toggle-group" id="categoryToggle">
-        <button class="toggle-btn active" data-cat="CKD 2W">CKD 2W</button>
-        <button class="toggle-btn" data-cat="SKD 2W">SKD 2W</button>
+      <h2>2W SKD / 2W CKD / 3W — Output Over Time</h2>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <div class="toggle-group" id="catTrendCategoryToggle">
+          <button class="toggle-btn active" data-cat="SKD 2W">SKD 2W</button>
+          <button class="toggle-btn" data-cat="CKD 2W">CKD 2W</button>
+          <button class="toggle-btn" data-cat="3W">3W</button>
+        </div>
+        <div class="toggle-group" id="catTrendGranToggle">
+          <button class="toggle-btn active" data-gran="daily">Daily</button>
+          <button class="toggle-btn" data-gran="weekly">Weekly</button>
+          <button class="toggle-btn" data-gran="monthly">Monthly</button>
+        </div>
+      </div>
+    </div>
+    <div class="sub">Planned vs. actual for the selected category, over time.</div>
+    <div class="legend">
+      <div class="li"><span class="sw" style="background:var(--blue)"></span>Planned</div>
+      <div class="li"><span class="sw" style="background:var(--teal)"></span>Actual</div>
+    </div>
+    <div id="catTrendChart"></div>
+  </div>
+
+  <div class="panel glass">
+    <div class="panel-head">
+      <h2>Models — Regardless of Color</h2>
+      <div class="toggle-group" id="modelCategoryToggle">
+        <button class="toggle-btn active" data-cat="SKD 2W">SKD 2W</button>
+        <button class="toggle-btn" data-cat="CKD 2W">CKD 2W</button>
         <button class="toggle-btn" data-cat="3W">3W</button>
       </div>
     </div>
-    <div class="sub">Every item code that produced units in this category, with actual output at each time window. Weekly = trailing 7 days ending on the latest logged date, not a calendar week. Item codes are kept exactly as entered in the source — they already encode model, color and build variant together.</div>
-    <div id="itemBreakdownTable"></div>
+    <div class="sub">Every model (Ntorq, Raider, Jupiter, etc.), combined across all colors. Click a row to expand and see the individual color/variant breakdown.</div>
+    <div id="modelHierarchy"></div>
   </div>
 
   <div class="nav-cards">
@@ -403,25 +427,86 @@ function renderModelsTable(topModels){
     </table>`;
 }
 
-/* ---------------- Model+color breakdown by category ---------------- */
-let itemBreakdownGlobal = {};
-function renderItemBreakdown(category){
-  const box = document.getElementById('itemBreakdownTable');
-  const rows = itemBreakdownGlobal[category] || [];
-  if (!rows.length) { box.innerHTML = '<div class="empty-note">No production recorded for this category.</div>'; return; }
+/* ---------------- Category-level trend (2W SKD / 2W CKD / 3W over time) ---------------- */
+let categorySeriesGlobal = {};
+let catTrendState = { cat: 'SKD 2W', gran: 'daily' };
+
+function renderCatTrendChart(){
+  const box = document.getElementById('catTrendChart');
+  const series = categorySeriesGlobal[catTrendState.cat] || [];
+  const data = aggregatePlan(series, catTrendState.gran).slice(-16);
+  if (!data.length) { box.innerHTML = '<div class="empty-note">No data for this category yet.</div>'; return; }
+
+  const W = 1100, H = 260, padL = 46, padR = 20, padT = 14, padB = 34;
+  const maxVal = Math.max(1, ...data.map(d => Math.max(d.planned, d.actual)));
+  const groupW = (W-padL-padR) / data.length;
+  const barW = Math.min(28, groupW*0.32);
+  const scaleY = (H-padT-padB)/maxVal;
+
+  const svg = el('svg', { viewBox:`0 0 ${W} ${H}`, width:'100%', height:H, style:'display:block' });
+  for (let g=0; g<=4; g++) {
+    const y = padT+(H-padT-padB)*(1-g/4);
+    svg.appendChild(el('line', { x1:padL, x2:W-padR, y1:y, y2:y, stroke:'rgba(255,255,255,0.06)', 'stroke-width':1 }));
+    const t = el('text', { x:padL-8, y:y+3, 'text-anchor':'end', fill:'#6f7c96', 'font-size':9.5 });
+    t.textContent = fmt(Math.round(maxVal*g/4));
+    svg.appendChild(t);
+  }
+  data.forEach((d,i) => {
+    const cx = padL + groupW*i + groupW/2;
+    const planH = d.planned*scaleY, actH = d.actual*scaleY;
+    svg.appendChild(el('rect', { x:cx-barW-2, y:H-padB-planH, width:barW, height:Math.max(0,planH), rx:4, fill:'#6fa3ff', opacity:0.9 }));
+    svg.appendChild(el('rect', { x:cx+2, y:H-padB-actH, width:barW, height:Math.max(0,actH), rx:4, fill:'#5ee6cf', opacity:0.9 }));
+    const t = el('text', { x:cx, y:H-10, 'text-anchor':'middle', fill:'#6f7c96', 'font-size':9.5 });
+    t.textContent = d.label;
+    svg.appendChild(t);
+  });
+  box.innerHTML = ''; box.appendChild(svg);
+}
+
+/* ---------------- Expandable model hierarchy ---------------- */
+let modelBreakdownGlobal = {};
+let expandedModels = new Set();
+
+function renderModelHierarchy(category){
+  const box = document.getElementById('modelHierarchy');
+  const models = modelBreakdownGlobal[category] || [];
+  if (!models.length) { box.innerHTML = '<div class="empty-note">No production recorded for this category.</div>'; return; }
+
   box.innerHTML = `
     <table>
-      <thead><tr><th>Item Code</th><th>Daily</th><th>Weekly (7d)</th><th>Monthly</th><th>Yearly</th></tr></thead>
+      <thead><tr><th>Model</th><th></th><th>Daily</th><th>Weekly (7d)</th><th>Monthly</th><th>Yearly</th></tr></thead>
       <tbody>
-        ${rows.map(r => `<tr>
-          <td style="font-size:11.5px;">${r.itemCode}</td>
-          <td>${fmt(r.daily)}</td>
-          <td>${fmt(r.weekly)}</td>
-          <td>${fmt(r.monthly)}</td>
-          <td>${fmt(r.yearly)}</td>
-        </tr>`).join('')}
+        ${models.map((m, mi) => {
+          const isOpen = expandedModels.has(category + '|' + m.baseModel);
+          const rowsHtml = `<tr class="model-row-main" data-key="${category}|${m.baseModel}" style="cursor:pointer;">
+            <td style="font-weight:700;">${m.baseModel}</td>
+            <td style="color:var(--text-low);">${isOpen ? '▾' : '▸'} ${m.variants.length} color${m.variants.length===1?'':'s'}</td>
+            <td>${fmt(m.daily)}</td>
+            <td>${fmt(m.weekly)}</td>
+            <td>${fmt(m.monthly)}</td>
+            <td style="font-weight:700; color:var(--teal);">${fmt(m.yearly)}</td>
+          </tr>`;
+          const variantRows = isOpen ? m.variants.map(v => `
+            <tr style="background:rgba(255,255,255,0.02);">
+              <td colspan="2" style="padding-left:24px; font-size:11.5px; color:var(--text-mid);">${v.itemCode}</td>
+              <td style="color:var(--text-mid);">${fmt(v.daily)}</td>
+              <td style="color:var(--text-mid);">${fmt(v.weekly)}</td>
+              <td style="color:var(--text-mid);">${fmt(v.monthly)}</td>
+              <td style="color:var(--text-mid);">${fmt(v.yearly)}</td>
+            </tr>
+          `).join('') : '';
+          return rowsHtml + variantRows;
+        }).join('')}
       </tbody>
     </table>`;
+
+  box.querySelectorAll('.model-row-main').forEach(row => {
+    row.addEventListener('click', () => {
+      const key = row.dataset.key;
+      if (expandedModels.has(key)) expandedModels.delete(key); else expandedModels.add(key);
+      renderModelHierarchy(category);
+    });
+  });
 }
 
 /* ---------------- Boot ---------------- */
@@ -441,18 +526,34 @@ async function load(){
 
     dailySeriesGlobal = data.dailySeries || [];
     productivitySeriesGlobal = data.productivitySeries || [];
-    itemBreakdownGlobal = data.itemBreakdown || {};
+    categorySeriesGlobal = data.categorySeries || {};
+    modelBreakdownGlobal = data.modelBreakdown || {};
     renderPlanChart('daily');
     renderProdChart('daily');
     renderModeTable(data.byModeLatest || []);
     renderModelsTable(data.topModels || []);
-    renderItemBreakdown('CKD 2W');
+    renderCatTrendChart();
+    renderModelHierarchy('SKD 2W');
 
-    document.getElementById('categoryToggle').addEventListener('click', (e) => {
+    document.getElementById('catTrendCategoryToggle').addEventListener('click', (e) => {
       const btn = e.target.closest('.toggle-btn'); if (!btn) return;
-      document.querySelectorAll('#categoryToggle .toggle-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('#catTrendCategoryToggle .toggle-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      renderItemBreakdown(btn.dataset.cat);
+      catTrendState.cat = btn.dataset.cat;
+      renderCatTrendChart();
+    });
+    document.getElementById('catTrendGranToggle').addEventListener('click', (e) => {
+      const btn = e.target.closest('.toggle-btn'); if (!btn) return;
+      document.querySelectorAll('#catTrendGranToggle .toggle-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      catTrendState.gran = btn.dataset.gran;
+      renderCatTrendChart();
+    });
+    document.getElementById('modelCategoryToggle').addEventListener('click', (e) => {
+      const btn = e.target.closest('.toggle-btn'); if (!btn) return;
+      document.querySelectorAll('#modelCategoryToggle .toggle-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderModelHierarchy(btn.dataset.cat);
     });
 
     document.getElementById('planToggle').addEventListener('click', (e) => {
