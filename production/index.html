@@ -189,6 +189,19 @@ footer{max-width:1220px;margin:0 auto;padding:20px 24px 0;font-size:11.5px;color
     <div id="modelsTable"></div>
   </div>
 
+  <div class="panel glass">
+    <div class="panel-head">
+      <h2>Production by Model — Daily / Weekly / Monthly / Yearly</h2>
+      <div class="toggle-group" id="categoryToggle">
+        <button class="toggle-btn active" data-cat="CKD 2W">CKD 2W</button>
+        <button class="toggle-btn" data-cat="SKD 2W">SKD 2W</button>
+        <button class="toggle-btn" data-cat="3W">3W</button>
+      </div>
+    </div>
+    <div class="sub">Every item code that produced units in this category, with actual output at each time window. Weekly = trailing 7 days ending on the latest logged date, not a calendar week. Item codes are kept exactly as entered in the source — they already encode model, color and build variant together.</div>
+    <div id="itemBreakdownTable"></div>
+  </div>
+
   <div class="nav-cards">
     <a class="nav-card glass" href="../index.html">
       <div class="nc-title">← Back to MIS Hub</div>
@@ -390,6 +403,27 @@ function renderModelsTable(topModels){
     </table>`;
 }
 
+/* ---------------- Model+color breakdown by category ---------------- */
+let itemBreakdownGlobal = {};
+function renderItemBreakdown(category){
+  const box = document.getElementById('itemBreakdownTable');
+  const rows = itemBreakdownGlobal[category] || [];
+  if (!rows.length) { box.innerHTML = '<div class="empty-note">No production recorded for this category.</div>'; return; }
+  box.innerHTML = `
+    <table>
+      <thead><tr><th>Item Code</th><th>Daily</th><th>Weekly (7d)</th><th>Monthly</th><th>Yearly</th></tr></thead>
+      <tbody>
+        ${rows.map(r => `<tr>
+          <td style="font-size:11.5px;">${r.itemCode}</td>
+          <td>${fmt(r.daily)}</td>
+          <td>${fmt(r.weekly)}</td>
+          <td>${fmt(r.monthly)}</td>
+          <td>${fmt(r.yearly)}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
+}
+
 /* ---------------- Boot ---------------- */
 async function load(){
   try{
@@ -407,10 +441,19 @@ async function load(){
 
     dailySeriesGlobal = data.dailySeries || [];
     productivitySeriesGlobal = data.productivitySeries || [];
+    itemBreakdownGlobal = data.itemBreakdown || {};
     renderPlanChart('daily');
     renderProdChart('daily');
     renderModeTable(data.byModeLatest || []);
     renderModelsTable(data.topModels || []);
+    renderItemBreakdown('CKD 2W');
+
+    document.getElementById('categoryToggle').addEventListener('click', (e) => {
+      const btn = e.target.closest('.toggle-btn'); if (!btn) return;
+      document.querySelectorAll('#categoryToggle .toggle-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderItemBreakdown(btn.dataset.cat);
+    });
 
     document.getElementById('planToggle').addEventListener('click', (e) => {
       const btn = e.target.closest('.toggle-btn'); if (!btn) return;
