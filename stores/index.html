@@ -98,6 +98,14 @@ h1{font-size:32px;font-weight:800;margin:0;letter-spacing:-0.02em;
 svg text{font-family:inherit;}
 .empty-note{color:var(--text-low);font-size:13px;padding:20px 0;text-align:center;}
 
+.chart-tip{position:fixed;z-index:999;pointer-events:none;padding:9px 13px;border-radius:10px;
+  font-size:12px;line-height:1.6;color:var(--text-hi);white-space:nowrap;
+  background:linear-gradient(160deg, rgba(22,28,38,0.97), rgba(10,14,20,0.97));
+  border:1px solid rgba(255,255,255,0.14);box-shadow:0 14px 34px -10px rgba(0,0,0,0.6);
+  opacity:0;transform:translateY(4px);transition:opacity 0.12s ease, transform 0.12s ease;}
+.chart-tip.show{opacity:1;transform:translateY(0);}
+.chart-tip b{color:var(--teal);font-weight:700;}
+
 .model-row{padding:14px 0;border-bottom:1px solid rgba(255,255,255,0.06);}
 .model-row:last-child{border-bottom:none;}
 .model-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;flex-wrap:wrap;gap:6px;}
@@ -217,6 +225,25 @@ const CAT_PALETTE = ["#6fa3ff","#5ee6cf","#ffc267","#ff7a7a","#b28dff","#8fd6ff"
 function fmt(n){ return Number(n||0).toLocaleString('en-US'); }
 function el(tag, attrs){ const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); return e; }
 
+/* ---------------- Shared chart hover tooltip ---------------- */
+const chartTipEl = document.createElement('div');
+chartTipEl.className = 'chart-tip';
+document.body.appendChild(chartTipEl);
+function positionTip(evt){
+  const w = chartTipEl.offsetWidth, h = chartTipEl.offsetHeight;
+  let left = evt.clientX + 14, top = evt.clientY - h - 12;
+  if (left + w > window.innerWidth - 8) left = evt.clientX - w - 14;
+  if (top < 8) top = evt.clientY + 16;
+  chartTipEl.style.left = left + 'px';
+  chartTipEl.style.top = top + 'px';
+}
+function addTip(node, html){
+  node.style.cursor = 'default';
+  node.addEventListener('mouseenter', (e) => { chartTipEl.innerHTML = html; chartTipEl.classList.add('show'); positionTip(e); });
+  node.addEventListener('mousemove', positionTip);
+  node.addEventListener('mouseleave', () => chartTipEl.classList.remove('show'));
+}
+
 function colorDot(colorName){
   const c = (colorName||'').toUpperCase();
   const map = [
@@ -268,7 +295,9 @@ function renderCategoryChart(categoryBreakdown){
     const lbl = el('text', { x: padL-10, y: y+barH/2, 'text-anchor':'end', fill:'#f5f8fd', 'font-size':11.5, 'font-weight':600, 'dominant-baseline':'middle' });
     lbl.textContent = r.category;
     svg.appendChild(lbl);
-    svg.appendChild(el('rect', { x:padL, y, width:Math.max(2,w), height:barH, rx:5, fill:CAT_PALETTE[i%CAT_PALETTE.length], opacity:0.9 }));
+    const bar = el('rect', { x:padL, y, width:Math.max(2,w), height:barH, rx:5, fill:CAT_PALETTE[i%CAT_PALETTE.length], opacity:0.9 });
+    addTip(bar, `<b>${r.category}</b><br>Units: <b>${fmt(r.total)}</b>`);
+    svg.appendChild(bar);
     const t = el('text', { x: padL+w+8, y: y+barH/2, fill:'#aab6cc', 'font-size':11, 'dominant-baseline':'middle' });
     t.textContent = fmt(r.total);
     svg.appendChild(t);
@@ -296,7 +325,9 @@ function renderLocationChart(locationBreakdown){
     const xi0 = cx+rInner*Math.cos(a1), yi0 = cy+rInner*Math.sin(a1);
     const xi1 = cx+rInner*Math.cos(a0), yi1 = cy+rInner*Math.sin(a0);
     const d = `M${x0},${y0} A${rOuter},${rOuter} 0 ${large} 1 ${x1},${y1} L${xi0},${yi0} A${rInner},${rInner} 0 ${large} 0 ${xi1},${yi1} Z`;
-    svg.appendChild(el('path', { d, fill: LOC_COLORS[r.location], opacity:0.92 }));
+    const seg = el('path', { d, fill: LOC_COLORS[r.location], opacity:0.92 });
+    addTip(seg, `<b>${r.location}</b><br>Units: <b>${fmt(r.total)}</b> (${(frac*100).toFixed(1)}%)`);
+    svg.appendChild(seg);
     angle = a1;
   });
   const centerLbl = el('text', { x:cx, y:cy-6, 'text-anchor':'middle', fill:'#f5f8fd', 'font-size':22, 'font-weight':800 });
@@ -337,7 +368,9 @@ function renderTrendChart(dailyTotals){
     svg.appendChild(t);
   }
   if (data.length === 1) {
-    svg.appendChild(el('circle', { cx:padL, cy:padT+(H-padT-padB)-data[0].total*scaleY, r:5, fill:'#6fa3ff' }));
+    const dot = el('circle', { cx:padL, cy:padT+(H-padT-padB)-data[0].total*scaleY, r:5, fill:'#6fa3ff' });
+    addTip(dot, `<b>${data[0].date}</b><br>Total: <b>${fmt(data[0].total)}</b>`);
+    svg.appendChild(dot);
   } else {
     let path = '';
     data.forEach((d,i) => {
@@ -354,6 +387,9 @@ function renderTrendChart(dailyTotals){
     data.forEach((d,i) => {
       const x = padL+i*stepX, y = padT+(H-padT-padB)-d.total*scaleY;
       svg.appendChild(el('circle', { cx:x, cy:y, r:3.5, fill:'#030509', stroke:'#6fa3ff', 'stroke-width':2 }));
+      const hitDot = el('circle', { cx:x, cy:y, r:9, fill:'transparent' });
+      addTip(hitDot, `<b>${d.date}</b><br>Total: <b>${fmt(d.total)}</b>`);
+      svg.appendChild(hitDot);
     });
   }
   const labelEvery = Math.max(1, Math.ceil(data.length/12));
