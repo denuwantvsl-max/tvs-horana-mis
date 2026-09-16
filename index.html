@@ -147,78 +147,99 @@ footer{max-width:1220px;margin:0 auto;padding:24px 24px 0;font-size:11.5px;color
 @keyframes pulseGlow{0%,100%{box-shadow:0 0 0 0 rgba(94,230,207,0.55);}50%{box-shadow:0 0 0 5px rgba(94,230,207,0);}}
 
 /* ============================================================
-   Plant photo hook — set --plant-photo: url('your-image.jpg')
-   on :root (or inline on <html style="...">) once available.
-   Sits behind everything at low opacity so the glass panels stay
-   legible; nothing else needs to change when the photo is added.
+   Plant photo background — tinted duotone so a real photo sits
+   naturally inside the liquid-glass palette instead of looking
+   pasted on. Two layers: a soft full-page wash behind everything,
+   and a stronger crop used inside the photo-band panel lower down.
    ============================================================ */
-:root{--plant-photo:none;}
-.plant-photo{position:fixed;inset:0;z-index:0;background-image:var(--plant-photo);
-  background-size:cover;background-position:center 35%;
-  opacity:0.24;filter:grayscale(0.25) contrast(1.08) brightness(0.9);
-  mask-image:radial-gradient(120% 90% at 50% 20%, #000 40%, transparent 92%);
-  -webkit-mask-image:radial-gradient(120% 90% at 50% 20%, #000 40%, transparent 92%);}
+.plant-photo{position:fixed;inset:0;z-index:0;background-image:url('images/plant-floor.jpg');
+  background-size:cover;background-position:center 38%;
+  opacity:0.30;filter:grayscale(0.55) contrast(1.05) brightness(0.75);
+  mask-image:radial-gradient(120% 85% at 50% 15%, #000 35%, transparent 90%);
+  -webkit-mask-image:radial-gradient(120% 85% at 50% 15%, #000 35%, transparent 90%);
+  animation:photoDrift 40s ease-in-out infinite alternate;}
+.plant-photo::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(160deg, rgba(6,12,18,0.35), rgba(94,230,207,0.14) 45%, rgba(111,163,255,0.16) 100%);
+  mix-blend-mode:color;}
+@keyframes photoDrift{0%{transform:scale(1.04) translate(0,0);}100%{transform:scale(1.1) translate(-1.5%,1%);}}
+@media (prefers-reduced-motion:reduce){.plant-photo{animation:none;}}
+
+.photo-band{background-image:linear-gradient(120deg, rgba(3,5,9,0.88), rgba(3,5,9,0.55) 55%, rgba(3,5,9,0.82)), url('images/plant-assembly.jpg');
+  background-size:cover;background-position:center 30%;}
+.photo-band::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(120deg, rgba(94,230,207,0.16), transparent 60%);mix-blend-mode:overlay;}
 
 /* ============================================================
-   Plant flow diagram
+   Plant flow diagram — orbs, not boxes
    ============================================================ */
 .flow-section{margin:8px 0 36px;}
-.flow-head{margin-bottom:20px;}
+.flow-head{margin-bottom:26px;}
 .flow-label{font-size:10.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--teal);font-weight:700;margin-bottom:6px;}
 .flow-title{font-size:23px;font-weight:800;color:var(--text-hi);letter-spacing:-0.01em;}
-.flow-sub{font-size:12.5px;color:var(--text-mid);margin-top:5px;max-width:520px;line-height:1.5;}
+.flow-sub{font-size:12.5px;color:var(--text-mid);margin-top:5px;max-width:540px;line-height:1.5;}
 
-.flow-diagram{position:relative;padding:44px 22px 40px;overflow:visible;}
-.flow-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible;}
+.flow-diagram{position:relative;padding:56px 24px 46px;overflow:visible;
+  display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;min-height:360px;}
+.flow-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible;z-index:0;}
 .flow-path{fill:none;stroke-width:2;stroke-linecap:round;}
-.flow-path.main{stroke:url(#gradMain);stroke-dasharray:5 9;animation:flowMain 1.4s linear infinite;filter:drop-shadow(0 0 4px rgba(94,230,207,0.35));}
-.flow-path.branch{stroke:url(#gradBranch);stroke-width:1.6;stroke-dasharray:3 8;opacity:0.55;animation:flowBranch 2s linear infinite;}
+.flow-path.main{stroke:url(#gradMain);stroke-dasharray:5 9;animation:flowMain 1.4s linear infinite;filter:drop-shadow(0 0 4px rgba(94,230,207,0.4));}
+.flow-path.branch{stroke:url(#gradBranch);stroke-width:1.5;stroke-dasharray:3 7;opacity:0.6;animation:flowBranch 2s linear infinite;}
 @keyframes flowMain{to{stroke-dashoffset:-56;}}
-@keyframes flowBranch{to{stroke-dashoffset:-44;}}
+@keyframes flowBranch{to{stroke-dashoffset:-40;}}
 @media (prefers-reduced-motion:reduce){.flow-path{animation:none!important;}}
 
-.flow-grid{position:relative;z-index:1;display:grid;
-  grid-template-columns:1fr 1.45fr 1fr;
-  grid-template-rows:auto auto auto auto;
-  grid-template-areas:
-    ".      stores    ."
-    "prod   hub       transit"
-    "qual   hub       canni"
-    ".      delivery  .";
-  gap:16px 22px;align-items:stretch;}
+.flow-endpoint{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:10px;
+  width:128px;text-align:center;flex-shrink:0;}
+.flow-orb{position:relative;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:transform 0.28s cubic-bezier(.2,.8,.2,1), box-shadow 0.28s ease;
+  background:linear-gradient(160deg, var(--glass-fill-1), var(--glass-fill-2));
+  backdrop-filter:blur(20px) saturate(170%); -webkit-backdrop-filter:blur(20px) saturate(170%);
+  border:1px solid var(--glass-border); box-shadow:var(--glass-shadow), inset 0 1px 0 rgba(255,255,255,0.16);}
+.flow-orb svg{width:38%;height:38%;stroke:var(--text-hi);}
+.flow-orb:hover, .flow-orb:focus-visible, .flow-orb.active{transform:translateY(-4px) scale(1.05);outline:none;}
+.flow-endpoint .flow-orb{width:96px;height:96px;}
+.flow-endpoint[data-accent="teal"] .flow-orb:hover{box-shadow:var(--glass-shadow),0 0 0 1px rgba(94,230,207,0.5),0 0 32px -4px rgba(94,230,207,0.55);}
+.flow-endpoint[data-accent="blue"] .flow-orb:hover{box-shadow:var(--glass-shadow),0 0 0 1px rgba(111,163,255,0.5),0 0 32px -4px rgba(111,163,255,0.55);}
+.fn-title{font-size:14px;font-weight:700;color:var(--text-hi);}
+.fn-hint{font-size:10.5px;color:var(--text-mid);line-height:1.35;}
+
+.flow-cluster{position:relative;width:290px;height:290px;flex-shrink:0;z-index:2;}
+.flow-orb.hub{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:132px;height:132px;
+  background:radial-gradient(circle at 35% 30%, rgba(94,230,207,0.22), rgba(255,255,255,0.04) 70%);
+  border-color:rgba(94,230,207,0.4);
+  box-shadow:var(--glass-shadow), 0 0 46px -6px rgba(94,230,207,0.45), inset 0 1px 0 rgba(255,255,255,0.2);
+  animation:hubPulse 3.2s ease-in-out infinite;}
+.flow-orb.hub svg{width:34%;height:34%;stroke:var(--teal);}
+.flow-orb.hub:hover, .flow-orb.hub.active{transform:translate(-50%,-50%) scale(1.06);}
+@keyframes hubPulse{0%,100%{box-shadow:var(--glass-shadow), 0 0 46px -6px rgba(94,230,207,0.45), inset 0 1px 0 rgba(255,255,255,0.2);}
+  50%{box-shadow:var(--glass-shadow), 0 0 64px -4px rgba(94,230,207,0.7), inset 0 1px 0 rgba(255,255,255,0.2);}}
+@media (prefers-reduced-motion:reduce){.flow-orb.hub{animation:none;}}
+.hub-label{position:absolute;left:50%;top:calc(50% + 78px);transform:translateX(-50%);width:180px;text-align:center;}
+.hub-label .fn-title{font-size:13px;}
+
+.flow-satellite{position:absolute;width:76px;text-align:center;}
+.flow-satellite .flow-orb{width:60px;height:60px;margin:0 auto 8px;}
+.flow-satellite .flow-orb svg{stroke:var(--violet);}
+.flow-satellite .fn-title{font-size:11.5px;}
+.flow-satellite .fn-hint{display:none;}
+.flow-satellite.pos-nw{left:6%;top:6%;}
+.flow-satellite.pos-ne{right:6%;top:6%;}
+.flow-satellite.pos-sw{left:6%;bottom:0%;}
+.flow-satellite.pos-se{right:6%;bottom:0%;}
+.flow-satellite .flow-orb:hover{box-shadow:var(--glass-shadow),0 0 0 1px rgba(178,141,255,0.5),0 0 24px -4px rgba(178,141,255,0.55);}
+
 @media (max-width:860px){
-  .flow-grid{grid-template-columns:1fr;
-    grid-template-areas:"stores" "prod" "qual" "hub" "transit" "canni" "delivery";}
+  .flow-diagram{flex-direction:column;gap:28px;padding:36px 20px;}
   .flow-svg{display:none;}
+  .flow-cluster{width:100%;height:auto;display:flex;flex-direction:column;align-items:center;gap:20px;}
+  .flow-orb.hub{position:static;transform:none;}
+  .flow-orb.hub:hover{transform:scale(1.05);}
+  .hub-label{position:static;transform:none;width:auto;}
+  .flow-satellites-row{display:flex;gap:18px;flex-wrap:wrap;justify-content:center;}
+  .flow-satellite{position:static;width:76px;}
 }
 
-.flow-node{position:relative;padding:18px 20px;cursor:pointer;
-  transition:transform 0.25s cubic-bezier(.2,.8,.2,1), border-color 0.25s ease, box-shadow 0.25s ease;}
-.flow-node:hover, .flow-node:focus-visible, .flow-node.active{transform:translateY(-3px);
-  border-color:rgba(94,230,207,0.4);box-shadow:var(--glass-shadow), 0 0 0 1px rgba(94,230,207,0.18), inset 0 1px 0 rgba(255,255,255,0.18);outline:none;}
-.flow-node .fn-eyebrow{font-size:9.5px;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-low);font-weight:700;margin-bottom:6px;}
-.flow-node .fn-title{font-size:15.5px;font-weight:700;color:var(--text-hi);}
-.flow-node .fn-hint{font-size:11px;color:var(--text-mid);margin-top:5px;}
-.flow-node.soon .fn-eyebrow{color:var(--text-low);}
-.flow-node.soon{opacity:0.82;}
-
-.flow-node[data-flow="stores"]{grid-area:stores;}
-.flow-node[data-flow="delivery"]{grid-area:delivery;}
-.flow-node[data-flow="production"]{grid-area:prod;}
-.flow-node[data-flow="quality"]{grid-area:qual;}
-.flow-node[data-flow="transit"]{grid-area:transit;}
-.flow-node[data-flow="cannibalize"]{grid-area:canni;}
-
-.flow-node.hub{grid-area:hub;padding:26px 26px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;
-  background:linear-gradient(160deg, rgba(94,230,207,0.10), rgba(255,255,255,0.03));
-  border-color:rgba(94,230,207,0.22);min-height:180px;}
-.flow-node.hub .fn-title{font-size:19px;}
-.flow-node.hub .fn-eyebrow{color:var(--teal);}
-.flow-node.hub .hub-orbit{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;justify-content:center;}
-.flow-node.hub .hub-orbit span{font-size:10px;padding:4px 9px;border-radius:100px;
-  background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:var(--text-mid);}
-
-.flow-tip{position:absolute;z-index:5;min-width:200px;max-width:240px;padding:14px 16px;
+.flow-tip{position:absolute;z-index:6;min-width:200px;max-width:240px;padding:14px 16px;
   font-size:12px;line-height:1.6;color:var(--text-hi);pointer-events:none;
   opacity:0;transform:translateY(6px) scale(0.97);transition:opacity 0.18s ease, transform 0.18s ease;}
 .flow-tip.show{opacity:1;transform:translateY(0) scale(1);}
@@ -257,68 +278,72 @@ footer{max-width:1220px;margin:0 auto;padding:24px 24px 0;font-size:11.5px;color
     <div class="flow-head reveal">
       <div class="flow-label">Plant flow</div>
       <div class="flow-title">How a vehicle moves through Horana</div>
-      <div class="flow-sub">Stores intake feeds the assembly process — production, quality, transit and cannibalize all happen on that floor — before finished units move to delivery. Hover or tap any stage for a live snapshot.</div>
+      <div class="flow-sub">Stores intake feeds the assembly process — production, quality, transit and cannibalize all happen on that floor — before finished units move to delivery. Hover or tap any node for a live snapshot.</div>
     </div>
 
     <div class="flow-diagram glass reveal">
       <svg class="flow-svg" id="flowSvg">
         <defs>
-          <linearGradient id="gradMain" x1="0" y1="0" x2="0" y2="1">
+          <linearGradient id="gradMain" x1="0" y1="0" x2="1" y2="0">
             <stop offset="0%" stop-color="#5ee6cf"/>
             <stop offset="100%" stop-color="#6fa3ff"/>
           </linearGradient>
-          <linearGradient id="gradBranch" x1="0" y1="0" x2="1" y2="0">
+          <linearGradient id="gradBranch" x1="0" y1="0" x2="1" y2="1">
             <stop offset="0%" stop-color="#b28dff"/>
             <stop offset="100%" stop-color="#5ee6cf"/>
           </linearGradient>
         </defs>
       </svg>
 
-      <div class="flow-grid" id="flowGrid">
-        <div class="flow-node glass" data-flow="stores" tabindex="0">
-          <div class="fn-eyebrow">01 · Intake</div>
-          <div class="fn-title">Stores</div>
-          <div class="fn-hint">Container-level stock, live</div>
+      <div class="flow-endpoint" data-accent="teal">
+        <div class="flow-orb" data-flow="stores" tabindex="0">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg>
         </div>
+        <div class="fn-title">Stores</div>
+        <div class="fn-hint">Intake · live</div>
+      </div>
 
-        <div class="flow-node glass" data-flow="production" tabindex="0">
-          <div class="fn-eyebrow">Assembly</div>
-          <div class="fn-title">Production</div>
-          <div class="fn-hint">Plan vs. actual, by line</div>
-        </div>
-
-        <div class="flow-node glass" data-flow="quality" tabindex="0">
-          <div class="fn-eyebrow">Assembly</div>
-          <div class="fn-title">Quality</div>
-          <div class="fn-hint">Planned module</div>
-        </div>
-
-        <div class="flow-node hub glass" data-flow="assembly" tabindex="0">
-          <div class="fn-eyebrow">02 · Build</div>
-          <div class="fn-title">Assembly Process</div>
-          <div class="fn-hint">Where the vehicle actually gets built</div>
-          <div class="hub-orbit">
-            <span>Production</span><span>Quality</span><span>Transit</span><span>Cannibalize</span>
+      <div class="flow-cluster">
+        <div class="flow-satellite pos-nw">
+          <div class="flow-orb" data-flow="production" tabindex="0">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 13.5a7.97 7.97 0 000-3l2-1.4-2-3.4-2.3.9a8 8 0 00-2.6-1.5L14 2h-4l-.5 2.6a8 8 0 00-2.6 1.5l-2.3-.9-2 3.4 2 1.4a8 8 0 000 3l-2 1.5 2 3.4 2.3-.9a8 8 0 002.6 1.5L10 22h4l.5-2.5a8 8 0 002.6-1.5l2.3.9 2-3.4-2-1.5z"/></svg>
           </div>
+          <div class="fn-title">Production</div>
         </div>
-
-        <div class="flow-node glass soon" data-flow="transit" tabindex="0">
-          <div class="fn-eyebrow">Assembly</div>
+        <div class="flow-satellite pos-ne">
+          <div class="flow-orb" data-flow="quality" tabindex="0">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z"/><path d="M9 12l2 2 4-4"/></svg>
+          </div>
+          <div class="fn-title">Quality</div>
+        </div>
+        <div class="flow-satellite pos-sw">
+          <div class="flow-orb" data-flow="transit" tabindex="0">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="7" width="13" height="9"/><path d="M14 10h4l3 3v3h-7"/><circle cx="6" cy="18" r="1.6"/><circle cx="17.5" cy="18" r="1.6"/></svg>
+          </div>
           <div class="fn-title">Transit</div>
-          <div class="fn-hint">Damage &amp; part tracking</div>
         </div>
-
-        <div class="flow-node glass soon" data-flow="cannibalize" tabindex="0">
-          <div class="fn-eyebrow">Assembly</div>
+        <div class="flow-satellite pos-se">
+          <div class="flow-orb" data-flow="cannibalize" tabindex="0">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9a8 8 0 0114-4"/><path d="M20 4v5h-5"/><path d="M20 15a8 8 0 01-14 4"/><path d="M4 20v-5h5"/></svg>
+          </div>
           <div class="fn-title">Cannibalize</div>
-          <div class="fn-hint">Planned module</div>
         </div>
 
-        <div class="flow-node glass" data-flow="delivery" tabindex="0">
-          <div class="fn-eyebrow">03 · Dispatch</div>
-          <div class="fn-title">Delivery</div>
-          <div class="fn-hint">Plan vs. delivered, live</div>
+        <div class="flow-orb hub" data-flow="assembly" tabindex="0">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V10l5 3V10l5 3V10l5 3v8H3z"/><path d="M3 21h18"/></svg>
         </div>
+        <div class="hub-label">
+          <div class="fn-title">Assembly Process</div>
+          <div class="fn-hint">Where the vehicle gets built</div>
+        </div>
+      </div>
+
+      <div class="flow-endpoint" data-accent="blue">
+        <div class="flow-orb" data-flow="delivery" tabindex="0">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h13"/><path d="M12 5l7 7-7 7"/></svg>
+        </div>
+        <div class="fn-title">Delivery</div>
+        <div class="fn-hint">Dispatch · live</div>
       </div>
 
       <div class="flow-tip glass" id="flowTip"></div>
@@ -480,37 +505,24 @@ if (reduceMotion) {
 // ============================================================
 (function(){
   const API_URL = 'https://script.google.com/macros/s/AKfycbzJFWD_AQc8UwEkVHcb3q9lDmzoMcO-fq9qDX3wIEAoUi8gIZN09Uxbbjfj3Z30spjjpw/exec';
-  const grid = document.getElementById('flowGrid');
   const svg = document.getElementById('flowSvg');
   const diagram = svg ? svg.closest('.flow-diagram') : null;
   const tip = document.getElementById('flowTip');
-  if (!grid || !svg || !diagram || !tip) return;
+  if (!svg || !diagram || !tip) return;
 
-  function node(key){ return grid.querySelector('.flow-node[data-flow="' + key + '"]'); }
+  function orb(key){ return diagram.querySelector('.flow-orb[data-flow="' + key + '"]'); }
 
-  // Anchor point on one edge of a node, in coordinates relative to
-  // the diagram container. `frac` (0-1) offsets along that edge so
-  // multiple connectors from the same side don't all start at the
-  // exact same pixel.
-  function anchor(el, side, frac){
+  function centerOf(el){
     if (!el) return null;
-    frac = (frac === undefined) ? 0.5 : frac;
     const r = el.getBoundingClientRect();
     const c = diagram.getBoundingClientRect();
-    const x0 = r.left - c.left, y0 = r.top - c.top;
-    if (side === 'top')    return { x: x0 + r.width * frac, y: y0 };
-    if (side === 'bottom') return { x: x0 + r.width * frac, y: y0 + r.height };
-    if (side === 'left')   return { x: x0, y: y0 + r.height * frac };
-    return { x: x0 + r.width, y: y0 + r.height * frac }; // 'right'
+    return { x: (r.left - c.left) + r.width / 2, y: (r.top - c.top) + r.height / 2 };
   }
 
   function curve(a, b, cls){
     if (!a || !b) return null;
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     const dx = (b.x - a.x) * 0.5, dy = (b.y - a.y) * 0.5;
-    // Bend the control points along whichever axis has the larger
-    // gap, so both vertical (main flow) and horizontal (branch)
-    // connectors curve naturally instead of looking like a kink.
     const c1 = Math.abs(dx) > Math.abs(dy) ? { x: a.x + dx, y: a.y } : { x: a.x, y: a.y + dy };
     const c2 = Math.abs(dx) > Math.abs(dy) ? { x: b.x - dx, y: b.y } : { x: b.x, y: b.y - dy };
     path.setAttribute('d', `M ${a.x} ${a.y} C ${c1.x} ${c1.y}, ${c2.x} ${c2.y}, ${b.x} ${b.y}`);
@@ -522,24 +534,24 @@ if (reduceMotion) {
     if (window.innerWidth <= 860) return; // stacked mobile layout has no connectors
     while (svg.childNodes.length > 1) svg.removeChild(svg.lastChild); // keep <defs>
 
-    const stores = node('stores'), hub = node('assembly'), delivery = node('delivery');
-    const prod = node('production'), qual = node('quality'), transit = node('transit'), canni = node('cannibalize');
+    const stores = orb('stores'), hub = orb('assembly'), delivery = orb('delivery');
+    const prod = orb('production'), qual = orb('quality'), transit = orb('transit'), canni = orb('cannibalize');
 
     const add = (a, b, cls) => { const p = curve(a, b, cls); if (p) svg.appendChild(p); };
 
-    add(anchor(stores, 'bottom'), anchor(hub, 'top'), 'main');
-    add(anchor(hub, 'bottom'), anchor(delivery, 'top'), 'main');
-    add(anchor(hub, 'left', 0.28), anchor(prod, 'right'), 'branch');
-    add(anchor(hub, 'left', 0.72), anchor(qual, 'right'), 'branch');
-    add(anchor(hub, 'right', 0.28), anchor(transit, 'left'), 'branch');
-    add(anchor(hub, 'right', 0.72), anchor(canni, 'left'), 'branch');
+    add(centerOf(stores), centerOf(hub), 'main');
+    add(centerOf(hub), centerOf(delivery), 'main');
+    add(centerOf(hub), centerOf(prod), 'branch');
+    add(centerOf(hub), centerOf(qual), 'branch');
+    add(centerOf(hub), centerOf(transit), 'branch');
+    add(centerOf(hub), centerOf(canni), 'branch');
   }
 
   window.addEventListener('load', drawConnectors);
   let resizeT;
   window.addEventListener('resize', () => { clearTimeout(resizeT); resizeT = setTimeout(drawConnectors, 150); });
-  // Fonts/layout can settle a moment after load - redraw once more shortly after.
   setTimeout(drawConnectors, 400);
+  setTimeout(drawConnectors, 1200); // catch any late font/layout shift from the boot sequence
 
   // ---- Live snapshot tooltips ----
   const cache = {};
@@ -623,12 +635,11 @@ if (reduceMotion) {
     }
   }
 
-  grid.querySelectorAll('.flow-node').forEach(el => {
+  diagram.querySelectorAll('.flow-orb[data-flow]').forEach(el => {
     el.addEventListener('mouseenter', () => showTip(el));
     el.addEventListener('mouseleave', () => hideTip(el));
     el.addEventListener('focus', () => showTip(el));
     el.addEventListener('blur', () => hideTip(el));
-    // Touch devices: tap toggles the tooltip instead of relying on hover.
     el.addEventListener('click', (e) => {
       if (activeNode === el) { hideTip(el); return; }
       e.preventDefault();
