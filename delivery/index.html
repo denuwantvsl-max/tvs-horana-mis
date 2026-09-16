@@ -106,6 +106,10 @@ h1{font-size:32px;font-weight:800;margin:0;letter-spacing:-0.02em;
 .legend .li{display:flex;align-items:center;gap:6px;}
 .legend .sw{width:10px;height:10px;border-radius:3px;flex-shrink:0;}
 
+.cat-block{margin-bottom:26px;}
+.cat-block:last-child{margin-bottom:0;}
+.cat-block-head{margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+
 svg text{font-family:inherit;}
 .empty-note{color:var(--text-low);font-size:13px;padding:20px 0;text-align:center;}
 
@@ -160,7 +164,7 @@ footer{max-width:1220px;margin:0 auto;padding:20px 24px 0;font-size:11.5px;color
   <!-- Requested vs Received -->
   <div class="panel glass">
     <div class="panel-head">
-      <h2><span id="reqRecCatPill"></span>Requested vs. Received — This Week</h2>
+      <h2>Requested vs. Received — This Week</h2>
     </div>
     <div class="sub" id="reqRecSub">Sales team's confirmed production vs. what was originally requested, per model + color. New or unplanned models show up automatically.</div>
     <div class="legend">
@@ -181,7 +185,8 @@ footer{max-width:1220px;margin:0 auto;padding:20px 24px 0;font-size:11.5px;color
         <button class="toggle-btn" data-gran="monthly">Monthly</button>
       </div>
     </div>
-    <div class="sub">Plant-wide units actually delivered, by calendar date. Sparse periods reflect real gaps in the report history, not a display issue.</div>
+    <div class="sub">Plant-wide units actually delivered, by calendar date, split by category. Sparse periods reflect real gaps in the report history, not a display issue.</div>
+    <div class="legend" id="trendLegend"></div>
     <div id="trendChart"></div>
   </div>
 
@@ -189,6 +194,12 @@ footer{max-width:1220px;margin:0 auto;padding:20px 24px 0;font-size:11.5px;color
   <div class="panel glass">
     <div class="panel-head">
       <h2>Plan vs. Actual Delivery</h2>
+      <div class="toggle-group" id="planCatToggle">
+        <button class="toggle-btn active" data-cat="all">All</button>
+        <button class="toggle-btn" data-cat="Summary">2W</button>
+        <button class="toggle-btn" data-cat="IQUBE">Electric</button>
+        <button class="toggle-btn" data-cat="3W">3W</button>
+      </div>
     </div>
     <div class="sub">Each date's planned quantity (declared the day before) paired against what was actually delivered that day — matched by the calendar date embedded in the source file, not by which report it arrived in.</div>
     <div class="legend">
@@ -201,7 +212,7 @@ footer{max-width:1220px;margin:0 auto;padding:20px 24px 0;font-size:11.5px;color
   <!-- Stock funnel -->
   <div class="panel glass">
     <div class="panel-head">
-      <h2><span id="funnelCatPill"></span>Stock Funnel — Where Every Unit Stands</h2>
+      <h2>Stock Funnel — Where Every Unit Stands</h2>
     </div>
     <div class="sub">For each model: ready to dispatch (assembled), committed to orders but still needs assembly, and free/uncommitted stock in Stores.</div>
     <div class="legend">
@@ -274,34 +285,29 @@ function renderKPIs(s){
   `;
 }
 
-/* ---------------- Requested vs Received (grouped bar) ---------------- */
+/* ---------------- Requested vs Received (grouped bar, per category) ---------------- */
 function renderReqRec(weeklyPerformance){
   const wp = weeklyPerformance || { weekLabel: {}, byCategory: {} };
-  // Find the first category with real rows
-  let cat = null, rows = [];
-  for (const c of CATEGORY_ORDER) {
-    const r = (wp.byCategory && wp.byCategory[c]) || [];
-    if (r.length) { cat = c; rows = r; break; }
-  }
-  const pill = document.getElementById('reqRecCatPill');
-  const sub = document.getElementById('reqRecSub');
   const box = document.getElementById('reqRecChart');
+  const sub = document.getElementById('reqRecSub');
+  const label = wp.weekLabel && (wp.weekLabel.requested || wp.weekLabel.received);
+  sub.textContent = `Sales team's confirmed production vs. what was originally requested, per model + color, across every category` + (label ? ` — week ${label}` : '') + `. New or unplanned models show up automatically.`;
 
-  if (!cat) {
-    pill.innerHTML = '';
+  const cats = CATEGORY_ORDER.filter(c => ((wp.byCategory && wp.byCategory[c]) || []).some(r => r.requested || r.received));
+  if (!cats.length) {
     box.innerHTML = '<div class="empty-note">No weekly requested/received figures available for the current report date.</div>';
     return;
   }
-  pill.innerHTML = `<span class="cat-pill" style="background:${CATEGORY_META[cat].color}">${cat}</span> `;
-  const label = wp.weekLabel && (wp.weekLabel.requested || wp.weekLabel.received);
-  sub.textContent = `Sales team's confirmed production vs. what was originally requested, per model + color` + (label ? ` — week ${label}` : '') + `. New or unplanned models show up automatically.`;
-
-  // Only plot rows with some non-zero activity, sorted by requested desc
+  box.innerHTML = cats.map(c => `<div class="cat-block">
+    <div class="cat-block-head"><span class="cat-pill" style="background:${CATEGORY_META[c].color}">${c}</span></div>
+    <div id="reqRec_${c}"></div>
+  </div>`).join('');
+  cats.forEach(c => renderReqRecChart(c, (wp.byCategory && wp.byCategory[c]) || []));
+}
+function renderReqRecChart(cat, rows){
+  const box = document.getElementById('reqRec_' + cat);
   const active = rows.filter(r => (r.requested || r.received)).sort((a,b) => (b.requested||0) - (a.requested||0));
-  if (!active.length) {
-    box.innerHTML = '<div class="empty-note">All models show zero requested/received this week.</div>';
-    return;
-  }
+  if (!active.length) { box.innerHTML = '<div class="empty-note">No requested/received activity this week.</div>'; return; }
 
   const W = 1100, barH = 34, gap = 14, padL = 190, padR = 70, padT = 10;
   const maxVal = Math.max(1, ...active.map(r => Math.max(r.requested||0, r.received||0)));
@@ -313,22 +319,18 @@ function renderReqRec(weeklyPerformance){
     const y0 = padT + i * (barH*2 + gap);
     const reqLen = (r.requested||0) * scale;
     const recLen = (r.received||0) * scale;
-    // label
     const lbl = el('text', { x: padL - 12, y: y0 + barH, 'text-anchor': 'end', fill: '#f5f8fd', 'font-size': 11.5, 'font-weight': 600, 'dominant-baseline': 'middle' });
     lbl.textContent = `${r.model} — ${r.color}`;
     svg.appendChild(lbl);
-    // requested bar
     svg.appendChild(el('rect', { x: padL, y: y0, width: Math.max(2,reqLen), height: barH-6, rx: 5, fill: '#6fa3ff', opacity: 0.9 }));
     const reqTxt = el('text', { x: padL + reqLen + 8, y: y0 + (barH-6)/2, fill: '#aab6cc', 'font-size': 10.5, 'dominant-baseline': 'middle' });
     reqTxt.textContent = fmt(r.requested);
     svg.appendChild(reqTxt);
-    // received bar
     const y1 = y0 + barH;
     svg.appendChild(el('rect', { x: padL, y: y1, width: Math.max(2,recLen), height: barH-6, rx: 5, fill: '#5ee6cf', opacity: 0.9 }));
     const recTxt = el('text', { x: padL + recLen + 8, y: y1 + (barH-6)/2, fill: '#aab6cc', 'font-size': 10.5, 'dominant-baseline': 'middle' });
     recTxt.textContent = fmt(r.received);
     svg.appendChild(recTxt);
-    // variance tag
     if (r.variance) {
       const varTxt = el('text', { x: W - padR + 6, y: y0 + barH, fill: r.variance < 0 ? '#ff7a7a' : '#5ee6cf', 'font-size': 11, 'font-weight': 700, 'dominant-baseline': 'middle' });
       varTxt.textContent = (r.variance > 0 ? '+' : '') + fmt(r.variance);
@@ -339,10 +341,14 @@ function renderReqRec(weeklyPerformance){
   box.appendChild(svg);
 }
 
-/* ---------------- Delivered trend (line/bar, daily/weekly/monthly) ---------------- */
+/* ---------------- Delivered trend (multi-line, one per category) ---------------- */
 let dailySeriesGlobal = [];
 function aggregateSeries(series, gran){
-  if (gran === 'daily') return series.map(d => ({ label: d.date.slice(5), value: d.delivered.total }));
+  function base(){ return { total:0, Summary:0, IQUBE:0, '3W':0 }; }
+  if (gran === 'daily') {
+    return series.map(d => ({ label: d.date.slice(5), total: d.delivered.total,
+      Summary: d.delivered.Summary||0, IQUBE: d.delivered.IQUBE||0, '3W': d.delivered['3W']||0 }));
+  }
   const buckets = {};
   series.forEach(d => {
     const dt = new Date(d.date + 'T00:00:00');
@@ -354,25 +360,38 @@ function aggregateSeries(series, gran){
     } else {
       key = d.date.slice(0,7);
     }
-    buckets[key] = (buckets[key] || 0) + d.delivered.total;
+    if (!buckets[key]) buckets[key] = base();
+    buckets[key].total += d.delivered.total;
+    buckets[key].Summary += d.delivered.Summary||0;
+    buckets[key].IQUBE += d.delivered.IQUBE||0;
+    buckets[key]['3W'] += d.delivered['3W']||0;
   });
-  return Object.keys(buckets).sort().map(k => ({ label: k, value: buckets[k] }));
+  return Object.keys(buckets).sort().map(k => ({ label: k, ...buckets[k] }));
+}
+
+function renderTrendLegend(cats){
+  document.getElementById('trendLegend').innerHTML = cats.map(c =>
+    `<div class="li"><span class="sw" style="background:${CATEGORY_META[c].color}"></span>${CATEGORY_META[c].label}</div>`
+  ).join('');
 }
 
 function renderTrendChart(gran){
   const box = document.getElementById('trendChart');
-  const data = aggregateSeries(dailySeriesGlobal.filter(d => d.delivered.total > 0), gran);
-  if (!data.length) {
+  const data = aggregateSeries(dailySeriesGlobal, gran);
+  const cats = CATEGORY_ORDER.filter(c => data.some(d => d[c] > 0));
+  if (!data.length || !cats.length) {
+    document.getElementById('trendLegend').innerHTML = '';
     box.innerHTML = '<div class="empty-note">No delivered-quantity history available yet.</div>';
     return;
   }
+  renderTrendLegend(cats);
+
   const W = 1100, H = 260, padL = 46, padR = 20, padT = 16, padB = 34;
-  const maxVal = Math.max(1, ...data.map(d => d.value));
+  const maxVal = Math.max(1, ...data.map(d => Math.max(d.Summary||0, d.IQUBE||0, d['3W']||0)));
   const stepX = (W - padL - padR) / Math.max(1, data.length - 1 || 1);
   const scaleY = (H - padT - padB) / maxVal;
 
   const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, width: '100%', height: H, style: 'display:block' });
-  // gridlines
   for (let g = 0; g <= 4; g++) {
     const y = padT + (H - padT - padB) * (1 - g/4);
     svg.appendChild(el('line', { x1: padL, x2: W-padR, y1: y, y2: y, stroke: 'rgba(255,255,255,0.06)', 'stroke-width': 1 }));
@@ -380,28 +399,27 @@ function renderTrendChart(gran){
     t.textContent = fmt(Math.round(maxVal * g/4));
     svg.appendChild(t);
   }
-  if (data.length === 1) {
-    const x = padL, y = padT + (H-padT-padB) - data[0].value*scaleY;
-    svg.appendChild(el('circle', { cx: x, cy: y, r: 5, fill: '#5ee6cf' }));
-  } else {
+
+  cats.forEach(cat => {
+    const color = CATEGORY_META[cat].color;
+    if (data.length === 1) {
+      const x = padL, y = padT + (H-padT-padB) - (data[0][cat]||0)*scaleY;
+      svg.appendChild(el('circle', { cx: x, cy: y, r: 4.5, fill: color }));
+      return;
+    }
     let path = '';
     data.forEach((d,i) => {
-      const x = padL + i*stepX, y = padT + (H-padT-padB) - d.value*scaleY;
+      const x = padL + i*stepX, y = padT + (H-padT-padB) - (d[cat]||0)*scaleY;
       path += (i===0 ? 'M' : 'L') + x + ',' + y + ' ';
     });
-    const areaPath = path + `L${padL+(data.length-1)*stepX},${H-padB} L${padL},${H-padB} Z`;
-    svg.appendChild(el('path', { d: areaPath, fill: 'url(#trendGrad)', opacity: 0.25 }));
-    const grad = el('linearGradient', { id: 'trendGrad', x1:0, y1:0, x2:0, y2:1 });
-    grad.appendChild(el('stop', { offset:'0%', 'stop-color':'#5ee6cf' }));
-    grad.appendChild(el('stop', { offset:'100%', 'stop-color':'#5ee6cf', 'stop-opacity':0 }));
-    const defs = el('defs', {}); defs.appendChild(grad); svg.appendChild(defs);
-    svg.appendChild(el('path', { d: path.trim(), fill: 'none', stroke: '#5ee6cf', 'stroke-width': 2.5, 'stroke-linejoin':'round', 'stroke-linecap':'round' }));
+    svg.appendChild(el('path', { d: path.trim(), fill: 'none', stroke: color, 'stroke-width': 2.2, 'stroke-linejoin':'round', 'stroke-linecap':'round', opacity: 0.92 }));
     data.forEach((d,i) => {
-      const x = padL + i*stepX, y = padT + (H-padT-padB) - d.value*scaleY;
-      svg.appendChild(el('circle', { cx:x, cy:y, r:3.5, fill:'#030509', stroke:'#5ee6cf', 'stroke-width':2 }));
+      if ((d[cat]||0) === 0) return;
+      const x = padL + i*stepX, y = padT + (H-padT-padB) - (d[cat]||0)*scaleY;
+      svg.appendChild(el('circle', { cx:x, cy:y, r:2.8, fill:'#030509', stroke:color, 'stroke-width':1.8 }));
     });
-  }
-  // x labels
+  });
+
   const labelEvery = Math.max(1, Math.ceil(data.length / 12));
   data.forEach((d,i) => {
     if (i % labelEvery !== 0 && i !== data.length-1) return;
@@ -414,16 +432,23 @@ function renderTrendChart(gran){
   box.appendChild(svg);
 }
 
-/* ---------------- Plan vs Actual (paired bars) ---------------- */
+/* ---------------- Plan vs Actual (paired bars, category-selectable) ---------------- */
+let planCatCurrent = 'all';
+function valueFor(d, field, cat){
+  // field is 'plan' or 'delivered'; cat is 'all' or a category key
+  return cat === 'all' ? d[field].total : (d[field][cat] || 0);
+}
 function renderPlanActual(series){
   const box = document.getElementById('planActualChart');
-  const active = series.filter(d => d.plan.total > 0 || d.delivered.total > 0).slice(-10);
+  const cat = planCatCurrent;
+  const active = series.filter(d => valueFor(d,'plan',cat) > 0 || valueFor(d,'delivered',cat) > 0).slice(-10);
   if (!active.length) {
-    box.innerHTML = '<div class="empty-note">No plan/actual pairs available yet.</div>';
+    box.innerHTML = '<div class="empty-note">No plan/actual pairs available yet for this category.</div>';
     return;
   }
+
   const W = 1100, H = 240, padL = 40, padR = 20, padT = 14, padB = 34;
-  const maxVal = Math.max(1, ...active.map(d => Math.max(d.plan.total, d.delivered.total)));
+  const maxVal = Math.max(1, ...active.map(d => Math.max(valueFor(d,'plan',cat), valueFor(d,'delivered',cat))));
   const groupW = (W - padL - padR) / active.length;
   const barW = Math.min(26, groupW * 0.32);
   const scaleY = (H - padT - padB) / maxVal;
@@ -438,7 +463,8 @@ function renderPlanActual(series){
   }
   active.forEach((d,i) => {
     const cx = padL + groupW*i + groupW/2;
-    const planH = d.plan.total * scaleY, actH = d.delivered.total * scaleY;
+    const planV = valueFor(d,'plan',cat), actV = valueFor(d,'delivered',cat);
+    const planH = planV * scaleY, actH = actV * scaleY;
     svg.appendChild(el('rect', { x:cx-barW-2, y:H-padB-planH, width:barW, height:Math.max(0,planH), rx:4, fill:'#6fa3ff', opacity:0.9 }));
     svg.appendChild(el('rect', { x:cx+2, y:H-padB-actH, width:barW, height:Math.max(0,actH), rx:4, fill:'#5ee6cf', opacity:0.9 }));
     const t = el('text', { x:cx, y:H-10, 'text-anchor':'middle', fill:'#6f7c96', 'font-size':9.5 });
@@ -449,30 +475,28 @@ function renderPlanActual(series){
   box.appendChild(svg);
 }
 
-/* ---------------- Stock funnel (stacked bars per model) ---------------- */
+/* ---------------- Stock funnel (stacked bars per model, per category) ---------------- */
 function renderFunnel(byCategory){
-  let cat = null, rows = [];
-  for (const c of CATEGORY_ORDER) {
-    const r = (byCategory && byCategory[c]) || [];
-    if (r.length) { cat = c; rows = r; break; }
-  }
-  const pill = document.getElementById('funnelCatPill');
   const box = document.getElementById('funnelChart');
-  if (!cat) { pill.innerHTML=''; box.innerHTML = '<div class="empty-note">No stock data available.</div>'; return; }
-  pill.innerHTML = `<span class="cat-pill" style="background:${CATEGORY_META[cat].color}">${cat}</span> `;
-
+  const cats = CATEGORY_ORDER.filter(c => {
+    const rows = (byCategory && byCategory[c]) || [];
+    return rows.some(r => { const m = r.metrics||{}; return (m.balancedNewOrders||0)+(m.stockNA||0)+(m.balancedNotAssembled||0) > 0; });
+  });
+  if (!cats.length) { box.innerHTML = '<div class="empty-note">No stock data available.</div>'; return; }
+  box.innerHTML = cats.map(c => `<div class="cat-block">
+    <div class="cat-block-head"><span class="cat-pill" style="background:${CATEGORY_META[c].color}">${c}</span></div>
+    <div id="funnel_${c}"></div>
+  </div>`).join('');
+  cats.forEach(c => renderFunnelChart(c, (byCategory && byCategory[c]) || []));
+}
+function renderFunnelChart(cat, rows){
+  const box = document.getElementById('funnel_' + cat);
   const active = rows.map(r => {
     const m = r.metrics || {};
-    return {
-      label: `${r.model} — ${r.color}`,
-      assembled: m.balancedNewOrders || 0,
-      needsAsm: m.stockNA || 0,
-      free: m.balancedNotAssembled || 0
-    };
+    return { label: `${r.model} — ${r.color}`, assembled: m.balancedNewOrders||0, needsAsm: m.stockNA||0, free: m.balancedNotAssembled||0 };
   }).filter(r => r.assembled + r.needsAsm + r.free > 0)
     .sort((a,b) => (b.assembled+b.needsAsm+b.free) - (a.assembled+a.needsAsm+a.free))
     .slice(0, 12);
-
   if (!active.length) { box.innerHTML = '<div class="empty-note">All models show zero stock in this section.</div>'; return; }
 
   const W = 1100, barH = 26, gap = 10, padL = 200, padR = 70, padT = 6;
@@ -565,6 +589,15 @@ async function load(){
       document.querySelectorAll('#trendToggle .toggle-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       renderTrendChart(btn.dataset.gran);
+    });
+
+    document.getElementById('planCatToggle').addEventListener('click', (e) => {
+      const btn = e.target.closest('.toggle-btn');
+      if (!btn) return;
+      document.querySelectorAll('#planCatToggle .toggle-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      planCatCurrent = btn.dataset.cat;
+      renderPlanActual(dailySeriesGlobal);
     });
   }catch(err){
     document.getElementById('dateLabel').textContent = 'Could not load data';
