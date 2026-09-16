@@ -78,16 +78,21 @@ h1{font-size:32px;font-weight:800;margin:0;letter-spacing:-0.02em;
 .kpi{padding:20px 20px;position:relative;overflow:hidden;}
 .kpi::after{content:"";position:absolute;width:110px;height:110px;border-radius:50%;top:-45px;right:-45px;
   background:radial-gradient(circle, var(--kpi-glow,rgba(94,230,207,0.25)), transparent 70%);filter:blur(6px);}
+.kpi-icon{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;
+  background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);position:relative;z-index:1;}
+.kpi-icon svg{width:16px;height:16px;stroke:var(--text-hi);}
 .kpi .num{font-size:28px;font-weight:800;letter-spacing:-0.02em;position:relative;z-index:1;}
 .kpi .label{font-size:11.5px;color:var(--text-mid);margin-top:5px;font-weight:500;position:relative;z-index:1;}
-.kpi.ok{--kpi-glow:rgba(94,230,207,0.3);} .kpi.ok .num{color:var(--teal);}
-.kpi.info{--kpi-glow:rgba(111,163,255,0.3);} .kpi.info .num{color:var(--blue);}
-.kpi.warn{--kpi-glow:rgba(255,194,103,0.3);} .kpi.warn .num{color:var(--amber);}
-.kpi.neutral{--kpi-glow:rgba(178,141,255,0.25);} .kpi.neutral .num{color:var(--violet);}
+.kpi.ok{--kpi-glow:rgba(94,230,207,0.3);} .kpi.ok .num{color:var(--teal);} .kpi.ok .kpi-icon svg{stroke:var(--teal);}
+.kpi.info{--kpi-glow:rgba(111,163,255,0.3);} .kpi.info .num{color:var(--blue);} .kpi.info .kpi-icon svg{stroke:var(--blue);}
+.kpi.warn{--kpi-glow:rgba(255,194,103,0.3);} .kpi.warn .num{color:var(--amber);} .kpi.warn .kpi-icon svg{stroke:var(--amber);}
+.kpi.neutral{--kpi-glow:rgba(178,141,255,0.25);} .kpi.neutral .num{color:var(--violet);} .kpi.neutral .kpi-icon svg{stroke:var(--violet);}
 
-.panel{padding:24px 26px;margin-bottom:20px;}
+.panel{padding:24px 26px;margin-bottom:20px;transition:border-color 0.25s ease, box-shadow 0.25s ease;}
+.panel:hover{border-color:rgba(94,230,207,0.18);}
 .panel-head{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;margin-bottom:4px;}
-.panel h2{font-size:15px;margin:0;color:var(--text-hi);font-weight:700;}
+.panel h2{font-size:15px;margin:0;color:var(--text-hi);font-weight:700;display:flex;align-items:center;gap:9px;}
+.panel h2 svg{width:16px;height:16px;stroke:var(--teal);flex-shrink:0;}
 .panel .sub{font-size:12.5px;color:var(--text-mid);margin-bottom:16px;line-height:1.5;}
 
 .toggle-group{display:flex;gap:4px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);
@@ -148,7 +153,7 @@ footer{max-width:1220px;margin:0 auto;padding:20px 24px 0;font-size:11.5px;color
 
   <div class="panel glass">
     <div class="panel-head">
-      <h2>Plan vs. Actual Production</h2>
+      <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 16l4-6 4 3 5-8"/></svg>Plan vs. Actual Production</h2>
       <div class="toggle-group" id="planToggle">
         <button class="toggle-btn active" data-gran="daily">Daily</button>
         <button class="toggle-btn" data-gran="weekly">Weekly</button>
@@ -166,7 +171,7 @@ footer{max-width:1220px;margin:0 auto;padding:20px 24px 0;font-size:11.5px;color
 
   <div class="panel glass">
     <div class="panel-head">
-      <h2>Productivity vs. Target — By Production Line</h2>
+      <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 12l4-4"/><path d="M12 8v1"/></svg>Productivity vs. Target — By Production Line</h2>
       <div class="toggle-group" id="prodGranToggle">
         <button class="toggle-btn active" data-gran="daily">Daily</button>
         <button class="toggle-btn" data-gran="weekly">Weekly</button>
@@ -182,20 +187,20 @@ footer{max-width:1220px;margin:0 auto;padding:20px 24px 0;font-size:11.5px;color
   </div>
 
   <div class="panel glass">
-    <h2>By Production Line (Mode) — Latest Day</h2>
+    <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V10l5 3V10l5 3V10l5 3v8H3z"/><path d="M3 21h18"/></svg>By Production Line (Mode) — Latest Day</h2>
     <div class="sub">Planned vs. actual, and output per attendee, broken down by production line.</div>
     <div id="modeTable"></div>
   </div>
 
   <div class="panel glass">
-    <h2>Top Models — Latest Day</h2>
+    <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 13.5a7.97 7.97 0 000-3l2-1.4-2-3.4-2.3.9a8 8 0 00-2.6-1.5L14 2h-4l-.5 2.6a8 8 0 00-2.6 1.5l-2.3-.9-2 3.4 2 1.4a8 8 0 000 3l-2 1.5 2 3.4 2.3-.9a8 8 0 002.6 1.5L10 22h4l.5-2.5a8 8 0 002.6-1.5l2.3.9 2-3.4-2-1.5z"/></svg>Top Models — Latest Day</h2>
     <div class="sub">Every item code that ran today, ranked by actual output.</div>
     <div id="modelsTable"></div>
   </div>
 
   <div class="panel glass">
     <div class="panel-head">
-      <h2>Output Over Time — By Production Line</h2>
+      <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>Output Over Time — By Production Line</h2>
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
         <div class="toggle-group" id="catTrendCategoryToggle">
           <button class="toggle-btn active" data-cat="2W SKD (NTORQ/ICUBE)">SKD Ntorq/iQube</button>
@@ -220,7 +225,7 @@ footer{max-width:1220px;margin:0 auto;padding:20px 24px 0;font-size:11.5px;color
 
   <div class="panel glass">
     <div class="panel-head">
-      <h2>Models — Regardless of Color</h2>
+      <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Models — Regardless of Color</h2>
       <div class="toggle-group" id="modelCategoryToggle">
         <button class="toggle-btn active" data-cat="2W SKD (NTORQ/ICUBE)">SKD Ntorq/iQube</button>
         <button class="toggle-btn" data-cat="2W SKD (JUPITER/SPORT/RAIDER/RTR/ RONIN 225)">SKD Jupiter/Sport/Raider</button>
@@ -235,7 +240,7 @@ footer{max-width:1220px;margin:0 auto;padding:20px 24px 0;font-size:11.5px;color
   <div class="nav-cards">
     <a class="nav-card glass" href="../index.html">
       <div class="nc-title">← Back to MIS Hub</div>
-      <div class="nc-sub">Stores, Delivery, Quality, Costing</div>
+      <div class="nc-sub">Stores, Delivery, Costing</div>
     </a>
   </div>
 
@@ -268,11 +273,17 @@ function formatProvenance(sheetLastUpdated, latestDate){
 function renderKPIs(s){
   const t = s.totals || {};
   const box = document.getElementById('kpiGrid');
+  const icons = {
+    actual: '<path d="M20 7l-8-4-8 4 8 4 8-4z"/><path d="M4 7v10l8 4 8-4V7"/><path d="M12 11v10"/>',
+    plan: '<path d="M9 11l3 3 8-8"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>',
+    attain: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/>',
+    att: '<circle cx="9" cy="8" r="3.2"/><path d="M2.5 20c0-3.6 2.9-6.2 6.5-6.2s6.5 2.6 6.5 6.2"/><circle cx="17.5" cy="8.5" r="2.5"/><path d="M15.8 13.6c2.6.5 4.7 2.6 4.7 6"/>'
+  };
   box.innerHTML = `
-    <div class="kpi glass ok"><div class="num">${fmt(t.actual)}</div><div class="label">Actual output — latest day</div></div>
-    <div class="kpi glass info"><div class="num">${fmt(t.planned)}</div><div class="label">Planned — latest day</div></div>
-    <div class="kpi glass ${t.outputPct !== null && t.outputPct < 100 ? 'warn' : 'ok'}"><div class="num">${t.outputPct !== null ? fmt1(t.outputPct)+'%' : '—'}</div><div class="label">Plan attainment</div></div>
-    <div class="kpi glass neutral"><div class="num">${t.attendancePct !== null ? fmt1(t.attendancePct)+'%' : '—'}</div><div class="label">Attendance vs. plan</div></div>
+    <div class="kpi glass ok"><div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${icons.actual}</svg></div><div class="num">${fmt(t.actual)}</div><div class="label">Actual output — latest day</div></div>
+    <div class="kpi glass info"><div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${icons.plan}</svg></div><div class="num">${fmt(t.planned)}</div><div class="label">Planned — latest day</div></div>
+    <div class="kpi glass ${t.outputPct !== null && t.outputPct < 100 ? 'warn' : 'ok'}"><div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${icons.attain}</svg></div><div class="num">${t.outputPct !== null ? fmt1(t.outputPct)+'%' : '—'}</div><div class="label">Plan attainment</div></div>
+    <div class="kpi glass neutral"><div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${icons.att}</svg></div><div class="num">${t.attendancePct !== null ? fmt1(t.attendancePct)+'%' : '—'}</div><div class="label">Attendance vs. plan</div></div>
   `;
 }
 
@@ -562,12 +573,6 @@ async function load(){
       document.querySelectorAll('#planToggle .toggle-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       renderPlanChart(btn.dataset.gran);
-    });
-    document.getElementById('prodToggle').addEventListener('click', (e) => {
-      const btn = e.target.closest('.toggle-btn'); if (!btn) return;
-      document.querySelectorAll('#prodToggle .toggle-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      renderProdChart(btn.dataset.gran);
     });
   }catch(err){
     document.getElementById('dateLabel').textContent = 'Could not load data';
