@@ -254,7 +254,11 @@ const API_URL = "https://script.google.com/macros/s/AKfycbzJFWD_AQc8UwEkVHcb3q9l
 
 const CATEGORY_META = {
   "Summary": { label: "2-Wheeler — Summary", color: "#6fa3ff" },
-  "IQUBE":   { label: "IQUBE (Electric)",     color: "#ffc267" },
+  // "IQUBE" is the tab/category name the source sheet uses, but it now
+  // covers ALL electric models, not just the iQube itself - Orbiter
+  // was added as a second EV model and reports under this same tab.
+  // Label reflects that so it doesn't read as iQube-only.
+  "IQUBE":   { label: "Electric (iQube + Orbiter)", color: "#ffc267" },
   "3W":      { label: "3-Wheeler",            color: "#ff7a7a" }
 };
 const CATEGORY_ORDER = ["Summary", "IQUBE", "3W"];
@@ -612,12 +616,16 @@ function renderCategoryTable(rows){
 }
 function renderCategoryPanels(byCategory){
   const box = document.getElementById('categoryPanels');
+  const CATEGORY_NOTE = {
+    IQUBE: 'Covers every electric model reported under this sheet tab — currently iQube and Orbiter. Any future EV model added here will show up automatically.'
+  };
   box.innerHTML = CATEGORY_ORDER.map(cat => {
     const meta = CATEGORY_META[cat];
     const rows = (byCategory && byCategory[cat]) || [];
+    const note = CATEGORY_NOTE[cat] ? ` ${CATEGORY_NOTE[cat]}` : '';
     return `<div class="panel glass">
       <h2><span class="cat-pill" style="background:${meta.color}">${cat}</span>${meta.label}</h2>
-      <div class="sub">Every model + color combination reported for this section on the latest date.</div>
+      <div class="sub">Every model + color combination reported for this section on the latest date.${note}</div>
       <div class="source-tag">${rows.length} line${rows.length===1?'':'s'}</div>
       ${renderCategoryTable(rows)}
     </div>`;
