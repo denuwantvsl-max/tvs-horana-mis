@@ -100,8 +100,8 @@ h1{font-size:38px;font-weight:800;margin:0;letter-spacing:-0.02em;white-space:pr
 .updated{font-size:12.5px;color:var(--text-mid);text-align:right;}
 .updated strong{color:var(--text-hi);font-weight:600;}
 
-.modules{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:32px 0;}
-@media (max-width:900px){.modules{grid-template-columns:1fr;}}
+.modules-top{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:32px 0 16px;}
+@media (max-width:900px){.modules-top{grid-template-columns:1fr;}}
 .mod{padding:28px 26px 26px;display:flex;flex-direction:column;min-height:196px;position:relative;overflow:hidden;
   transition:transform 0.3s cubic-bezier(.2,.8,.2,1), border-color 0.3s ease, box-shadow 0.3s ease;}
 .mod-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px;}
@@ -124,8 +124,6 @@ h1{font-size:38px;font-weight:800;margin:0;letter-spacing:-0.02em;white-space:pr
   box-shadow:var(--glass-shadow), 0 0 0 1px rgba(94,230,207,0.18), 0 0 34px -10px rgba(94,230,207,0.5), inset 0 1px 0 rgba(255,255,255,0.18);}
 .mod.link[data-accent="blue"]:hover{border-color:rgba(111,163,255,0.4);
   box-shadow:var(--glass-shadow), 0 0 0 1px rgba(111,163,255,0.18), 0 0 34px -10px rgba(111,163,255,0.5), inset 0 1px 0 rgba(255,255,255,0.18);}
-.mod.link[data-accent="violet"]:hover{border-color:rgba(178,141,255,0.4);
-  box-shadow:var(--glass-shadow), 0 0 0 1px rgba(178,141,255,0.18), 0 0 34px -10px rgba(178,141,255,0.5), inset 0 1px 0 rgba(255,255,255,0.18);}
 .mod.link:hover{transform:translateY(-4px);}
 .mod .status{font-size:10.5px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;
   color:var(--teal);margin-bottom:10px;display:flex;align-items:center;}
@@ -137,6 +135,33 @@ h1{font-size:38px;font-weight:800;margin:0;letter-spacing:-0.02em;white-space:pr
 .mod .go{margin-top:16px;font-size:12.5px;font-weight:700;color:var(--text-hi);
   display:flex;align-items:center;gap:6px;transition:gap 0.25s ease;}
 .mod.link:hover .go{gap:11px;color:var(--teal);}
+
+/* Featured Production card */
+.mod-feature{margin-bottom:16px;padding:34px;display:grid;grid-template-columns:1.15fr 1fr;gap:36px;
+  align-items:center;position:relative;overflow:hidden;border-color:rgba(178,141,255,0.22);
+  background:linear-gradient(160deg, rgba(178,141,255,0.08), var(--glass-fill-2));}
+@media (max-width:860px){.mod-feature{grid-template-columns:1fr;gap:26px;padding:28px 24px;}}
+.mf-left .mod-top{margin-bottom:16px;}
+.mf-left h2{font-size:22px;font-weight:800;margin:0 0 8px;}
+.mf-left p{font-size:13px;color:var(--text-mid);line-height:1.55;margin:0;}
+.mod-tags{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0 4px;}
+.mod-tags span{font-size:10.5px;padding:5px 11px;border-radius:100px;
+  background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:var(--text-mid);}
+.mod-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px;}
+.mod-btn{padding:11px 20px;border-radius:100px;font-size:12.5px;font-weight:700;
+  display:inline-flex;align-items:center;gap:7px;transition:transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease, background 0.22s ease;}
+.mod-btn.primary{background:linear-gradient(135deg, #5ee6cf, #6fa3ff);color:#052018;}
+.mod-btn.primary:hover{transform:translateY(-2px);box-shadow:0 10px 26px -10px rgba(94,230,207,0.55);}
+.mod-btn.ghost{background:rgba(255,255,255,0.055);border:1px solid rgba(255,255,255,0.16);color:var(--text-hi);}
+.mod-btn.ghost:hover{transform:translateY(-2px);border-color:rgba(178,141,255,0.45);background:rgba(255,255,255,0.09);}
+
+.mf-right-label{font-size:10.5px;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-low);font-weight:700;
+  margin-bottom:12px;display:flex;justify-content:space-between;gap:8px;}
+.mf-right-label span{color:var(--text-low);font-weight:500;text-transform:none;letter-spacing:0;font-size:10.5px;}
+.mod-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.mod-stat{padding:16px 16px;border-radius:14px;background:rgba(255,255,255,0.045);border:1px solid rgba(255,255,255,0.09);}
+.mod-stat .val{font-size:21px;font-weight:800;color:var(--text-hi);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mod-stat .lbl{font-size:10px;color:var(--text-mid);margin-top:4px;text-transform:uppercase;letter-spacing:0.05em;}
 
 .photo-band{margin-top:8px;padding:28px 32px;position:relative;overflow:hidden;}
 .pb-label{font-size:10.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--teal);font-weight:700;margin-bottom:8px;}
@@ -218,7 +243,7 @@ footer{max-width:1220px;margin:0 auto;padding:24px 24px 0;font-size:11.5px;color
 
 <div class="wrap">
 
-  <div class="modules">
+  <div class="modules-top">
     <a class="mod link glass reveal" data-accent="teal" href="stores/index.html">
       <div class="mod-top">
         <div class="mod-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg></div>
@@ -239,33 +264,42 @@ footer{max-width:1220px;margin:0 auto;padding:24px 24px 0;font-size:11.5px;color
       <p>Dealer delivery status, weekly requested vs. delivered quantities, and pending delivery tracking.</p>
       <div class="go">Open <span>&rarr;</span></div>
     </a>
-    <a class="mod link glass reveal" data-accent="violet" href="production/index.html">
+    <div class="mod soon glass reveal" data-accent="amber">
+      <div class="mod-top">
+        <div class="mod-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6"/><path d="M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg></div>
+        <span class="idx">04</span>
+      </div>
+      <div class="status">Planned</div>
+      <h2>Costing</h2>
+      <p>Capital project tracking and cost monitoring across ongoing plant initiatives.</p>
+    </div>
+  </div>
+
+  <div class="mod-feature glass reveal" data-accent="violet">
+    <div class="mf-left">
       <div class="mod-top">
         <div class="mod-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 13.5a7.97 7.97 0 000-3l2-1.4-2-3.4-2.3.9a8 8 0 00-2.6-1.5L14 2h-4l-.5 2.6a8 8 0 00-2.6 1.5l-2.3-.9-2 3.4 2 1.4a8 8 0 000 3l-2 1.5 2 3.4 2.3-.9a8 8 0 002.6 1.5L10 22h4l.5-2.5a8 8 0 002.6-1.5l2.3.9 2-3.4-2-1.5z"/></svg></div>
         <span class="idx">03</span>
       </div>
       <div class="status"><span class="live-dot"></span>Live</div>
       <h2>Production</h2>
-      <p>Assembly records, pending vehicles, and quality data, alongside daily plan vs. actual output and productivity by line.</p>
-      <div class="go">Open <span>&rarr;</span></div>
-    </a>
-    <div class="mod soon glass reveal" data-accent="amber">
-      <div class="mod-top">
-        <div class="mod-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3z"/><path d="M9 12l2 2 4-4"/></svg></div>
-        <span class="idx">04</span>
+      <p>The assembly process — where the vehicle actually gets built. Assembly records, pending vehicles, and quality checks all happen here.</p>
+      <div class="mod-tags">
+        <span>Assembly records</span><span>Pending vehicles</span><span>Quality data</span>
       </div>
-      <div class="status">Planned</div>
-      <h2>Quality</h2>
-      <p>Non-conformance tracking, corrective actions, and quality objective monitoring.</p>
+      <div class="mod-actions">
+        <a class="mod-btn primary" href="production/index.html">Open Production <span>&rarr;</span></a>
+        <a class="mod-btn ghost" href="https://eclectic-sherbet-f54ab4.netlify.app" target="_blank" rel="noopener">Shop Floor Dashboard <span>&#8599;</span></a>
+      </div>
     </div>
-    <div class="mod soon glass reveal" data-accent="amber">
-      <div class="mod-top">
-        <div class="mod-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6"/><path d="M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg></div>
-        <span class="idx">05</span>
+    <div class="mf-right">
+      <div class="mf-right-label">On the floor right now <span id="prodDate"></span></div>
+      <div class="mod-stats">
+        <div class="mod-stat"><div class="val" id="prodUnits">…</div><div class="lbl">Units built today</div></div>
+        <div class="mod-stat"><div class="val" id="prodPct">…</div><div class="lbl">Of daily plan</div></div>
+        <div class="mod-stat"><div class="val" id="prodAtt">…</div><div class="lbl">Attendance</div></div>
+        <div class="mod-stat"><div class="val" id="prodTop">…</div><div class="lbl">Top model today</div></div>
       </div>
-      <div class="status">Planned</div>
-      <h2>Costing</h2>
-      <p>Capital project tracking and cost monitoring across ongoing plant initiatives.</p>
     </div>
   </div>
 
@@ -382,6 +416,34 @@ if (reduceMotion) {
 } else {
   runBoot();
 }
+
+// ============================================================
+// Production card — live "on the floor right now" snapshot
+// ============================================================
+(function(){
+  const API_URL = 'https://script.google.com/macros/s/AKfycbzJFWD_AQc8UwEkVHcb3q9lDmzoMcO-fq9qDX3wIEAoUi8gIZN09Uxbbjfj3Z30spjjpw/exec';
+  const els = {
+    units: document.getElementById('prodUnits'),
+    pct: document.getElementById('prodPct'),
+    att: document.getElementById('prodAtt'),
+    top: document.getElementById('prodTop'),
+    date: document.getElementById('prodDate')
+  };
+  if (!els.units) return;
+
+  fetch(API_URL + '?module=production').then(r => r.json()).then(d => {
+    const t = (d.summary && d.summary.totals) || {};
+    els.units.textContent = (t.actual !== undefined && t.actual !== null) ? t.actual : '—';
+    els.pct.textContent = (t.outputPct !== null && t.outputPct !== undefined) ? Math.round(t.outputPct) + '%' : '—';
+    els.att.textContent = (t.attendanceActual !== undefined && t.attendanceActual !== null)
+      ? (t.attendanceActual + ' / ' + (t.attendancePlanned || '—')) : '—';
+    const top = (d.topModels && d.topModels[0]) ? d.topModels[0] : null;
+    els.top.textContent = top ? (top.itemCode.length > 20 ? top.itemCode.slice(0, 18) + '…' : top.itemCode) : '—';
+    if (d.summary && d.summary.latestDate) els.date.textContent = 'as of ' + d.summary.latestDate;
+  }).catch(() => {
+    ['units','pct','att','top'].forEach(k => { els[k].textContent = '—'; });
+  });
+})();
 </script>
 </body>
 </html>
