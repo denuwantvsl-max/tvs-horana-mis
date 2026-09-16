@@ -76,8 +76,20 @@ h1{font-size:32px;font-weight:800;margin:0;letter-spacing:-0.02em;
 .provenance .unverified{color:var(--amber);}
 
 /* KPI strip */
-.kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:28px;}
+.kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:14px;}
 @media (max-width:1050px){.kpi-grid{grid-template-columns:repeat(2,1fr);}}
+
+.kpi-breakdown{padding:18px 22px;margin-bottom:28px;}
+.kb-title{font-size:10.5px;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-low);font-weight:700;margin-bottom:14px;}
+.kb-table{width:100%;border-collapse:collapse;font-size:12.5px;}
+.kb-table th{text-align:right;font-weight:700;color:var(--text-low);font-size:10px;letter-spacing:0.04em;
+  padding:6px 10px 8px 0;white-space:nowrap;}
+.kb-table th:first-child{text-align:left;}
+.kb-table td{padding:8px 10px 8px 0;text-align:right;font-family:'SFMono-Regular','Consolas',monospace;color:var(--text-hi);
+  font-weight:700;border-top:1px solid rgba(255,255,255,0.06);}
+.kb-table td:first-child{text-align:left;font-family:inherit;font-weight:600;}
+.kb-table tr.kb-total td{border-top:1px solid rgba(255,255,255,0.15);color:var(--text-hi);}
+.kb-table tr.kb-total td:first-child{color:var(--text-mid);font-weight:700;}
 .kpi{padding:20px 20px;position:relative;overflow:hidden;}
 .kpi::after{content:"";position:absolute;width:110px;height:110px;border-radius:50%;top:-45px;right:-45px;
   background:radial-gradient(circle, var(--kpi-glow,rgba(94,230,207,0.25)), transparent 70%);filter:blur(6px);}
@@ -160,6 +172,7 @@ footer{max-width:1220px;margin:0 auto;padding:20px 24px 0;font-size:11.5px;color
   <div class="provenance glass" id="provenance">Loading source information…</div>
 
   <div class="kpi-grid" id="kpiGrid"></div>
+  <div class="kpi-breakdown glass" id="kpiBreakdown"></div>
 
   <!-- Requested vs Received -->
   <div class="panel glass">
@@ -283,6 +296,49 @@ function renderKPIs(s){
     <div class="kpi glass neutral"><div class="num">${fmt(t.balancedNewOrders)}</div><div class="label">Ready — assembled</div></div>
     <div class="kpi glass"><div class="num">${fmt(t.balancedNotAssembled)}</div><div class="label">Free — not assembled</div></div>
   `;
+}
+
+/* ---------------- Per-category breakdown (2W / Electric / 3W) ---------------- */
+function renderKPIBreakdown(byCategory){
+  const box = document.getElementById('kpiBreakdown');
+  const sums = {};
+  CATEGORY_ORDER.forEach(cat => {
+    const rows = (byCategory && byCategory[cat]) || [];
+    const s = { delivered: 0, deliveryPlan: 0, pending: 0 };
+    rows.forEach(r => {
+      const m = r.metrics || {};
+      s.delivered += m.delivered || 0;
+      s.deliveryPlan += m.deliveryPlan || 0;
+      s.pending += m.pending || 0;
+    });
+    sums[cat] = s;
+  });
+  const totalRow = { delivered: 0, deliveryPlan: 0, pending: 0 };
+  CATEGORY_ORDER.forEach(cat => {
+    totalRow.delivered += sums[cat].delivered;
+    totalRow.deliveryPlan += sums[cat].deliveryPlan;
+    totalRow.pending += sums[cat].pending;
+  });
+
+  box.innerHTML = `
+    <div class="kb-title">Delivery — By Category</div>
+    <table class="kb-table">
+      <thead><tr><th>Category</th><th>Delivered</th><th>Planned (next day)</th><th>Pending</th></tr></thead>
+      <tbody>
+        ${CATEGORY_ORDER.map(cat => `<tr>
+          <td><span class="cat-pill" style="background:${CATEGORY_META[cat].color}">${cat}</span> &nbsp;${CATEGORY_META[cat].label}</td>
+          <td>${fmt(sums[cat].delivered)}</td>
+          <td>${fmt(sums[cat].deliveryPlan)}</td>
+          <td>${fmt(sums[cat].pending)}</td>
+        </tr>`).join('')}
+        <tr class="kb-total">
+          <td>All categories</td>
+          <td>${fmt(totalRow.delivered)}</td>
+          <td>${fmt(totalRow.deliveryPlan)}</td>
+          <td>${fmt(totalRow.pending)}</td>
+        </tr>
+      </tbody>
+    </table>`;
 }
 
 /* ---------------- Requested vs Received (grouped bar, per category) ---------------- */
@@ -576,6 +632,7 @@ async function load(){
     document.getElementById('dateLabel').innerHTML = 'Latest report date <strong>' + (data.summary.latestDate || '—') + '</strong>';
     formatProvenance(data.summary.source, data.summary.latestDate);
     renderKPIs(data.summary);
+    renderKPIBreakdown(data.byCategory || {});
     renderReqRec(data.weeklyPerformance);
     dailySeriesGlobal = data.dailySeries || [];
     renderTrendChart('daily');
