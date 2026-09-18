@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TVS Lanka — Quality Dashboard</title>
+<style>
+:root{
+  --bg-0:#030509; --bg-1:#06090f;
+  --glass-fill-1:rgba(255,255,255,0.09);
+  --glass-fill-2:rgba(255,255,255,0.03);
+  --glass-border:rgba(255,255,255,0.14);
+  --glass-border-hi:rgba(255,255,255,0.42);
+  --glass-shadow:0 20px 60px -12px rgba(0,0,0,0.55), 0 2px 8px rgba(0,0,0,0.3);
+  --teal:#5ee6cf; --blue:#6fa3ff; --violet:#b28dff; --amber:#ffc267; --red:#ff7a7a;
+  --text-hi:#f5f8fd; --text-mid:#aab6cc; --text-low:#6f7c96;
+  --r-xl:28px; --r-lg:20px; --r-md:14px; --r-sm:10px;
+}
+*{box-sizing:border-box;}
+::selection{background:rgba(94,230,207,0.28);color:#fff;}
+html{-webkit-font-smoothing:antialiased;}
+html,body{margin:0;padding:0;background:var(--bg-0);color:var(--text-hi);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Inter,system-ui,sans-serif;
+  font-variant-numeric:tabular-nums; line-height:1.4; min-height:100vh;}
+a{color:inherit;text-decoration:none;}
+
+.bg-mesh{position:fixed;inset:0;z-index:0;overflow:hidden;background:var(--bg-0);}
+.bg-mesh::before{content:"";position:absolute;inset:-10%;
+  background:
+    radial-gradient(38% 30% at 15% 8%, rgba(94,230,207,0.16), transparent 60%),
+    radial-gradient(42% 34% at 88% 2%, rgba(111,163,255,0.16), transparent 60%),
+    radial-gradient(40% 36% at 78% 88%, rgba(178,141,255,0.12), transparent 60%),
+    radial-gradient(30% 26% at 8% 90%, rgba(255,194,103,0.09), transparent 60%);
+  filter:blur(10px); animation:drift 34s ease-in-out infinite alternate;}
+.bg-mesh::after{content:"";position:absolute;inset:0;
+  background-image:radial-gradient(rgba(255,255,255,0.035) 1px, transparent 1px);
+  background-size:3px 3px; opacity:0.5; mix-blend-mode:overlay;}
+@keyframes drift{0%{transform:translate(0,0) scale(1);}50%{transform:translate(-2%,2%) scale(1.04);}100%{transform:translate(2%,-1%) scale(1.02);}}
+@media (prefers-reduced-motion:reduce){.bg-mesh::before{animation:none;}}
+
+.glass{position:relative;
+  background:linear-gradient(160deg, var(--glass-fill-1), var(--glass-fill-2));
+  backdrop-filter:blur(28px) saturate(170%); -webkit-backdrop-filter:blur(28px) saturate(170%);
+  border:1px solid var(--glass-border); border-radius:var(--r-lg);
+  box-shadow:var(--glass-shadow), inset 0 1px 0 rgba(255,255,255,0.14), inset 0 -1px 12px rgba(0,0,0,0.18);}
+.glass::before{content:"";position:absolute;top:0;left:12%;right:12%;height:1px;
+  background:linear-gradient(90deg, transparent, var(--glass-border-hi), transparent); border-radius:100%;}
+
+.wrap{max-width:1220px;margin:0 auto;padding:0 24px 80px;position:relative;z-index:1;}
+
+header{max-width:1220px;margin:0 auto;padding:36px 24px 22px;position:relative;z-index:1;
+  display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px;}
+.brand{font-size:11px;letter-spacing:0.14em;color:var(--teal);font-weight:700;text-transform:uppercase;margin-bottom:10px;}
+h1{font-size:32px;font-weight:800;margin:0;letter-spacing:-0.02em;
+  background:linear-gradient(135deg,#ffffff 30%,#b9c6de 100%);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+.updated{font-size:12.5px;color:var(--text-mid);text-align:right;}
+.live-badge{display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:700;letter-spacing:0.04em;
+  color:var(--teal);padding:5px 12px;border-radius:100px;background:rgba(94,230,207,0.10);border:1px solid rgba(94,230,207,0.25);}
+.live-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--teal);box-shadow:0 0 8px 1px rgba(94,230,207,0.8);
+  animation:pulseGlow 1.8s ease-in-out infinite;}
+@keyframes pulseGlow{0%,100%{box-shadow:0 0 0 0 rgba(94,230,207,0.55);}50%{box-shadow:0 0 0 5px rgba(94,230,207,0);}}
+
+.tabbar{max-width:1220px;margin:0 auto;padding:0 24px 18px;display:flex;gap:4px;position:relative;z-index:1;}
+.tabbar a{padding:9px 16px;font-size:12.5px;font-weight:600;color:var(--text-low);border-radius:100px;transition:all 0.2s ease;}
+.tabbar a.active{color:#fff;background:linear-gradient(135deg, rgba(94,230,207,0.20), rgba(111,163,255,0.08));
+  border:1px solid rgba(94,230,207,0.25);}
+
+.provenance{padding:14px 20px;margin-bottom:14px;font-size:12.5px;color:var(--text-mid);
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.provenance b{color:var(--text-hi);}
+
+.data-note{padding:13px 18px;margin-bottom:20px;font-size:12px;color:var(--amber);
+  border-left:2px solid var(--amber);background:rgba(255,194,103,0.06);}
+
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px;}
+@media (max-width:900px){.kpi-grid{grid-template-columns:repeat(2,1fr);}}
+.kpi{padding:20px 20px;position:relative;overflow:hidden;}
+.kpi::after{content:"";position:absolute;width:110px;height:110px;border-radius:50%;top:-45px;right:-45px;
+  background:radial-gradient(circle, var(--kpi-glow,rgba(94,230,207,0.25)), transparent 70%);filter:blur(6px);}
+.kpi-icon{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;
+  background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);position:relative;z-index:1;}
+.kpi-icon svg{width:16px;height:16px;stroke:var(--text-hi);}
+.kpi .num{font-size:28px;font-weight:800;letter-spacing:-0.02em;position:relative;z-index:1;}
+.kpi .label{font-size:11.5px;color:var(--text-mid);margin-top:5px;font-weight:500;position:relative;z-index:1;}
+.kpi.ok{--kpi-glow:rgba(94,230,207,0.3);} .kpi.ok .num{color:var(--teal);} .kpi.ok .kpi-icon svg{stroke:var(--teal);}
+.kpi.info{--kpi-glow:rgba(111,163,255,0.3);} .kpi.info .num{color:var(--blue);} .kpi.info .kpi-icon svg{stroke:var(--blue);}
+.kpi.warn{--kpi-glow:rgba(255,194,103,0.3);} .kpi.warn .num{color:var(--amber);} .kpi.warn .kpi-icon svg{stroke:var(--amber);}
+.kpi.bad{--kpi-glow:rgba(255,122,122,0.3);} .kpi.bad .num{color:var(--red);} .kpi.bad .kpi-icon svg{stroke:var(--red);}
+.kpi.neutral{--kpi-glow:rgba(178,141,255,0.25);} .kpi.neutral .num{color:var(--violet);} .kpi.neutral .kpi-icon svg{stroke:var(--violet);}
+
+.panel{padding:24px 26px;margin-bottom:20px;transition:border-color 0.25s ease, box-shadow 0.25s ease;}
+.panel:hover{border-color:rgba(94,230,207,0.18);}
+.panel-head{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;margin-bottom:4px;}
+.panel h2{font-size:15px;margin:0;color:var(--text-hi);font-weight:700;display:flex;align-items:center;gap:9px;}
+.panel h2 svg{width:16px;height:16px;stroke:var(--teal);flex-shrink:0;}
+.panel .sub{font-size:12.5px;color:var(--text-mid);margin-bottom:16px;line-height:1.5;}
+
+.cat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px;}
+@media (max-width:900px){.cat-grid{grid-template-columns:1fr;}}
+.cat-card{padding:20px 22px;}
+.cat-card.no-data{opacity:0.55;}
+.cat-title{font-size:13px;font-weight:800;letter-spacing:0.04em;text-transform:uppercase;color:var(--text-hi);margin-bottom:14px;
+  display:flex;justify-content:space-between;align-items:center;}
+.cat-title .pill{font-size:10px;font-weight:700;padding:3px 9px;border-radius:100px;background:rgba(255,255,255,0.07);color:var(--text-mid);}
+.cat-stats{display:flex;gap:18px;margin-bottom:16px;}
+.cat-stat .n{font-size:22px;font-weight:800;}
+.cat-stat .l{font-size:10.5px;color:var(--text-mid);margin-top:2px;}
+
+.pass-bar-wrap{margin-bottom:14px;}
+.pass-bar-label{display:flex;justify-content:space-between;font-size:11px;color:var(--text-mid);margin-bottom:5px;}
+.pass-bar-track{height:10px;background:rgba(255,255,255,0.06);border-radius:6px;overflow:hidden;position:relative;}
+.pass-bar-fill{height:100%;border-radius:6px;transition:width 0.4s ease;}
+.pass-bar-target{position:absolute;top:-2px;bottom:-2px;width:2px;background:#fff;opacity:0.6;}
+
+.mismatch-box{margin-top:10px;padding:10px 12px;border-radius:10px;font-size:11.5px;line-height:1.5;}
+.mismatch-box.flag{background:rgba(255,122,122,0.08);border:1px solid rgba(255,122,122,0.25);color:var(--red);}
+.mismatch-box.ok{background:rgba(94,230,207,0.06);border:1px solid rgba(94,230,207,0.2);color:var(--teal);}
+
+.issues-list{margin-top:12px;list-style:none;padding:0;font-size:12px;color:var(--text-mid);}
+.issues-list li{padding:5px 0 5px 16px;position:relative;border-top:1px solid rgba(255,255,255,0.05);}
+.issues-list li:first-child{border-top:none;}
+.issues-list li::before{content:"—";position:absolute;left:0;color:var(--amber);}
+.empty-note{color:var(--text-low);font-size:12px;padding:8px 0;}
+.tester-line{margin-top:12px;font-size:11.5px;color:var(--text-mid);}
+.tester-line b{color:var(--text-hi);}
+
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:14px;font-size:11.5px;color:var(--text-mid);}
+.legend .li{display:flex;align-items:center;gap:6px;}
+.legend .sw{width:10px;height:10px;border-radius:3px;flex-shrink:0;}
+
+svg text{font-family:inherit;}
+.chart-tip{position:fixed;z-index:999;pointer-events:none;padding:9px 13px;border-radius:10px;
+  font-size:12px;line-height:1.6;color:var(--text-hi);white-space:nowrap;
+  background:linear-gradient(160deg, rgba(22,28,38,0.97), rgba(10,14,20,0.97));
+  border:1px solid rgba(255,255,255,0.14);box-shadow:0 14px 34px -10px rgba(0,0,0,0.6);
+  opacity:0;transform:translateY(4px);transition:opacity 0.12s ease, transform 0.12s ease;}
+.chart-tip.show{opacity:1;transform:translateY(0);}
+.chart-tip b{color:var(--teal);font-weight:700;}
+
+.nav-cards{margin-top:24px;display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media (max-width:700px){.nav-cards{grid-template-columns:1fr;}}
+.nav-card{padding:20px 24px;transition:transform 0.2s cubic-bezier(.2,.8,.2,1), border-color 0.2s ease;display:block;}
+.nav-card:hover{transform:translateY(-2px);border-color:rgba(94,230,207,0.35);}
+.nc-title{font-size:14.5px;font-weight:700;margin-bottom:3px;}
+.nc-sub{font-size:12px;color:var(--text-mid);}
+
+footer{max-width:1220px;margin:0 auto;padding:20px 24px 0;font-size:11.5px;color:var(--text-low);
+  line-height:1.7;position:relative;z-index:1;}
+</style>
+</head>
+<body>
+
+<div class="bg-mesh"></div>
+
+<header>
+  <div>
+    <div class="brand"><a href="../../index.html">TVS Lanka Horana MIS</a> · Production · Quality</div>
+    <h1>Quality Dashboard</h1>
+  </div>
+  <div class="updated"><span class="live-badge"><span class="dot"></span>LIVE</span> &nbsp;<span id="dateLabel">Loading…</span></div>
+</header>
+
+<div class="tabbar">
+  <a href="../index.html">Overview</a>
+  <a href="../pending-vehicles/index.html">Pending Vehicles</a>
+  <a class="active" href="index.html">Quality</a>
+</div>
+
+<div class="wrap">
+
+  <div class="provenance glass" id="provenance">Loading source information…</div>
+  <div class="data-note glass" id="dateCaveatNote">⚠️ Kalpa's Quality Dashboard file has no date field of its own — the date shown is the day the email was <b>received</b>, not a date stated in the report. Cross-checked against actual production: no exact match has been found on any day so far, so treat dates here as approximate until Kalpa adds a real date to the report.</div>
+
+  <div class="kpi-grid" id="kpiGrid"></div>
+
+  <div class="cat-grid" id="catGrid"></div>
+
+  <div class="panel glass">
+    <div class="panel-head">
+      <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>Direct Pass Rate — Trend</h2>
+    </div>
+    <div class="sub">Actual direct-pass % per category over time, against each category's own target. Builds up as more daily reports come in.</div>
+    <div class="legend" id="trendLegend"></div>
+    <div id="trendChart"></div>
+  </div>
+
+  <div class="nav-cards">
+    <a class="nav-card glass" href="../index.html">
+      <div class="nc-title">← Back to Production Overview</div>
+      <div class="nc-sub">Plan vs. actual, productivity, models</div>
+    </a>
+    <a class="nav-card glass" href="../pending-vehicles/index.html">
+      <div class="nc-title">Pending Vehicles →</div>
+      <div class="nc-sub">MB Age repair-location aging</div>
+    </a>
+  </div>
+
+</div>
+
+<footer>Production quantities shown here are Quality's own reported figures. Where a category's quantity could be cross-checked against the real SKD PRODUCTION sheet for that date, any mismatch is flagged directly on that category's card. CKD is not cross-checked (its line mapping isn't confirmed yet). Issues and tester name are only shown when Kalpa actually fills them in — most days so far he hasn't.</footer>
+
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbzJFWD_AQc8UwEkVHcb3q9lDmzoMcO-fq9qDX3wIEAoUi8gIZN09Uxbbjfj3Z30spjjpw/exec?module=quality";
+const NS = "http://www.w3.org/2000/svg";
+const CAT_COLORS = { SKD: '#5ee6cf', CKD: '#ffc267', '3W': '#6fa3ff' };
+const CAT_ORDER = ['SKD', 'CKD', '3W'];
+
+function fmt(n){ return (n === null || n === undefined) ? '—' : Number(n).toLocaleString('en-US', { maximumFractionDigits: 0 }); }
+function pct(n){ return (n === null || n === undefined) ? '—' : (n * 100).toFixed(0) + '%'; }
+function el(tag, attrs){ const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); return e; }
+
+const chartTipEl = document.createElement('div');
+chartTipEl.className = 'chart-tip';
+document.body.appendChild(chartTipEl);
+function positionTip(evt){
+  const w = chartTipEl.offsetWidth, h = chartTipEl.offsetHeight;
+  let left = evt.clientX + 14, top = evt.clientY - h - 12;
+  if (left + w > window.innerWidth - 8) left = evt.clientX - w - 14;
+  if (top < 8) top = evt.clientY + 16;
+  chartTipEl.style.left = left + 'px'; chartTipEl.style.top = top + 'px';
+}
+function addTip(node, html){
+  node.style.cursor = 'default';
+  node.addEventListener('mouseenter', (e) => { chartTipEl.innerHTML = html; chartTipEl.classList.add('show'); positionTip(e); });
+  node.addEventListener('mousemove', positionTip);
+  node.addEventListener('mouseleave', () => chartTipEl.classList.remove('show'));
+}
+
+function renderKPIs(p){
+  const box = document.getElementById('kpiGrid');
+  const cats = p.byCategory || {};
+  let prodTotal = 0, defTotal = 0, reporting = 0;
+  CAT_ORDER.forEach(c => {
+    const d = cats[c];
+    if (!d) return;
+    reporting++;
+    if (d.productionQty !== null) prodTotal += d.productionQty;
+    if (d.defectiveQty !== null) defTotal += d.defectiveQty;
+  });
+  const overallPass = prodTotal > 0 ? (1 - defTotal / prodTotal) : null;
+  const anyMismatch = CAT_ORDER.some(c => cats[c] && cats[c].mismatch && cats[c].mismatch.diffQty !== 0);
+
+  const icons = {
+    prod: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+    def: '<path d="M12 9v4"/><path d="M12 16.5h.01"/><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/>',
+    pass: '<circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/>',
+    check: '<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>'
+  };
+  box.innerHTML = `
+    <div class="kpi glass info"><div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${icons.prod}</svg></div><div class="num">${fmt(prodTotal)}</div><div class="label">Total production (reported)</div></div>
+    <div class="kpi glass ${defTotal > 0 ? 'warn' : 'ok'}"><div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${icons.def}</svg></div><div class="num">${fmt(defTotal)}</div><div class="label">Total defective</div></div>
+    <div class="kpi glass ${overallPass !== null && overallPass < 0.9 ? 'warn' : 'ok'}"><div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${icons.pass}</svg></div><div class="num">${pct(overallPass)}</div><div class="label">Overall direct pass rate</div></div>
+    <div class="kpi glass ${anyMismatch ? 'bad' : 'ok'}"><div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${icons.check}</svg></div><div class="num">${reporting}/3</div><div class="label">${anyMismatch ? 'Categories reporting — qty mismatch found' : 'Categories reporting today'}</div></div>
+  `;
+}
+
+function renderCategoryCards(p){
+  const box = document.getElementById('catGrid');
+  const cats = p.byCategory || {};
+  box.innerHTML = CAT_ORDER.map(cat => {
+    const d = cats[cat];
+    if (!d) {
+      return `<div class="glass cat-card no-data">
+        <div class="cat-title">${cat} <span class="pill">No data</span></div>
+        <div class="empty-note">No report received for this category on the latest date.</div>
+      </div>`;
+    }
+    const passPct = d.passActualPct !== null ? d.passActualPct * 100 : 0;
+    const targetPct = d.passTargetPct !== null ? d.passTargetPct * 100 : null;
+    const barColor = (d.passActualPct !== null && d.passTargetPct !== null && d.passActualPct < d.passTargetPct) ? 'var(--red)' : CAT_COLORS[cat];
+
+    let mismatchHtml = '';
+    if (d.mismatch) {
+      const diff = d.mismatch.diffQty;
+      if (diff !== 0) {
+        mismatchHtml = `<div class="mismatch-box flag">⚠️ Reported ${fmt(d.productionQty)}, but actual production for that date was ${fmt(d.mismatch.realQty)} (${diff > 0 ? '+' : ''}${diff}).</div>`;
+      } else {
+        mismatchHtml = `<div class="mismatch-box ok">✓ Matches actual production for that date.</div>`;
+      }
+    } else if (cat !== 'CKD' && d.productionQty !== null) {
+      mismatchHtml = `<div class="mismatch-box ok" style="opacity:0.7;">No production data found for that date to cross-check against.</div>`;
+    }
+
+    const issuesHtml = d.issues && d.issues.length
+      ? `<ul class="issues-list">${d.issues.map(i => `<li>${i}</li>`).join('')}</ul>`
+      : `<div class="empty-note">No issues logged for this report.</div>`;
+
+    const testerHtml = d.tester ? `<div class="tester-line">Tester: <b>${d.tester}</b></div>` : '';
+
+    return `<div class="glass cat-card">
+      <div class="cat-title">${cat} <span class="pill">${cat === 'CKD' && d.productionQty === null ? 'No production' : 'Reporting'}</span></div>
+      <div class="cat-stats">
+        <div class="cat-stat"><div class="n">${fmt(d.productionQty)}</div><div class="l">Production Qty</div></div>
+        <div class="cat-stat"><div class="n">${fmt(d.defectiveQty)}</div><div class="l">Defective Qty</div></div>
+      </div>
+      <div class="pass-bar-wrap">
+        <div class="pass-bar-label"><span>Direct Pass: ${pct(d.passActualPct)}</span><span>Target: ${pct(d.passTargetPct)}</span></div>
+        <div class="pass-bar-track">
+          <div class="pass-bar-fill" style="width:${Math.min(passPct,100)}%;background:${barColor};"></div>
+          ${targetPct !== null ? `<div class="pass-bar-target" style="left:${Math.min(targetPct,100)}%;"></div>` : ''}
+        </div>
+      </div>
+      ${mismatchHtml}
+      ${issuesHtml}
+      ${testerHtml}
+    </div>`;
+  }).join('');
+}
+
+function renderTrend(p){
+  const chartBox = document.getElementById('trendChart');
+  const legendBox = document.getElementById('trendLegend');
+  const trend = (p.trend || []).filter(t => CAT_ORDER.some(c => t[c] && t[c].passActualPct !== null));
+  legendBox.innerHTML = CAT_ORDER.map(c => `<div class="li"><span class="sw" style="background:${CAT_COLORS[c]}"></span>${c}</div>`).join('');
+
+  if (trend.length < 2) {
+    chartBox.innerHTML = '<div class="empty-note" style="text-align:center;padding:30px 0;">Need at least 2 days of reports to draw a trend — check back once more reports come in.</div>';
+    return;
+  }
+
+  const w = 1100, h = 260, padL = 40, padR = 20, padT = 20, padB = 30;
+  const plotW = w - padL - padR, plotH = h - padT - padB;
+  const n = trend.length;
+  const xFor = i => padL + (n === 1 ? 0 : (i / (n - 1)) * plotW);
+  const yFor = v => padT + plotH - (v * plotH);
+
+  const svg = el('svg', { viewBox: `0 0 ${w} ${h}`, width: '100%', height: h, preserveAspectRatio: 'none' });
+
+  [0, 0.25, 0.5, 0.75, 1].forEach(v => {
+    const y = yFor(v);
+    const line = el('line', { x1: padL, x2: w - padR, y1: y, y2: y, stroke: 'rgba(255,255,255,0.06)', 'stroke-width': 1 });
+    svg.appendChild(line);
+    const label = el('text', { x: padL - 8, y: y + 4, fill: 'var(--text-low)', 'font-size': 10, 'text-anchor': 'end' });
+    label.textContent = Math.round(v * 100) + '%';
+    svg.appendChild(label);
+  });
+
+  CAT_ORDER.forEach(cat => {
+    const pts = trend.map((t, i) => t[cat] && t[cat].passActualPct !== null ? { x: xFor(i), y: yFor(t[cat].passActualPct), v: t[cat].passActualPct, date: t.date } : null).filter(Boolean);
+    if (pts.length < 1) return;
+    if (pts.length > 1) {
+      const d = pts.map((pt, i) => (i === 0 ? 'M' : 'L') + pt.x + ' ' + pt.y).join(' ');
+      svg.appendChild(el('path', { d, fill: 'none', stroke: CAT_COLORS[cat], 'stroke-width': 2.5, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }));
+    }
+    pts.forEach(pt => {
+      const dot = el('circle', { cx: pt.x, cy: pt.y, r: 4, fill: CAT_COLORS[cat], stroke: 'var(--bg-0)', 'stroke-width': 1.5 });
+      addTip(dot, `<b>${cat}</b> · ${pt.date}<br>Direct pass: ${(pt.v * 100).toFixed(1)}%`);
+      svg.appendChild(dot);
+    });
+  });
+
+  const step = Math.max(1, Math.ceil(n / 8));
+  trend.forEach((t, i) => {
+    if (i % step !== 0 && i !== n - 1) return;
+    const label = el('text', { x: xFor(i), y: h - 8, fill: 'var(--text-low)', 'font-size': 10, 'text-anchor': 'middle' });
+    label.textContent = t.date.slice(5);
+    svg.appendChild(label);
+  });
+
+  chartBox.innerHTML = '';
+  chartBox.appendChild(svg);
+}
+
+function formatProvenance(p){
+  const box = document.getElementById('provenance');
+  const when = p.latestDate ? new Date(p.latestDate + 'T00:00:00').toLocaleDateString('en-US', { dateStyle: 'medium' }) : '—';
+  box.innerHTML = `📋 Latest report: <b>${when}</b> (email-received date). ${(p.trend || []).length} day(s) of history accumulated so far.`;
+}
+
+async function load(){
+  try {
+    const res = await fetch(API_URL);
+    const p = await res.json();
+    document.getElementById('dateLabel').textContent = p.latestDate
+      ? new Date(p.latestDate + 'T00:00:00').toLocaleDateString('en-US', { dateStyle: 'medium' })
+      : 'No data yet';
+    formatProvenance(p);
+    renderKPIs(p);
+    renderCategoryCards(p);
+    renderTrend(p);
+  } catch (err) {
+    document.getElementById('dateLabel').textContent = 'Error loading data';
+    document.getElementById('provenance').textContent = 'Could not load Quality data: ' + err;
+  }
+}
+load();
+</script>
+
+</body>
+</html>
