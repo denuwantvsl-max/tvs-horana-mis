@@ -219,7 +219,6 @@ const BUCKET_COLORS = { '0-30':'#5ee6cf', '31-60':'#6fa3ff', '61-90':'#ffc267', 
 const BUCKET_ORDER = ['0-30','31-60','61-90','91-180','180+'];
 
 function fmt(n){ return Number(n||0).toLocaleString('en-US', { maximumFractionDigits: 0 }); }
-function fmtMoney(n){ return 'Rs. ' + Number(n||0).toLocaleString('en-US', { maximumFractionDigits: 0 }); }
 function el(tag, attrs){ const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); return e; }
 
 const chartTipEl = document.createElement('div');
@@ -244,15 +243,15 @@ function renderKPIs(p){
   const box = document.getElementById('kpiGrid');
   const icons = {
     units: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
-    value: '<path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>',
     over: '<circle cx="12" cy="12" r="9"/><path d="M12 7v6"/><circle cx="12" cy="16.5" r="0.6" fill="currentColor"/>',
+    severe: '<path d="M12 9v4"/><path d="M12 16.5h.01"/><path d="M10.3 3.9L1.8 18a2 2 0 001.7 3h17a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/>',
     avg: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/>'
   };
   const overBad = t.overBenchmarkCount > 0;
   box.innerHTML = `
     <div class="kpi glass info"><div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${icons.units}</svg></div><div class="num">${fmt(t.units)}</div><div class="label">Total pending units</div></div>
-    <div class="kpi glass neutral"><div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${icons.value}</svg></div><div class="num">${fmtMoney(t.cost)}</div><div class="label">Total value tied up</div></div>
     <div class="kpi glass ${overBad ? 'bad' : 'ok'}"><div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${icons.over}</svg></div><div class="num">${fmt(t.overBenchmarkCount)}</div><div class="label">Over 60-day benchmark</div></div>
+    <div class="kpi glass ${t.severeCount > 0 ? 'bad' : 'ok'}"><div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${icons.severe}</svg></div><div class="num">${fmt(t.severeCount)}</div><div class="label">Over 90 days (severe)</div></div>
     <div class="kpi glass ${t.avgAgeDays > 60 ? 'warn' : 'ok'}"><div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${icons.avg}</svg></div><div class="num">${fmt(t.avgAgeDays)}d</div><div class="label">Average age (oldest: ${fmt(t.oldestAgeDays)}d)</div></div>
   `;
 }
@@ -268,7 +267,7 @@ function renderDonut(byBucket, totalUnits){
   const svg = el('svg', { viewBox: `0 0 ${size} ${size}`, width: size, height: size });
   let angle = -90; // start at top
   BUCKET_ORDER.forEach(b => {
-    const row = byBucket.find(x => x.bucket === b) || { bucket: b, count: 0, cost: 0 };
+    const row = byBucket.find(x => x.bucket === b) || { bucket: b, count: 0 };
     const frac = row.count / totalUnits;
     if (frac <= 0) return;
     const sweep = frac * 360;
@@ -281,7 +280,7 @@ function renderDonut(byBucket, totalUnits){
     const d = `M ${x0o} ${y0o} A ${rOuter} ${rOuter} 0 ${large} 1 ${x1o} ${y1o} L ${x1i} ${y1i} A ${rInner} ${rInner} 0 ${large} 0 ${x0i} ${y0i} Z`;
     const path = el('path', { d, fill: BUCKET_COLORS[b] });
     path.style.transition = 'opacity 0.15s ease';
-    addTip(path, `<b>${b} days</b><br>${row.count} unit${row.count===1?'':'s'} (${(frac*100).toFixed(0)}%)<br>${fmtMoney(row.cost)}`);
+    addTip(path, `<b>${b} days</b><br>${row.count} unit${row.count===1?'':'s'} (${(frac*100).toFixed(0)}%)`);
     path.addEventListener('mouseenter', () => path.style.opacity = '0.78');
     path.addEventListener('mouseleave', () => path.style.opacity = '1');
     svg.appendChild(path);
@@ -321,7 +320,7 @@ function renderBarChart(byPartNo){
       <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${color};"></div></div>
       <div class="bar-val">${g.count}</div>
     `;
-    addTip(row.querySelector('.bar-track'), `<b>${g.partNo}</b><br>${g.count} unit(s) · ${fmtMoney(g.cost)}<br>${g.overBenchmarkCount ? g.overBenchmarkCount + ' over benchmark · oldest ' + g.maxAgeDays + 'd' : 'all within benchmark'}`);
+    addTip(row.querySelector('.bar-track'), `<b>${g.partNo}</b><br>${g.count} unit(s)<br>${g.overBenchmarkCount ? g.overBenchmarkCount + ' over benchmark · oldest ' + g.maxAgeDays + 'd' : 'all within benchmark'}`);
     box.appendChild(row);
   });
 }
@@ -340,11 +339,10 @@ function renderUnitsTable(units){
       <td>${u.dateApplied}</td>
       <td>${u.ageDays}</td>
       <td class="${diffClass}">${diffLabel}</td>
-      <td>${fmtMoney(u.cost)}</td>
     </tr>`;
   }).join('');
   box.innerHTML = `<table>
-    <thead><tr><th>Part No.</th><th>Round No.</th><th>Location</th><th>Date Applied</th><th>Age (days)</th><th>vs. 60d benchmark</th><th>Value</th></tr></thead>
+    <thead><tr><th>Part No.</th><th>Round No.</th><th>Location</th><th>Date Applied</th><th>Age (days)</th><th>vs. 60d benchmark</th></tr></thead>
     <tbody>${rows}</tbody>
   </table>`;
 }
