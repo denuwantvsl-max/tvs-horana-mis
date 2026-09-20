@@ -54,9 +54,15 @@ h1{font-size:32px;font-weight:800;margin:0;letter-spacing:-0.02em;
   background:linear-gradient(135deg,#ffffff 30%,#b9c6de 100%);
   -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
 .clock-badge{text-align:right;}
+.clock-widget{display:flex;align-items:center;gap:14px;}
+.analog-wrap{flex-shrink:0;filter:drop-shadow(0 4px 14px rgba(0,0,0,0.4));}
 .clock-time{font-size:22px;font-weight:800;font-family:'SFMono-Regular','Consolas',monospace;letter-spacing:0.02em;}
 .clock-date{font-size:11.5px;color:var(--text-mid);margin-top:2px;}
 .clock-status{font-size:11px;color:var(--teal);margin-top:4px;font-weight:700;}
+.safety-strip{margin-top:18px;padding:12px 22px;display:flex;align-items:center;gap:12px;
+  border-color:rgba(255,194,103,0.35);background:linear-gradient(160deg, rgba(255,194,103,0.10), var(--glass-fill-2));}
+.safety-strip .safety-ic{font-size:16px;}
+.safety-strip span:last-child{font-size:12.5px;font-weight:600;color:var(--text-hi);}
 .tabbar{max-width:1220px;margin:0 auto;padding:0 24px 18px;display:flex;gap:4px;position:relative;z-index:1;}
 .tabbar a{padding:9px 16px;font-size:12.5px;font-weight:600;color:var(--text-low);border-radius:100px;transition:all 0.2s ease;}
 .tabbar a.active{color:#fff;background:linear-gradient(135deg, rgba(178,141,255,0.20), rgba(255,122,122,0.08));}
@@ -123,12 +129,28 @@ footer{max-width:1220px;margin:0 auto;padding:24px 24px 0;font-size:11.5px;color
     <div class="brand"><a class="back-link" href="../index.html">← Production</a> · CKD-DVA</div>
     <h1>2W CKD Production</h1>
   </div>
-  <div class="clock-badge reveal in">
-    <div class="clock-time" id="clockTime">--:--:--</div>
-    <div class="clock-date" id="clockDate">…</div>
-    <div class="clock-status" id="clockStatus">…</div>
+  <div class="clock-widget reveal in">
+    <div class="analog-wrap">
+      <svg viewBox="0 0 100 100" width="72" height="72">
+        <circle cx="50" cy="50" r="47" fill="#0a0d14" stroke="rgba(255,255,255,0.16)" stroke-width="2"/>
+        <g id="clockTicks"></g>
+        <line id="handHour" x1="50" y1="50" x2="50" y2="28" stroke="#f5f8fd" stroke-width="3.4" stroke-linecap="round"/>
+        <line id="handMin" x1="50" y1="50" x2="50" y2="18" stroke="#aab6cc" stroke-width="2.4" stroke-linecap="round"/>
+        <line id="handSec" x1="50" y1="50" x2="50" y2="15" stroke="#ff7a7a" stroke-width="1.2" stroke-linecap="round"/>
+        <circle cx="50" cy="50" r="3" fill="#ff7a7a"/>
+      </svg>
+    </div>
+    <div class="clock-badge">
+      <div class="clock-time" id="clockTime">--:--:--</div>
+      <div class="clock-date" id="clockDate">…</div>
+      <div class="clock-status" id="clockStatus">…</div>
+    </div>
   </div>
 </header>
+
+<div class="safety-strip glass reveal in" id="safetyStrip" style="display:none;">
+  <span class="safety-ic">⚠</span><span id="safetyMsg"></span>
+</div>
 
 <div class="tabbar">
   <a href="../index.html">Overview</a>
@@ -234,6 +256,16 @@ const BREAKS = [
   { t: '17:45', label: 'Shift end' },
   { t: '20:00', label: 'OT end' }
 ];
+// Time-windowed safety reminders — shown only while "now" falls inside
+// a window, tied to the same working-hours rhythm as BREAKS above.
+const SAFETY_MESSAGES = [
+  { start:'08:00', end:'08:30', msg:'Toolbox talk before start — check PPE: helmet, gloves, safety shoes.' },
+  { start:'10:15', end:'10:30', msg:'Morning tea in 15 min — secure your station before stepping away.' },
+  { start:'12:15', end:'12:30', msg:'Lunch in 15 min — power down handheld tools before leaving your station.' },
+  { start:'14:45', end:'15:00', msg:'Afternoon tea in 15 min.' },
+  { start:'17:30', end:'17:45', msg:'Shift ending soon — clear walkways, return tools to their racks.' },
+  { start:'19:45', end:'20:00', msg:'OT ending soon — ensure all machines are powered down safely.' }
+];
 
 // ---------------- CSV parsing (RFC4180-ish) ----------------
 function parseCSV(text){
@@ -264,19 +296,31 @@ function findCol(headers, ...needles){
   return -1;
 }
 function parseNum(v){ const n = parseFloat(String(v||'').replace(/,/g,'')); return isNaN(n) ? null : n; }
+const MONTHS = ['january','february','march','april','may','june','july','august','september','october','november','december'];
+// FIX (2026-09-20): new Date(string) is unreliable across ambiguous
+// formats (e.g. "24/09/2026" parses differently — or fails outright —
+// depending on the browser's locale assumptions), and it silently
+// returned Invalid Date for every row on first deploy, which is why
+// the page showed "Could not determine an active batch" even though
+// the CSV fetch itself succeeded. This parses explicit known shapes
+// instead of trusting the loose built-in parser.
 function parseDateCell(v){
   if (!v) return null;
-  const d = new Date(v);
+  const s = String(v).trim();
+  let m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/); // ISO: YYYY-MM-DD
+  if (m) return new Date(+m[1], +m[2]-1, +m[3]);
+  m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/); // M/D/YYYY (Sheets default for this workbook)
+  if (m) { const a = +m[1], b = +m[2]; return a > 12 ? new Date(+m[3], b-1, a) : new Date(+m[3], a-1, b); }
+  m = s.match(/([A-Za-z]+)\s+(\d{1,2}),?\s+(\d{4})/); // "Thursday, September 24, 2026" / "September 24, 2026"
+  if (m) { const mi = MONTHS.indexOf(m[1].toLowerCase()); if (mi !== -1) return new Date(+m[3], mi, +m[2]); }
+  const d = new Date(s);
   return isNaN(d.getTime()) ? null : new Date(d.getFullYear(), d.getMonth(), d.getDate());
 }
 function dayKey(d){ return d.toISOString().slice(0,10); }
 function fmtDate(d){ return d.toLocaleDateString('en-GB', { weekday:'short', day:'numeric', month:'short' }); }
 
 // ---------------- Gauge rendering ----------------
-function renderGauge(ratio, statusColor){
-  // ratio: recentRate / requiredRate, clamped for needle sweep -60deg..+60deg over 0..2x
-  const clamped = Math.max(0, Math.min(2, ratio));
-  const angle = -90 + (clamped / 2) * 180; // -90 (empty) to +90 (2x)
+function gaugeStaticSvg(){
   const ticks = [];
   for (let i = 0; i <= 8; i++){
     const a = -90 + (i/8)*180;
@@ -285,38 +329,110 @@ function renderGauge(ratio, statusColor){
     const x2 = 90 + 76*Math.cos(rad), y2 = 90 + 76*Math.sin(rad);
     ticks.push(`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="rgba(255,255,255,0.25)" stroke-width="2"/>`);
   }
-  const nrad = angle * Math.PI/180;
-  const nx = 90 + 60*Math.cos(nrad), ny = 90 + 60*Math.sin(nrad);
   return `<svg width="180" height="120" viewBox="0 0 180 100">
     <path d="M 22 90 A 68 68 0 0 1 158 90" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="10"/>
     <path d="M 22 90 A 68 68 0 0 1 90 22" fill="none" stroke="#ff7a7a" stroke-width="10" opacity="0.55"/>
     <path d="M 90 22 A 68 68 0 0 1 134 34" fill="none" stroke="#ffc267" stroke-width="10" opacity="0.55"/>
     <path d="M 134 34 A 68 68 0 0 1 158 90" fill="none" stroke="#5ee6cf" stroke-width="10" opacity="0.55"/>
     ${ticks.join('')}
-    <line x1="90" y1="90" x2="${nx}" y2="${ny}" stroke="${statusColor}" stroke-width="3.5" stroke-linecap="round"/>
-    <circle cx="90" cy="90" r="7" fill="${statusColor}"/>
+    <circle id="gNeedleGlow" cx="90" cy="90" r="20" fill="none" opacity="0"/>
+    <line id="gNeedle" x1="90" y1="90" x2="90" y2="22" stroke="#5ee6cf" stroke-width="3.5" stroke-linecap="round"/>
+    <circle id="gHub" cx="90" cy="90" r="7" fill="#5ee6cf"/>
     <text x="22" y="105" fill="#6f7c96" font-size="9" text-anchor="middle">0x</text>
     <text x="90" y="16" fill="#6f7c96" font-size="9" text-anchor="middle">1x</text>
     <text x="158" y="105" fill="#6f7c96" font-size="9" text-anchor="middle">2x</text>
   </svg>`;
 }
+// Sweeps the needle from empty (0x) to its true position over ~900ms,
+// then colors the hub/needle for status — small, purposeful motion on
+// load rather than a static readout, per Denuwan's "make it interesting"
+// note on the earlier pipeline animation.
+function animateGaugeTo(ratio, statusColor, complete){
+  const needle = document.getElementById('gNeedle');
+  const hub = document.getElementById('gHub');
+  if (!needle) return;
+  const clamped = Math.max(0, Math.min(2, ratio));
+  const finalAngle = -90 + (clamped/2)*180;
+  const start = performance.now();
+  const dur = 900;
+  function frame(now){
+    const p = Math.min(1, (now-start)/dur);
+    const eased = 1 - Math.pow(1-p, 3);
+    const angle = -90 + (finalAngle - (-90)) * eased;
+    const rad = angle * Math.PI/180;
+    needle.setAttribute('x2', 90 + 60*Math.cos(rad));
+    needle.setAttribute('y2', 90 + 60*Math.sin(rad));
+    if (p < 1) requestAnimationFrame(frame);
+    else if (complete) pulseComplete();
+  }
+  requestAnimationFrame(frame);
+  needle.setAttribute('stroke', statusColor);
+  hub.setAttribute('fill', statusColor);
+}
+function pulseComplete(){
+  const glow = document.getElementById('gNeedleGlow');
+  if (!glow) return;
+  glow.setAttribute('stroke', '#5ee6cf');
+  glow.setAttribute('stroke-width', '3');
+  let n = 0;
+  function pulse(){
+    if (n >= 3) { glow.setAttribute('opacity', 0); return; }
+    glow.animate(
+      [{ r:20, opacity:0.8 }, { r:44, opacity:0 }],
+      { duration: 900, easing: 'ease-out' }
+    );
+    glow.setAttribute('opacity', 1);
+    n++;
+    setTimeout(pulse, 950);
+  }
+  pulse();
+}
 
 // ---------------- Clock ----------------
+function drawClockTicks(){
+  const g = document.getElementById('clockTicks');
+  if (!g) return;
+  let html = '';
+  for (let i = 0; i < 12; i++){
+    const a = (i/12) * 2*Math.PI;
+    const inner = i % 3 === 0 ? 39 : 42;
+    const x1 = 50 + inner*Math.sin(a), y1 = 50 - inner*Math.cos(a);
+    const x2 = 50 + 45*Math.sin(a), y2 = 50 - 45*Math.cos(a);
+    html += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="rgba(255,255,255,0.35)" stroke-width="${i%3===0?1.6:1}"/>`;
+  }
+  g.innerHTML = html;
+}
+function toMin(t){ const [h,m] = t.split(':').map(Number); return h*60+m; }
 function tick(){
   const now = new Date();
   document.getElementById('clockTime').textContent = now.toLocaleTimeString('en-GB');
   document.getElementById('clockDate').textContent = now.toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+
+  // Analog hands
+  const h = now.getHours() % 12, m = now.getMinutes(), s = now.getSeconds();
+  const hAngle = (h + m/60) * 30, mAngle = (m + s/60) * 6, sAngle = s * 6;
+  const hh = document.getElementById('handHour'), hm = document.getElementById('handMin'), hs = document.getElementById('handSec');
+  if (hh){ hh.setAttribute('transform', `rotate(${hAngle} 50 50)`); }
+  if (hm){ hm.setAttribute('transform', `rotate(${mAngle} 50 50)`); }
+  if (hs){ hs.setAttribute('transform', `rotate(${sAngle} 50 50)`); }
+
   const mins = now.getHours()*60 + now.getMinutes();
-  const toMin = t => { const [h,m] = t.split(':').map(Number); return h*60+m; };
   let next = BREAKS.find(b => toMin(b.t) > mins);
   const statusEl = document.getElementById('clockStatus');
   if (!next){ statusEl.textContent = 'Shift ended for today'; }
   else {
     const diff = toMin(next.t) - mins;
-    const h = Math.floor(diff/60), m = diff % 60;
-    statusEl.textContent = `${next.label} in ${h>0? h+'h ':''}${m}m`;
+    const dh = Math.floor(diff/60), dm = diff % 60;
+    statusEl.textContent = `${next.label} in ${dh>0? dh+'h ':''}${dm}m`;
   }
+
+  // Time-windowed safety reminder
+  const strip = document.getElementById('safetyStrip');
+  const active = SAFETY_MESSAGES.find(w => mins >= toMin(w.start) && mins < toMin(w.end));
+  if (active){ strip.style.display = 'flex'; document.getElementById('safetyMsg').textContent = active.msg; }
+  else { strip.style.display = 'none'; }
 }
+drawClockTicks();
 setInterval(tick, 1000); tick();
 
 // ---------------- Main data load ----------------
@@ -385,7 +501,7 @@ fetch(CSV_URL).then(r => {
       requiredRate = daysRemaining > 0 ? unitsNeeded / daysRemaining : (unitsNeeded > 0 ? unitsNeeded : 0);
     }
     return {
-      item: (lastActualRow || planTodayRow).item, cumActual, cumPlanToday, variance,
+      item: (lastActualRow || planTodayRow || track[0]).item, cumActual, cumPlanToday, variance,
       recentRate, requiredRate, daysRemaining, unitsNeeded,
       target: nextInspect ? nextInspect.plan : null,
       inspectionDate: nextInspect ? nextInspect.date : null,
@@ -401,14 +517,17 @@ fetch(CSV_URL).then(r => {
   if (!primary) throw new Error('Could not determine an active batch');
 
   // ---- Status banner ----
+  const batchComplete = primary.target !== null && primary.cumActual >= primary.target;
   const ratio = (primary.recentRate !== null && primary.requiredRate) ? (primary.recentRate / primary.requiredRate) : (primary.requiredRate === 0 ? 2 : null);
   let statusClass = 'safe', statusColor = '#5ee6cf', head = 'On pace', sub = '';
-  if (primary.requiredRate === 0) { statusClass='safe'; statusColor='#5ee6cf'; head='Target already met'; }
+  if (batchComplete) { statusClass='safe'; statusColor='#5ee6cf'; head='🎉 Batch target reached'; }
   else if (ratio === null) { statusClass='risk'; statusColor='#ffc267'; head='Not enough data yet to judge pace'; }
   else if (ratio >= 1) { statusClass='safe'; statusColor='#5ee6cf'; head='On pace for the next inspection'; }
   else if (ratio >= 0.75) { statusClass='risk'; statusColor='#ffc267'; head='Slightly behind required pace'; }
   else { statusClass='behind'; statusColor='#ff7a7a'; head='Behind required pace — action needed'; }
-  if (primary.inspectionDate){
+  if (batchComplete && primary.inspectionDate){
+    sub = `${primary.cumActual.toLocaleString()} of ${primary.target.toLocaleString()} units complete, ahead of the ${fmtDate(primary.inspectionDate)} inspection.`;
+  } else if (primary.inspectionDate){
     sub = `${primary.unitsNeeded} units needed by ${fmtDate(primary.inspectionDate)} (${primary.daysRemaining} day${primary.daysRemaining===1?'':'s'} left) · required ~${primary.requiredRate.toFixed(1)}/day`;
   }
   const banner = document.getElementById('statusBanner');
@@ -417,7 +536,8 @@ fetch(CSV_URL).then(r => {
   document.getElementById('statusSub').textContent = sub;
 
   // ---- Gauge + odometer ----
-  document.getElementById('gaugeSvg').innerHTML = renderGauge(ratio === null ? 1 : ratio, statusColor);
+  document.getElementById('gaugeSvg').innerHTML = gaugeStaticSvg();
+  animateGaugeTo(batchComplete ? 2 : (ratio === null ? 1 : ratio), statusColor, batchComplete);
   document.getElementById('odoVal').textContent = primary.cumActual.toLocaleString();
   document.getElementById('odoTarget').textContent = primary.target !== null ? primary.target.toLocaleString() : '—';
 
