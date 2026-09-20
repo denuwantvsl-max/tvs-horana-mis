@@ -92,6 +92,10 @@ a{color:inherit;text-decoration:none;}
 
 header{max-width:1220px;margin:0 auto;padding:56px 24px 26px;position:relative;z-index:1;
   display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px;}
+.header-left{display:flex;align-items:center;gap:16px;}
+.header-logo{width:52px;height:52px;border-radius:13px;background:#fff;display:flex;align-items:center;
+  justify-content:center;flex-shrink:0;box-shadow:0 4px 14px rgba(0,0,0,0.35);overflow:hidden;}
+.header-logo img{width:38px;height:38px;object-fit:contain;display:block;}
 .brand{font-size:11px;letter-spacing:0.16em;color:var(--teal);font-weight:700;text-transform:uppercase;margin-bottom:12px;}
 h1{font-size:38px;font-weight:800;margin:0;letter-spacing:-0.02em;white-space:pre;
   background:linear-gradient(135deg,#ffffff 30%,#b9c6de 100%);
@@ -209,10 +213,68 @@ footer{max-width:1220px;margin:0 auto;padding:24px 24px 0;font-size:11.5px;color
 @keyframes photoDrift{0%{transform:scale(1.04) translate(0,0);}100%{transform:scale(1.1) translate(-1.5%,1%);}}
 @media (prefers-reduced-motion:reduce){.plant-photo{animation:none;}}
 
-.photo-band{background-image:linear-gradient(120deg, rgba(3,5,9,0.88), rgba(3,5,9,0.55) 55%, rgba(3,5,9,0.82)), url('images/plant-assembly.jpg');
-  background-size:cover;background-position:center 30%;}
+.photo-band{background-image:linear-gradient(90deg, rgba(3,5,9,0.92) 0%, rgba(3,5,9,0.55) 45%, rgba(3,5,9,0.18) 100%), url('assets/hero-line.jpg');
+  background-size:cover;background-position:center 42%;height:200px;}
 .photo-band::after{content:"";position:absolute;inset:0;pointer-events:none;
   background:linear-gradient(120deg, rgba(94,230,207,0.16), transparent 60%);mix-blend-mode:overlay;}
+
+/* ============================================================
+   Pipeline flow band, flow-grid layout, and the Quality /
+   Pending Vehicles mini-cards nested under Production — added
+   for the Sep 2026 hub redesign. Reuses every existing token,
+   glass surface, and icon style above rather than introducing a
+   parallel system.
+   ============================================================ */
+.pipeline{margin-top:16px;padding:16px 40px 12px;}
+@keyframes flow{0%{stroke-dashoffset:24;}100%{stroke-dashoffset:0;}}
+.flow-line{stroke-dasharray:2 6;animation:flow 1s linear infinite;}
+@media (prefers-reduced-motion:reduce){.flow-line{animation:none;}}
+
+.flow-grid{display:grid;grid-template-columns:1fr 1.55fr 1fr;gap:16px;margin:20px 0 16px;}
+@media (max-width:980px){.flow-grid{grid-template-columns:1fr;}
+  .flow-grid .mod{grid-column:1 !important;}
+  .row-sub{grid-column:1 !important;grid-row:auto !important;grid-template-columns:1fr !important;}
+  .mod-feature{grid-column:1 !important;}
+}
+.flow-grid .mod-feature{grid-template-columns:1fr;gap:20px;}
+.row-sub{grid-column:2;grid-row:2;display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+
+.mini-stats{display:flex;gap:22px;margin:14px 0 8px;flex-wrap:wrap;}
+.mini-stats .val{font-size:24px;font-weight:800;letter-spacing:-0.01em;display:block;}
+.mini-stats .lbl{font-size:10.5px;color:var(--text-mid);margin-top:2px;display:block;text-transform:uppercase;letter-spacing:0.04em;}
+
+.bar-row{display:flex;align-items:center;gap:10px;margin:7px 0;}
+.bar-lbl{width:148px;font-size:11.5px;color:var(--text-mid);flex-shrink:0;}
+.bar-track{flex-grow:1;height:8px;border-radius:6px;background:rgba(255,255,255,0.07);overflow:hidden;}
+.bar-fill{height:100%;border-radius:6px;transition:width 0.6s cubic-bezier(.2,.8,.2,1);}
+.bar-val{width:56px;text-align:right;font-size:11.5px;font-weight:700;flex-shrink:0;}
+
+.src{margin-top:16px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.08);
+  font-size:10.5px;color:var(--text-low);}
+
+.mf-monthly{margin-top:22px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.08);}
+.month-select{font-size:11px;font-weight:700;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.16);
+  color:var(--text-hi);border-radius:8px;padding:4px 9px;}
+
+.mod-mini{padding:22px 24px;display:block;position:relative;overflow:hidden;
+  transition:transform 0.3s cubic-bezier(.2,.8,.2,1), border-color 0.3s ease;}
+.mod-mini:hover{transform:translateY(-3px);}
+.mod-mini[data-accent="amber"]:hover{border-color:rgba(255,194,103,0.4);}
+.mod-mini[data-accent="red"]:hover{border-color:rgba(255,122,122,0.4);}
+.mod-mini[data-accent="amber"] .mod-icon{border-color:rgba(255,194,103,0.3);}
+.mod-mini[data-accent="amber"] .mod-icon svg{stroke:var(--amber);}
+.mod-mini[data-accent="red"] .mod-icon{border-color:rgba(255,122,122,0.3);}
+.mod-mini[data-accent="red"] .mod-icon svg{stroke:var(--red);}
+.mod-mini h2{font-size:16.5px;font-weight:700;margin:0 0 2px;}
+.mod-mini .sub{font-size:11.5px;color:var(--text-mid);margin:0;}
+.mod-mini .go{margin-top:14px;font-size:12px;font-weight:700;color:var(--text-hi);display:flex;align-items:center;gap:6px;}
+
+.issue-box{margin-top:12px;padding:10px 12px;border-radius:10px;background:rgba(255,194,103,0.07);
+  border:1px solid rgba(255,194,103,0.22);font-size:11.5px;color:var(--text-mid);}
+.issue-box b{color:var(--amber);}
+
+.donut-wrap{display:flex;gap:14px;align-items:center;margin-top:4px;}
+.ring-wrap{display:flex;justify-content:center;margin:8px 0;}
 
 </style>
 </head>
@@ -232,9 +294,12 @@ footer{max-width:1220px;margin:0 auto;padding:24px 24px 0;font-size:11.5px;color
 </div>
 
 <header>
-  <div>
-    <div class="brand reveal" id="brandLine">TVS Lanka · Horana Assembly Plant</div>
-    <h1 id="titleFlap"></h1>
+  <div class="header-left">
+    <div class="header-logo"><img src="assets/tvs-logo.jpg" alt="TVS Lanka logo"></div>
+    <div>
+      <div class="brand reveal" id="brandLine">TVS Lanka · Horana Assembly Plant</div>
+      <h1 id="titleFlap"></h1>
+    </div>
   </div>
   <div class="updated reveal" id="updatedLine">Live plant data, unified</div>
 </header>
@@ -243,34 +308,125 @@ footer{max-width:1220px;margin:0 auto;padding:24px 24px 0;font-size:11.5px;color
 
 <div class="wrap">
 
-  <div class="modules-top">
-    <a class="mod link glass reveal" data-accent="teal" href="stores/index.html">
+  <div class="photo-band glass reveal">
+    <div class="pb-label">Horana Assembly Complex</div>
+    <div class="pb-title">Every number on this site traces back to what's physically moving on this floor.</div>
+  </div>
+
+  <div class="pipeline glass reveal">
+    <svg width="100%" height="104" viewBox="0 0 1172 104" preserveAspectRatio="xMidYMid meet" style="display:block;">
+      <line x1="120" y1="34" x2="1052" y2="34" stroke="rgba(255,255,255,0.12)" stroke-width="2"/>
+      <line x1="120" y1="34" x2="1052" y2="34" stroke="#5ee6cf" stroke-width="1.5" class="flow-line" opacity="0.65"/>
+      <path d="M586,34 V54 M586,54 H472 M586,54 H700 M472,54 V66 M700,54 V66" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="1.6"/>
+
+      <text x="120" y="10" fill="#f5f8fd" font-size="11" font-weight="700" text-anchor="middle" letter-spacing="0.03em">STORES</text>
+      <circle cx="120" cy="34" r="14" fill="#0a0d14" stroke="#5ee6cf" stroke-width="2"/>
+      <g transform="translate(111,25) scale(0.75)" stroke="#5ee6cf" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></g>
+      <text x="120" y="98" fill="#6f7c96" font-size="9.5" text-anchor="middle">Input</text>
+
+      <text x="586" y="10" fill="#f5f8fd" font-size="11" font-weight="700" text-anchor="middle" letter-spacing="0.03em">PRODUCTION</text>
+      <circle cx="586" cy="34" r="16" fill="#0a0d14" stroke="#b28dff" stroke-width="2.2"/>
+      <g transform="translate(575,23) scale(0.9)" stroke="#b28dff" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 13.5a7.97 7.97 0 000-3l2-1.4-2-3.4-2.3.9a8 8 0 00-2.6-1.5L14 2h-4l-.5 2.6a8 8 0 00-2.6 1.5l-2.3-.9-2 3.4 2 1.4a8 8 0 000 3l-2 1.5 2 3.4 2.3-.9a8 8 0 002.6 1.5L10 22h4l.5-2.5a8 8 0 002.6-1.5l2.3.9 2-3.4-2-1.5z"/></g>
+      <text x="586" y="98" fill="#6f7c96" font-size="9.5" text-anchor="middle">Process</text>
+
+      <text x="1052" y="10" fill="#f5f8fd" font-size="11" font-weight="700" text-anchor="middle" letter-spacing="0.03em">DELIVERY</text>
+      <circle cx="1052" cy="34" r="14" fill="#0a0d14" stroke="#6fa3ff" stroke-width="2"/>
+      <g transform="translate(1043,25) scale(0.75)" stroke="#6fa3ff" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h13"/><path d="M12 5l7 7-7 7"/></g>
+      <text x="1052" y="98" fill="#6f7c96" font-size="9.5" text-anchor="middle">Output</text>
+
+      <circle cx="472" cy="66" r="9" fill="#0a0d14" stroke="#ffc267" stroke-width="1.6"/>
+      <g transform="translate(466.5,60.5) scale(0.46)" stroke="#ffc267" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.4 8.4-8 10-4.6-1.6-8-5-8-10V6l8-4z"/><path d="M9 12l2 2 4-4"/></g>
+      <text x="472" y="88" fill="#aab6cc" font-size="10" font-weight="600" text-anchor="middle">Quality</text>
+
+      <circle cx="700" cy="66" r="9" fill="#0a0d14" stroke="#ff7a7a" stroke-width="1.6"/>
+      <g transform="translate(694.5,60.5) scale(0.46)" stroke="#ff7a7a" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></g>
+      <text x="700" y="88" fill="#aab6cc" font-size="10" font-weight="600" text-anchor="middle">Pending</text>
+
+      <circle r="3" fill="#5ee6cf"><animateMotion dur="3s" repeatCount="indefinite" begin="0s" path="M120,34 L1052,34"/></circle>
+      <circle r="2.4" fill="#6fa3ff"><animateMotion dur="3s" repeatCount="indefinite" begin="1s" path="M120,34 L1052,34"/></circle>
+      <circle r="2.4" fill="#b28dff"><animateMotion dur="3s" repeatCount="indefinite" begin="2s" path="M120,34 L1052,34"/></circle>
+
+      <circle cx="472" cy="66" r="9" fill="none" stroke="#ffc267" stroke-width="1.4" opacity="0"><animate attributeName="r" values="9;16;9" dur="2.6s" repeatCount="indefinite" begin="0.4s"/><animate attributeName="opacity" values="0.55;0;0.55" dur="2.6s" repeatCount="indefinite" begin="0.4s"/></circle>
+      <circle cx="700" cy="66" r="9" fill="none" stroke="#ff7a7a" stroke-width="1.4" opacity="0"><animate attributeName="r" values="9;16;9" dur="2.6s" repeatCount="indefinite" begin="1.7s"/><animate attributeName="opacity" values="0.55;0;0.55" dur="2.6s" repeatCount="indefinite" begin="1.7s"/></circle>
+    </svg>
+  </div>
+
+  <div class="flow-grid">
+    <a class="mod link glass reveal" data-accent="teal" href="stores/index.html" style="grid-column:1;grid-row:1;">
       <div class="mod-top">
         <div class="mod-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg></div>
         <span class="idx">01</span>
       </div>
       <div class="status"><span class="live-dot"></span>Live</div>
       <h2>Stores</h2>
-      <p>Container-level stock tracking, warehouse location, and aging against the 14-day Spectra Yard threshold.</p>
+      <div class="mini-stats">
+        <div><span class="val" id="storesUnits">…</span><span class="lbl">Units in stock</span></div>
+        <div><span class="val" id="storesNew">…</span><span class="lbl">New containers today</span></div>
+      </div>
+      <div id="storesBars"></div>
+      <div class="src">Source: Stores Raw · <span id="storesSrc">…</span></div>
       <div class="go">Open <span>&rarr;</span></div>
     </a>
-    <a class="mod link glass reveal" data-accent="blue" href="delivery/index.html">
+
+    <a class="mod link glass reveal" data-accent="blue" href="delivery/index.html" style="grid-column:3;grid-row:1;">
       <div class="mod-top">
         <div class="mod-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h13"/><path d="M12 5l7 7-7 7"/></svg></div>
-        <span class="idx">02</span>
+        <span class="idx">05</span>
       </div>
       <div class="status"><span class="live-dot"></span>Live</div>
       <h2>Delivery</h2>
-      <p>Dealer delivery status, weekly requested vs. delivered quantities, and pending delivery tracking.</p>
+      <div class="mini-stats">
+        <div><span class="val" id="delivUnits">…</span><span class="lbl">Delivered, month</span></div>
+        <div><span class="val" id="delivPct">…</span><span class="lbl">Of plan</span></div>
+      </div>
+      <div class="ring-wrap" id="delivRing"></div>
+      <div class="src">Source: Delivery Raw · <span id="delivSrc">…</span></div>
       <div class="go">Open <span>&rarr;</span></div>
     </a>
-  </div>
 
-  <div class="mod-feature glass reveal" data-accent="violet">
+    <div class="row-sub">
+      <a class="mod-mini glass reveal" data-accent="amber" href="production/quality/index.html">
+        <div class="mod-top">
+          <div class="mod-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.4 8.4-8 10-4.6-1.6-8-5-8-10V6l8-4z"/><path d="M9 12l2 2 4-4"/></svg></div>
+          <span class="idx">03</span>
+        </div>
+        <div class="status"><span class="live-dot"></span>Live</div>
+        <h2>Quality</h2>
+        <p class="sub">Direct pass rate · latest report</p>
+        <div id="qualityBars"></div>
+        <div class="issue-box" id="qualityIssue" style="display:none;"></div>
+        <div class="src">Source: Quality Raw · <span id="qualitySrc">…</span></div>
+        <div class="go">Open <span>&rarr;</span></div>
+      </a>
+
+      <a class="mod-mini glass reveal" data-accent="red" href="production/pending-vehicles/index.html">
+        <div class="mod-top">
+          <div class="mod-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg></div>
+          <span class="idx">04</span>
+        </div>
+        <div class="status"><span class="live-dot"></span>Live</div>
+        <h2>Pending Vehicles</h2>
+        <p class="sub">In repair locations</p>
+        <div class="donut-wrap">
+          <div id="pvDonut"></div>
+          <div style="flex-grow:1;">
+            <div class="mini-stats" style="margin:0;">
+              <div><span class="val" id="pvOver" style="font-size:19px;color:var(--amber);">…</span><span class="lbl">Over 60d</span></div>
+              <div><span class="val" id="pvSevere" style="font-size:19px;color:var(--red);">…</span><span class="lbl">Severe (90d+)</span></div>
+            </div>
+            <div style="font-size:11px;color:var(--text-mid);margin-top:8px;" id="pvOldest">…</div>
+          </div>
+        </div>
+        <div class="src">Source: MB Age Report · <span id="pvSrc">…</span></div>
+        <div class="go">Open <span>&rarr;</span></div>
+      </a>
+    </div>
+
+  <div class="mod-feature glass reveal" data-accent="violet" style="grid-column:2;grid-row:1;">
     <div class="mf-left">
       <div class="mod-top">
         <div class="mod-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 13.5a7.97 7.97 0 000-3l2-1.4-2-3.4-2.3.9a8 8 0 00-2.6-1.5L14 2h-4l-.5 2.6a8 8 0 00-2.6 1.5l-2.3-.9-2 3.4 2 1.4a8 8 0 000 3l-2 1.5 2 3.4 2.3-.9a8 8 0 002.6 1.5L10 22h4l.5-2.5a8 8 0 002.6-1.5l2.3.9 2-3.4-2-1.5z"/></svg></div>
-        <span class="idx">03</span>
+        <span class="idx">02</span>
       </div>
       <div class="status"><span class="live-dot"></span>Live</div>
       <h2>Production</h2>
@@ -291,12 +447,15 @@ footer{max-width:1220px;margin:0 auto;padding:24px 24px 0;font-size:11.5px;color
         <div class="mod-stat"><div class="val" id="prodAtt">…</div><div class="lbl">Attendance</div></div>
         <div class="mod-stat"><div class="val" id="prodTop">…</div><div class="lbl">Top model today</div></div>
       </div>
+      <div class="src">Source: DATA BY PROD EXE sheet · <span id="prodSrc">…</span></div>
+    </div>
+    <div class="mf-monthly">
+      <div class="mf-right-label">Planned production <select id="prodMonthSelect" class="month-select"></select></div>
+      <div class="val" id="prodMonthTotal" style="font-size:22px;font-weight:800;margin-bottom:10px;">…</div>
+      <div id="prodMonthBars"></div>
+      <div class="src">Source: <span id="prodMonthSrc">…</span></div>
     </div>
   </div>
-
-  <div class="photo-band glass reveal">
-    <div class="pb-label">Horana Assembly Complex</div>
-    <div class="pb-title">Every number on this site traces back to what's physically moving on this floor.</div>
   </div>
 
   <div class="external reveal">
@@ -409,32 +568,205 @@ if (reduceMotion) {
 }
 
 // ============================================================
-// Production card — live "on the floor right now" snapshot
+// Hub live data — five modules, one shared Apps Script exec URL.
+// Every card shows a "Source: ..." line per Denuwan's instruction
+// (2026-09-20) so it's always clear which sheet a number came from
+// and how stale it might be, mirroring the WhatsApp DATA FRESHNESS
+// banner built the same day.
 // ============================================================
-(function(){
-  const API_URL = 'https://script.google.com/macros/s/AKfycbzJFWD_AQc8UwEkVHcb3q9lDmzoMcO-fq9qDX3wIEAoUi8gIZN09Uxbbjfj3Z30spjjpw/exec';
-  const els = {
-    units: document.getElementById('prodUnits'),
-    pct: document.getElementById('prodPct'),
-    att: document.getElementById('prodAtt'),
-    top: document.getElementById('prodTop'),
-    date: document.getElementById('prodDate')
-  };
-  if (!els.units) return;
+const API_URL = 'https://script.google.com/macros/s/AKfycbzJFWD_AQc8UwEkVHcb3q9lDmzoMcO-fq9qDX3wIEAoUi8gIZN09Uxbbjfj3Z30spjjpw/exec';
+const CATEGORY_COLORS = {
+  '2W CKD - DVA': '#b28dff',
+  '2W SKD (NTORQ/ICUBE)': '#6fa3ff',
+  '2W SKD (JUPITER/SPORT/RAIDER/RTR/ RONIN 225)': '#5ee6cf',
+  '3W SKD': '#ffc267'
+};
+const CATEGORY_LABELS = {
+  '2W CKD - DVA': 'CKD-DVA',
+  '2W SKD (NTORQ/ICUBE)': 'SKD N/iQube',
+  '2W SKD (JUPITER/SPORT/RAIDER/RTR/ RONIN 225)': 'SKD J/S/R/Ronin',
+  '3W SKD': '3W SKD'
+};
 
-  fetch(API_URL + '?module=production').then(r => r.json()).then(d => {
-    const t = (d.summary && d.summary.totals) || {};
-    els.units.textContent = (t.actual !== undefined && t.actual !== null) ? t.actual : '—';
-    els.pct.textContent = (t.outputPct !== null && t.outputPct !== undefined) ? Math.round(t.outputPct) + '%' : '—';
-    els.att.textContent = (t.attendanceActual !== undefined && t.attendanceActual !== null)
-      ? (t.attendanceActual + ' / ' + (t.attendancePlanned || '—')) : '—';
-    const top = (d.topModels && d.topModels[0]) ? d.topModels[0] : null;
-    els.top.textContent = top ? (top.itemCode.length > 20 ? top.itemCode.slice(0, 18) + '…' : top.itemCode) : '—';
-    if (d.summary && d.summary.latestDate) els.date.textContent = 'as of ' + d.summary.latestDate;
-  }).catch(() => {
-    ['units','pct','att','top'].forEach(k => { els[k].textContent = '—'; });
+function formatAgo(iso){
+  if (!iso) return 'unknown';
+  const then = new Date(iso).getTime();
+  if (isNaN(then)) return 'unknown';
+  const mins = Math.max(0, Math.round((Date.now() - then) / 60000));
+  if (mins < 60) return mins + 'm ago';
+  const hrs = Math.round(mins / 60);
+  if (hrs < 48) return hrs + 'h ago';
+  return Math.round(hrs / 24) + 'd ago';
+}
+function monthLabel(key){
+  if (!key) return '';
+  const [y, m] = key.split('-');
+  const names = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  return names[parseInt(m,10)-1] + ' ' + y;
+}
+function barsHtml(entries){
+  const max = Math.max(1, ...entries.map(e => e.value));
+  return entries.map(e => `
+    <div class="bar-row">
+      <span class="bar-lbl">${e.label}</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.round(e.value/max*100)}%;background:${e.color};"></div></div>
+      <span class="bar-val">${e.value.toLocaleString()}</span>
+    </div>`).join('');
+}
+function ringSvg(pct, color){
+  const p = Math.max(0, Math.min(200, pct));
+  const c = 2 * Math.PI * 38;
+  const dash = Math.min(c, c * (p/100));
+  return `<svg width="96" height="96" viewBox="0 0 96 96">
+    <circle cx="48" cy="48" r="38" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="9"/>
+    <circle cx="48" cy="48" r="38" fill="none" stroke="${color}" stroke-width="9" stroke-linecap="round"
+      stroke-dasharray="${dash} ${c}" transform="rotate(-90 48 48)"/>
+    <text x="48" y="54" fill="#f5f8fd" font-size="17" font-weight="800" text-anchor="middle">${Math.round(pct)}%</text>
+  </svg>`;
+}
+function donutSvg(segments, total){
+  const c = 2 * Math.PI * 32;
+  let offset = 0;
+  const arcs = segments.map(s => {
+    const len = total > 0 ? (s.value/total)*c : 0;
+    const arc = `<circle cx="42" cy="42" r="32" fill="none" stroke="${s.color}" stroke-width="9"
+      stroke-dasharray="${len} ${c}" stroke-dashoffset="${-offset}" transform="rotate(-90 42 42)"/>`;
+    offset += len;
+    return arc;
+  }).join('');
+  return `<svg width="84" height="84" viewBox="0 0 84 84" style="flex-shrink:0;">
+    <circle cx="42" cy="42" r="32" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="9"/>
+    ${arcs}
+    <text x="42" y="39" fill="#f5f8fd" font-size="18" font-weight="800" text-anchor="middle">${total}</text>
+    <text x="42" y="54" fill="#6f7c96" font-size="8.5" text-anchor="middle">total</text>
+  </svg>`;
+}
+
+// ---- Stores ----
+fetch(API_URL + '?module=stores').then(r => r.json()).then(d => {
+  const s = d.summary || {};
+  const el = id => document.getElementById(id);
+  if (!el('storesUnits')) return;
+  el('storesUnits').textContent = (s.totalUnitsLatest ?? '—').toLocaleString?.() ?? s.totalUnitsLatest ?? '—';
+  el('storesNew').textContent = (d.newShipments ? d.newShipments.length : '—');
+  const top4 = (d.categoryBreakdown || []).slice(0, 4).map(c => ({ label: c.category, value: c.total, color: 'var(--teal)' }));
+  el('storesBars').innerHTML = barsHtml(top4);
+  const src = s.source;
+  el('storesSrc').textContent = src ? formatAgo(src.receivedAt) : (s.latestDate || 'unknown');
+}).catch(() => {});
+
+// ---- Delivery (current month, summed from dailySeries) ----
+fetch(API_URL + '?module=delivery').then(r => r.json()).then(d => {
+  const el = id => document.getElementById(id);
+  if (!el('delivUnits')) return;
+  const latest = (d.summary && d.summary.latestDate) || '';
+  const monthPrefix = latest.slice(0, 7);
+  let plan = 0, delivered = 0;
+  (d.dailySeries || []).forEach(day => {
+    if (day.date && day.date.slice(0,7) === monthPrefix) {
+      plan += (day.plan && day.plan.total) || 0;
+      delivered += (day.delivered && day.delivered.total) || 0;
+    }
   });
-})();
+  const pct = plan > 0 ? (delivered/plan*100) : 0;
+  el('delivUnits').textContent = delivered.toLocaleString();
+  el('delivPct').textContent = Math.round(pct) + '%';
+  el('delivRing').innerHTML = ringSvg(pct, '#6fa3ff');
+  const src = d.summary && d.summary.source;
+  el('delivSrc').textContent = src ? formatAgo(src.receivedAt) : (latest || 'unknown');
+}).catch(() => {});
+
+// ---- Production (daily "on the floor" stats — unchanged source/logic) ----
+fetch(API_URL + '?module=production').then(r => r.json()).then(d => {
+  const t = (d.summary && d.summary.totals) || {};
+  const el = id => document.getElementById(id);
+  if (!el('prodUnits')) return;
+  el('prodUnits').textContent = (t.actual !== undefined && t.actual !== null) ? t.actual : '—';
+  el('prodPct').textContent = (t.outputPct !== null && t.outputPct !== undefined) ? Math.round(t.outputPct) + '%' : '—';
+  el('prodAtt').textContent = (t.attendanceActual !== undefined && t.attendanceActual !== null)
+    ? (t.attendanceActual + ' / ' + (t.attendancePlanned || '—')) : '—';
+  const top = (d.topModels && d.topModels[0]) ? d.topModels[0] : null;
+  el('prodTop').textContent = top ? (top.itemCode.length > 20 ? top.itemCode.slice(0, 18) + '…' : top.itemCode) : '—';
+  if (d.summary && d.summary.latestDate) el('prodDate').textContent = 'as of ' + d.summary.latestDate;
+  el('prodSrc').textContent = (d.summary && d.summary.sheetLastUpdated) ? formatAgo(d.summary.sheetLastUpdated) : 'unknown';
+}).catch(() => {
+  ['prodUnits','prodPct','prodAtt','prodTop'].forEach(k => { const e = document.getElementById(k); if (e) e.textContent = '—'; });
+});
+
+// ---- Production — planned by month (SKD PRODUCTION sheet; see Code.gs Part 11) ----
+fetch(API_URL + '?module=productionMonthly').then(r => r.json()).then(d => {
+  const el = id => document.getElementById(id);
+  const sel = el('prodMonthSelect');
+  if (!sel || !d.availableMonths || !d.availableMonths.length) {
+    if (el('prodMonthTotal')) el('prodMonthTotal').textContent = 'No data';
+    return;
+  }
+  sel.innerHTML = d.availableMonths.slice().reverse().map(m => `<option value="${m}">${monthLabel(m)}</option>`).join('');
+  sel.value = d.latestMonth;
+
+  function render(monthKey){
+    const m = d.byMonth[monthKey];
+    if (!m) return;
+    el('prodMonthTotal').textContent = m.plannedTotal.toLocaleString() + ' units planned';
+    const order = ['2W CKD - DVA','2W SKD (NTORQ/ICUBE)','2W SKD (JUPITER/SPORT/RAIDER/RTR/ RONIN 225)','3W SKD'];
+    const entries = order.map(cat => ({ label: CATEGORY_LABELS[cat], value: m.planned[cat] || 0, color: CATEGORY_COLORS[cat] }));
+    el('prodMonthBars').innerHTML = barsHtml(entries);
+  }
+  render(d.latestMonth);
+  sel.addEventListener('change', () => render(sel.value));
+
+  const src = d.source || {};
+  el('prodMonthSrc').textContent = (src.label || 'SKD PRODUCTION sheet') + ' · ' + (src.lastUpdated ? formatAgo(src.lastUpdated) : 'unknown');
+}).catch(() => {
+  const t = document.getElementById('prodMonthTotal'); if (t) t.textContent = '—';
+});
+
+// ---- Quality ----
+fetch(API_URL + '?module=quality').then(r => r.json()).then(d => {
+  const el = id => document.getElementById(id);
+  if (!el('qualityBars')) return;
+  const cats = ['SKD','CKD','3W'];
+  const colors = { SKD: '#5ee6cf', CKD: '#ffc267', '3W': '#ff7a7a' };
+  const entries = [];
+  let firstIssue = null;
+  cats.forEach(cat => {
+    const c = d.byCategory && d.byCategory[cat];
+    if (!c) return;
+    const pct = (c.passActualPct !== null && c.passActualPct !== undefined) ? c.passActualPct * 100 : 0;
+    entries.push({ label: cat, value: Math.round(pct * 10) / 10, color: colors[cat] });
+    if (!firstIssue && c.issues && c.issues.length) firstIssue = c.issues[0];
+  });
+  // Render as percentage bars against a fixed 100 scale, not each other
+  el('qualityBars').innerHTML = entries.map(e => `
+    <div class="bar-row">
+      <span class="bar-lbl">${e.label}</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.min(100,e.value)}%;background:${e.color};"></div></div>
+      <span class="bar-val">${e.value}%</span>
+    </div>`).join('');
+  const issueEl = el('qualityIssue');
+  if (firstIssue) {
+    issueEl.style.display = 'block';
+    issueEl.innerHTML = '<b>Issue — </b>' + firstIssue;
+  }
+  const caveat = d.dateCaveat ? ' (email-received date, not report-stated)' : '';
+  el('qualitySrc').textContent = (d.latestDate || 'unknown') + caveat;
+}).catch(() => {});
+
+// ---- Pending Vehicles ----
+fetch(API_URL + '?module=pendingVehicles').then(r => r.json()).then(d => {
+  const el = id => document.getElementById(id);
+  if (!el('pvDonut')) return;
+  const t = d.totals || {};
+  el('pvOver').textContent = t.overBenchmarkCount ?? '—';
+  el('pvSevere').textContent = t.severeCount ?? '—';
+  const oldest = (d.units && d.units[0]) || null;
+  el('pvOldest').textContent = oldest ? `Oldest: ${oldest.partNo}, ${oldest.ageDays}d at ${oldest.locationName}` : 'No units pending';
+  const buckets = (d.byBucket || []).filter(b => b.count > 0);
+  const bucketColors = { '0-30': '#5ee6cf', '31-60': '#5ee6cf', '61-90': '#ffc267', '91-180': '#ff7a7a', '180+': '#ff7a7a' };
+  const segs = buckets.map(b => ({ value: b.count, color: bucketColors[b.bucket] || '#6fa3ff' }));
+  el('pvDonut').innerHTML = donutSvg(segs, t.units || 0);
+  el('pvSrc').textContent = d.lastReportDate ? formatAgo(new Date(d.lastReportDate).toISOString()) : 'unknown';
+}).catch(() => {});
 </script>
 </body>
 </html>
