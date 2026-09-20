@@ -242,8 +242,15 @@ footer{max-width:1220px;margin:0 auto;padding:24px 24px 0;font-size:11.5px;color
 
 <script>
 const SHEET_ID = '1iu8H0v0_3ekOsCSYXdOGe7YP8FzvMQcJUVPFG4SrY50';
-const TAB_NAME = 'CKD Dashboard';
-const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(TAB_NAME)}`;
+// FIX (2026-09-20): gviz's sheet=<name> parameter silently falls back
+// to the workbook's FIRST tab (gid=0, "DATA BY PROD EXE") whenever it
+// doesn't match exactly - it never errors, so the page looked "broken"
+// when it was actually reading the wrong tab entirely (confirmed via
+// the Network response: it had a "Mode" column and hourly time labels,
+// which is DATA BY PROD EXE's shape, not CKD Dashboard's). Addressing
+// the tab by its numeric gid is exact and can't silently fall back.
+const CKD_GID = '911632104'; // CKD Dashboard tab
+const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${CKD_GID}`;
 const API_URL = 'https://script.google.com/macros/s/AKfycbzJFWD_AQc8UwEkVHcb3q9lDmzoMcO-fq9qDX3wIEAoUi8gIZN09Uxbbjfj3Z30spjjpw/exec';
 // Break markers mirror the hourly-checkpoint columns being added to the
 // CKD Dashboard tab (same cadence as the SKD PRODUCTION sheet), so this
