@@ -57,6 +57,10 @@ h1{font-size:32px;font-weight:800;margin:0;letter-spacing:-0.02em;
 .clock-time{font-size:22px;font-weight:800;font-family:'SFMono-Regular','Consolas',monospace;letter-spacing:0.02em;}
 .clock-date{font-size:11.5px;color:var(--text-mid);margin-top:2px;}
 .clock-status{font-size:11px;color:var(--teal);margin-top:4px;font-weight:700;}
+.tabbar{max-width:1220px;margin:0 auto;padding:0 24px 18px;display:flex;gap:4px;position:relative;z-index:1;}
+.tabbar a{padding:9px 16px;font-size:12.5px;font-weight:600;color:var(--text-low);border-radius:100px;transition:all 0.2s ease;}
+.tabbar a.active{color:#fff;background:linear-gradient(135deg, rgba(178,141,255,0.20), rgba(255,122,122,0.08));}
+.tabbar a:hover{color:var(--text-hi);}
 
 .status-banner{margin:26px 0 20px;padding:18px 26px;display:flex;align-items:center;gap:16px;}
 .status-banner .dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;box-shadow:0 0 14px 3px currentColor;}
@@ -125,6 +129,13 @@ footer{max-width:1220px;margin:0 auto;padding:24px 24px 0;font-size:11.5px;color
     <div class="clock-status" id="clockStatus">…</div>
   </div>
 </header>
+
+<div class="tabbar">
+  <a href="../index.html">Overview</a>
+  <a class="active" href="index.html">CKD Production</a>
+  <a href="../pending-vehicles/index.html">Pending Vehicles</a>
+  <a href="../quality/index.html">Quality</a>
+</div>
 
 <div class="wrap">
 
