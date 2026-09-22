@@ -126,6 +126,11 @@ tbody td:first-child,tbody td:nth-child(2){text-align:left;font-family:inherit;c
 td.short{color:var(--red);font-weight:700;}
 td.over{color:var(--teal);font-weight:700;}
 
+.daytag{display:inline-block;padding:2px 8px;border-radius:100px;font-size:10px;font-weight:700;letter-spacing:0.02em;}
+.daytag.weekday{background:rgba(255,255,255,0.06);color:var(--text-mid);}
+.daytag.weekend{background:rgba(111,163,255,0.14);color:var(--blue);}
+.daytag.holiday{background:rgba(255,194,103,0.16);color:var(--amber);}
+
 .nav-cards{margin-top:24px;}
 .nav-card{padding:20px 24px;transition:transform 0.2s cubic-bezier(.2,.8,.2,1), border-color 0.2s ease;display:block;}
 .nav-card:hover{transform:translateY(-2px);border-color:rgba(94,230,207,0.35);}
@@ -247,6 +252,26 @@ footer{max-width:1220px;margin:0 auto;padding:20px 24px 0;font-size:11.5px;color
     </div>
     <div class="sub">Every model (Ntorq, Raider, Jupiter, etc.), combined across all colors, within the selected production line. Click a row to expand and see the individual color/variant breakdown.</div>
     <div id="modelHierarchy"></div>
+  </div>
+
+  <div class="panel glass">
+    <div class="panel-head">
+      <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Overtime — Hours &amp; Output</h2>
+      <div class="toggle-group" id="otGranToggle">
+        <button class="toggle-btn active" data-gran="daily">Daily</button>
+        <button class="toggle-btn" data-gran="weekly">Weekly</button>
+        <button class="toggle-btn" data-gran="monthly">Monthly</button>
+      </div>
+    </div>
+    <div class="sub" id="otSub">Overtime hours logged and units produced during OT (after 5:45 p.m.), read directly from the same sheet. Saturdays, Sundays, and Sri Lankan public holidays are flagged separately from regular weekday OT.</div>
+    <div class="kpi-grid" id="otKpiGrid" style="margin-bottom:22px;"></div>
+    <div id="otTrendTable"></div>
+    <div style="height:26px;"></div>
+    <div class="panel-head" style="margin-bottom:4px;">
+      <h2 style="font-size:13px;">By Production Line — Latest Logged Day</h2>
+    </div>
+    <div id="otLineTable"></div>
+    <div class="data-note" id="otHolidayNote" style="margin-top:18px;margin-bottom:0;"></div>
   </div>
 
   <div class="nav-cards">
@@ -556,6 +581,264 @@ function renderModelHierarchy(category){
     });
   });
 }
+
+/* ---------------- Overtime — Hours & Output (direct sheet read, independent of the summary API) ---------------- */
+const OT_SHEET_ID = '1iu8H0v0_3ekOsCSYXdOGe7YP8FzvMQcJUVPFG4SrY50';
+const OT_GID = '0'; // "Data by Prod EXE" tab
+const OT_CSV_URL = `https://docs.google.com/spreadsheets/d/${OT_SHEET_ID}/gviz/tq?tqx=out:csv&gid=${OT_GID}`;
+
+// Sri Lanka public/bank/poya holidays, 2026 (Government Gazette 2438/22 of 27.05.2025 + Labour Dept mercantile list).
+// Moon-dependent dates (Poya, Id-Ul-Fitr, Id-Ul-Alha) are subject to official confirmation and may shift by a day.
+const SL_HOLIDAYS_2026 = {
+  '2026-01-03': 'Duruthu Full Moon Poya',
+  '2026-01-15': 'Tamil Thai Pongal',
+  '2026-02-01': 'Nawam Full Moon Poya',
+  '2026-02-04': 'Independence Day',
+  '2026-02-15': 'Maha Sivarathri',
+  '2026-03-02': 'Medin Full Moon Poya',
+  '2026-03-21': 'Id-Ul-Fitr (Ramazan)',
+  '2026-04-01': 'Bak Full Moon Poya',
+  '2026-04-03': 'Good Friday',
+  '2026-04-13': 'Day Prior to Sinhala & Tamil New Year',
+  '2026-04-14': 'Sinhala & Tamil New Year',
+  '2026-05-01': 'Vesak Full Moon Poya / May Day',
+  '2026-05-02': 'Day Following Vesak',
+  '2026-05-28': 'Id-Ul-Alha (Hadji)',
+  '2026-05-30': 'Adhi Poson Full Moon Poya',
+  '2026-06-29': 'Poson Full Moon Poya',
+  '2026-07-29': 'Esala Full Moon Poya',
+  '2026-08-26': 'Milad-Un-Nabi',
+  '2026-08-27': 'Nikini Full Moon Poya',
+  '2026-09-26': 'Binara Full Moon Poya',
+  '2026-10-25': 'Vap Full Moon Poya',
+  '2026-11-08': 'Deepavali',
+  '2026-11-24': 'Il Full Moon Poya',
+  '2026-12-23': 'Unduvap Full Moon Poya',
+  '2026-12-25': 'Christmas Day',
+};
+
+function classifyDay(iso){
+  const holiday = SL_HOLIDAYS_2026[iso];
+  if (holiday) return { type:'holiday', label: holiday };
+  const dow = new Date(iso + 'T00:00:00').getDay();
+  if (dow === 0) return { type:'weekend', label:'Sunday' };
+  if (dow === 6) return { type:'weekend', label:'Saturday' };
+  return { type:'weekday', label:'Weekday' };
+}
+
+function otParseNum(v){
+  if (v === null || v === undefined || v === '') return null;
+  const s = String(v).trim().replace(/,/g,'');
+  if (['#DIV/0!','#VALUE!','#REF!','#N/A','-','null'].includes(s)) return null;
+  const n = parseFloat(s);
+  return isNaN(n) ? null : n;
+}
+
+function otParseDate(v){
+  const s = String(v || '').trim();
+  const m = s.match(/(\w+)\s+(\d+),\s+(\d+)/);
+  if (m) {
+    const months = {January:1,February:2,March:3,April:4,May:5,June:6,July:7,August:8,September:9,October:10,November:11,December:12};
+    const mo = String(months[m[1]]).padStart(2,'0');
+    const da = String(m[2]).padStart(2,'0');
+    return `${m[3]}-${mo}-${da}`;
+  }
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+  return null;
+}
+
+// Minimal RFC4180-ish CSV parser (handles quoted fields with embedded commas, per Google's gviz export)
+function parseCSV(text){
+  const rows = []; let row = []; let field = ''; let inQuotes = false;
+  for (let i=0; i<text.length; i++){
+    const c = text[i];
+    if (inQuotes) {
+      if (c === '"') {
+        if (text[i+1] === '"') { field += '"'; i++; } else { inQuotes = false; }
+      } else field += c;
+    } else {
+      if (c === '"') inQuotes = true;
+      else if (c === ',') { row.push(field); field = ''; }
+      else if (c === '\n') { row.push(field); rows.push(row); row = []; field = ''; }
+      else if (c === '\r') { /* skip */ }
+      else field += c;
+    }
+  }
+  if (field.length || row.length) { row.push(field); rows.push(row); }
+  return rows;
+}
+
+let otByDate = {};      // { iso: { otHours, otQty, byMode: { mode: { otHours, otQty } } } }
+let otDatesSorted = [];
+
+async function loadOT(){
+  const sub = document.getElementById('otSub');
+  try {
+    const res = await fetch(OT_CSV_URL);
+    const text = await res.text();
+    const table = parseCSV(text);
+
+    // date -> mode -> { qtySum, hoursMax }
+    const cell = {};
+    for (let i = 1; i < table.length; i++) {
+      const r = table[i];
+      if (!r || r.length < 21) continue;
+      const iso = otParseDate(r[0]);
+      if (!iso) continue;
+      const mode = String(r[1] || '').trim();
+      if (!mode) continue;
+      const otQty = otParseNum(r[11]) || 0;
+      const otHours = otParseNum(r[20]);
+      if (!cell[iso]) cell[iso] = {};
+      if (!cell[iso][mode]) cell[iso][mode] = { qtySum: 0, hoursMax: 0 };
+      cell[iso][mode].qtySum += otQty;
+      if (otHours !== null) cell[iso][mode].hoursMax = Math.max(cell[iso][mode].hoursMax, otHours);
+    }
+
+    otByDate = {};
+    Object.keys(cell).forEach(iso => {
+      let hoursTotal = 0, qtyTotal = 0;
+      const byMode = {};
+      Object.keys(cell[iso]).forEach(mode => {
+        const m = cell[iso][mode];
+        byMode[mode] = { otHours: m.hoursMax, otQty: m.qtySum };
+        hoursTotal += m.hoursMax;
+        qtyTotal += m.qtySum;
+      });
+      otByDate[iso] = { otHours: hoursTotal, otQty: qtyTotal, byMode };
+    });
+    otDatesSorted = Object.keys(otByDate).sort();
+
+    renderOTTrend(otGran);
+    renderOTLineTable();
+    document.getElementById('otHolidayNote').textContent =
+      '📅 Weekend/holiday days use the Sri Lanka Government Gazette public holiday & Poya calendar for 2026. Moon-dependent dates (Poya, Id-Ul-Fitr, Id-Ul-Alha) may shift by a day pending official confirmation — verify against company HR notices before payroll use.';
+  } catch(err){
+    if (sub) sub.textContent = 'Could not load overtime data from the sheet.';
+    console.error(err);
+  }
+}
+
+let otGran = 'daily';
+
+function otBucketKey(iso, gran){
+  if (gran === 'daily') return iso;
+  const dt = new Date(iso + 'T00:00:00');
+  if (gran === 'monthly') return iso.slice(0,7);
+  const onejan = new Date(dt.getFullYear(),0,1);
+  const week = Math.ceil((((dt - onejan) / 86400000) + onejan.getDay()+1)/7);
+  return dt.getFullYear() + '-W' + String(week).padStart(2,'0');
+}
+
+function renderOTKpis(rows){
+  const box = document.getElementById('otKpiGrid');
+  const totalHours = rows.reduce((s,r) => s + r.otHours, 0);
+  const totalQty   = rows.reduce((s,r) => s + r.otQty, 0);
+  const weekdayHours = rows.reduce((s,r) => s + r.weekdayHours, 0);
+  const specialHours  = rows.reduce((s,r) => s + r.specialHours, 0);
+  box.innerHTML = `
+    <div class="kpi glass ok"><div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><div class="num">${fmt1(totalHours)}</div><div class="label">Total OT hours</div></div>
+    <div class="kpi glass info"><div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7l-8-4-8 4 8 4 8-4z"/><path d="M4 7v10l8 4 8-4V7"/></svg></div><div class="num">${fmt(totalQty)}</div><div class="label">OT units produced</div></div>
+    <div class="kpi glass neutral"><div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18"/></svg></div><div class="num">${fmt1(weekdayHours)}</div><div class="label">Weekday OT hours</div></div>
+    <div class="kpi glass warn"><div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v9l6 3"/><circle cx="12" cy="12" r="9"/></svg></div><div class="num">${fmt1(specialHours)}</div><div class="label">Weekend/holiday OT hours</div></div>
+  `;
+}
+
+function renderOTTrend(gran){
+  otGran = gran;
+  const trendBox = document.getElementById('otTrendTable');
+  if (!otDatesSorted.length) { trendBox.innerHTML = '<div class="empty-note">No overtime data available yet.</div>'; renderOTKpis([]); return; }
+
+  if (gran === 'daily') {
+    const recentDates = otDatesSorted.slice(-14);
+    const rows = recentDates.map(iso => {
+      const d = otByDate[iso];
+      const info = classifyDay(iso);
+      const isSpecial = info.type !== 'weekday';
+      return {
+        label: iso, info, otHours: d.otHours, otQty: d.otQty,
+        weekdayHours: isSpecial ? 0 : d.otHours, specialHours: isSpecial ? d.otHours : 0,
+      };
+    });
+    renderOTKpis(rows);
+    trendBox.innerHTML = `
+      <table>
+        <thead><tr><th>Date</th><th>Day</th><th>OT Hours</th><th>OT Qty Produced</th></tr></thead>
+        <tbody>
+          ${rows.map(r => `<tr>
+            <td>${r.label}</td>
+            <td><span class="daytag ${r.info.type}">${r.info.label}</span></td>
+            <td>${fmt1(r.otHours)}</td>
+            <td>${fmt(r.otQty)}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>`;
+    return;
+  }
+
+  // weekly / monthly: bucket, split weekday vs weekend/holiday hours within each bucket
+  const buckets = {};
+  otDatesSorted.forEach(iso => {
+    const key = otBucketKey(iso, gran);
+    const d = otByDate[iso];
+    const info = classifyDay(iso);
+    const isSpecial = info.type !== 'weekday';
+    if (!buckets[key]) buckets[key] = { otHours:0, otQty:0, weekdayHours:0, specialHours:0 };
+    buckets[key].otHours += d.otHours;
+    buckets[key].otQty += d.otQty;
+    if (isSpecial) buckets[key].specialHours += d.otHours; else buckets[key].weekdayHours += d.otHours;
+  });
+  const keys = Object.keys(buckets).sort();
+  const limit = gran === 'weekly' ? 10 : 12;
+  const shown = keys.slice(-limit);
+  const rows = shown.map(k => ({ label:k, ...buckets[k] }));
+  renderOTKpis(rows);
+  trendBox.innerHTML = `
+    <table>
+      <thead><tr><th>${gran === 'weekly' ? 'Week' : 'Month'}</th><th></th><th>Weekday OT Hrs</th><th>Weekend/Holiday OT Hrs</th><th>Total OT Hrs</th><th>OT Qty Produced</th></tr></thead>
+      <tbody>
+        ${rows.map(r => `<tr>
+          <td>${r.label}</td><td></td>
+          <td>${fmt1(r.weekdayHours)}</td>
+          <td>${fmt1(r.specialHours)}</td>
+          <td>${fmt1(r.otHours)}</td>
+          <td>${fmt(r.otQty)}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
+}
+
+function renderOTLineTable(){
+  const box = document.getElementById('otLineTable');
+  if (!otDatesSorted.length) { box.innerHTML = '<div class="empty-note">No overtime data available yet.</div>'; return; }
+  const latestIso = otDatesSorted[otDatesSorted.length - 1];
+  const info = classifyDay(latestIso);
+  const byMode = otByDate[latestIso].byMode;
+  const modes = Object.keys(byMode);
+  if (!modes.length) { box.innerHTML = '<div class="empty-note">No overtime logged on the latest day.</div>'; return; }
+  box.innerHTML = `
+    <div class="sub" style="margin-bottom:10px;">${latestIso} <span class="daytag ${info.type}" style="margin-left:6px;">${info.label}</span></div>
+    <table>
+      <thead><tr><th>Mode</th><th></th><th>OT Hours</th><th>OT Qty Produced</th></tr></thead>
+      <tbody>
+        ${modes.map((mode,i) => `<tr>
+          <td>${mode}</td>
+          <td><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${colorForMode(mode,i)};"></span></td>
+          <td>${fmt1(byMode[mode].otHours)}</td>
+          <td>${fmt(byMode[mode].otQty)}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
+}
+
+document.getElementById('otGranToggle').addEventListener('click', (e) => {
+  const btn = e.target.closest('.toggle-btn'); if (!btn) return;
+  document.querySelectorAll('#otGranToggle .toggle-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderOTTrend(btn.dataset.gran);
+});
+
+loadOT();
 
 /* ---------------- Boot ---------------- */
 async function load(){
