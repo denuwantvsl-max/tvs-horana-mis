@@ -95,6 +95,19 @@ h1{font-size:32px;font-weight:800;margin:0;letter-spacing:-0.02em;
 .legend .li{display:flex;align-items:center;gap:6px;}
 .legend .sw{width:10px;height:10px;border-radius:3px;flex-shrink:0;}
 
+.range-picker{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+.range-picker input[type=date]{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);
+  border-radius:8px;padding:5px 8px;font-size:11.5px;color:var(--text-hi);font-family:inherit;
+  color-scheme:dark;}
+.range-picker input[type=date]:focus{outline:none;border-color:rgba(94,230,207,0.45);}
+.range-picker .range-sep{font-size:11px;color:var(--text-low);}
+.range-btn{padding:6px 13px;font-size:11.5px;font-weight:600;border-radius:8px;cursor:pointer;
+  font-family:inherit;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.04);color:var(--text-mid);
+  transition:all 0.15s ease;}
+.range-btn:hover{color:var(--text-hi);border-color:rgba(255,255,255,0.22);}
+.range-btn.apply{background:linear-gradient(135deg, rgba(94,230,207,0.22), rgba(111,163,255,0.10));color:#fff;border-color:transparent;}
+.range-active-note{font-size:11px;color:var(--teal);margin-bottom:8px;}
+
 svg text{font-family:inherit;}
 .empty-note{color:var(--text-low);font-size:13px;padding:20px 0;text-align:center;}
 
@@ -175,6 +188,15 @@ footer{max-width:1220px;margin:0 auto;padding:20px 24px 0;font-size:11.5px;color
   <div class="panel glass">
     <h2>Total Stock — Trend</h2>
     <div class="sub">Plant-wide units on hand, by calendar date. Reflects real reporting gaps in the underlying history, not a display issue.</div>
+    <div class="range-picker">
+      <span class="range-sep">Custom range:</span>
+      <input type="date" id="trendFrom">
+      <span class="range-sep">to</span>
+      <input type="date" id="trendTo">
+      <button class="range-btn apply" id="trendRangeApply">Apply</button>
+      <button class="range-btn" id="trendRangeClear">Clear</button>
+    </div>
+    <div class="range-active-note" id="trendRangeNote" style="display:none;"></div>
     <div id="trendChart"></div>
   </div>
 
@@ -349,10 +371,30 @@ function renderLocationChart(locationBreakdown){
 }
 
 /* ---------------- Total stock trend ---------------- */
+let dailyTotalsGlobal = [];
+let trendRangeState = { from: null, to: null };
+
+function filterByRange(series, from, to){
+  if (!from && !to) return series;
+  return series.filter(d => (!from || d.date >= from) && (!to || d.date <= to));
+}
+
 function renderTrendChart(dailyTotals){
   const box = document.getElementById('trendChart');
-  const data = (dailyTotals||[]).filter(d => d.total > 0);
-  if (!data.length) { box.innerHTML = '<div class="empty-note">No stock history available yet.</div>'; return; }
+  const filtered = filterByRange(dailyTotals||[], trendRangeState.from, trendRangeState.to);
+  const data = filtered.filter(d => d.total > 0);
+
+  const note = document.getElementById('trendRangeNote');
+  const hasRange = !!(trendRangeState.from || trendRangeState.to);
+  if (hasRange) {
+    note.style.display = 'block';
+    note.textContent = '📅 Showing ' + (trendRangeState.from || 'earliest') + ' to ' + (trendRangeState.to || 'latest') +
+      ' (' + data.length + ' day' + (data.length === 1 ? '' : 's') + ')';
+  } else {
+    note.style.display = 'none';
+  }
+
+  if (!data.length) { box.innerHTML = '<div class="empty-note">No stock history in the selected range.</div>'; return; }
 
   const W = 1100, H = 240, padL = 46, padR = 20, padT = 16, padB = 34;
   const maxVal = Math.max(1, ...data.map(d => d.total));
@@ -477,9 +519,28 @@ async function load(){
     renderKPIs(data.summary);
     renderCategoryChart(data.categoryBreakdown || []);
     renderLocationChart(data.locationBreakdown || []);
-    renderTrendChart(data.dailyTotals || []);
+    dailyTotalsGlobal = data.dailyTotals || [];
+    renderTrendChart(dailyTotalsGlobal);
     renderModelRows(data.modelBreakdown || []);
     renderShipments(data.newShipments || []);
+
+    const trendFromEl = document.getElementById('trendFrom');
+    const trendToEl = document.getElementById('trendTo');
+    if (dailyTotalsGlobal.length) {
+      const minDate = dailyTotalsGlobal[0].date;
+      const maxDate = dailyTotalsGlobal[dailyTotalsGlobal.length - 1].date;
+      [trendFromEl, trendToEl].forEach(inp => { inp.min = minDate; inp.max = maxDate; });
+    }
+    document.getElementById('trendRangeApply').addEventListener('click', () => {
+      trendRangeState.from = trendFromEl.value || null;
+      trendRangeState.to = trendToEl.value || null;
+      renderTrendChart(dailyTotalsGlobal);
+    });
+    document.getElementById('trendRangeClear').addEventListener('click', () => {
+      trendRangeState.from = null; trendRangeState.to = null;
+      trendFromEl.value = ''; trendToEl.value = '';
+      renderTrendChart(dailyTotalsGlobal);
+    });
   }catch(err){
     document.getElementById('dateLabel').textContent = 'Could not load data';
     document.getElementById('provenance').textContent = 'Could not load source information.';
