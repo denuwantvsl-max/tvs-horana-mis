@@ -237,7 +237,14 @@ footer{max-width:1220px;margin:0 auto;padding:24px 24px 0;font-size:11.5px;color
   .mod-feature{grid-column:1 !important;}
 }
 .flow-grid .mod-feature{grid-template-columns:1fr;gap:20px;}
-.row-sub{grid-column:2;grid-row:2;display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+/* FIX (2026-09-23, A2): row-sub was pinned to grid-column:2 only, the
+   same ~1.55fr width as the Production card above it - columns 1 and
+   3 sat empty for this whole row (the big dark margins either side of
+   Quality/Pending in the screenshot). Spanning the full row gives
+   both cards ~3x the width, which is also why the font/icon/donut
+   sizes below were bumped up - there's real room for them now. */
+.row-sub{grid-column:1 / -1;grid-row:2;display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+@media (max-width:700px){.row-sub{grid-template-columns:1fr;}}
 
 .mini-stats{display:flex;gap:22px;margin:14px 0 8px;flex-wrap:wrap;}
 .mini-stats .val{font-size:24px;font-weight:800;letter-spacing:-0.01em;display:block;}
@@ -248,6 +255,13 @@ footer{max-width:1220px;margin:0 auto;padding:24px 24px 0;font-size:11.5px;color
 .bar-track{flex-grow:1;height:8px;border-radius:6px;background:rgba(255,255,255,0.07);overflow:hidden;}
 .bar-fill{height:100%;border-radius:6px;transition:width 0.6s cubic-bezier(.2,.8,.2,1);}
 .bar-val{width:56px;text-align:right;font-size:11.5px;font-weight:700;flex-shrink:0;}
+/* A2: Quality's bars specifically (inside .mod-mini, now 3x wider) get
+   a larger scale - the general .bar-* above stays as-is since it's
+   also used by the narrower monthly-planning bars elsewhere. */
+.mod-mini .bar-lbl{width:64px;font-size:13px;}
+.mod-mini .bar-track{height:11px;}
+.mod-mini .bar-val{width:66px;font-size:13px;}
+.mod-mini .bar-row{margin:11px 0;}
 
 .src{margin-top:16px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.08);
   font-size:10.5px;color:var(--text-low);}
@@ -256,7 +270,7 @@ footer{max-width:1220px;margin:0 auto;padding:24px 24px 0;font-size:11.5px;color
 .month-select{font-size:11px;font-weight:700;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.16);
   color:var(--text-hi);border-radius:8px;padding:4px 9px;}
 
-.mod-mini{padding:22px 24px;display:block;position:relative;overflow:hidden;
+.mod-mini{padding:32px 36px;display:block;position:relative;overflow:hidden;
   transition:transform 0.3s cubic-bezier(.2,.8,.2,1), border-color 0.3s ease;}
 .mod-mini:hover{transform:translateY(-3px);}
 .mod-mini[data-accent="amber"]:hover{border-color:rgba(255,194,103,0.4);}
@@ -265,12 +279,15 @@ footer{max-width:1220px;margin:0 auto;padding:24px 24px 0;font-size:11.5px;color
 .mod-mini[data-accent="amber"] .mod-icon svg{stroke:var(--amber);}
 .mod-mini[data-accent="red"] .mod-icon{border-color:rgba(255,122,122,0.3);}
 .mod-mini[data-accent="red"] .mod-icon svg{stroke:var(--red);}
-.mod-mini h2{font-size:16.5px;font-weight:700;margin:0 0 2px;}
-.mod-mini .sub{font-size:11.5px;color:var(--text-mid);margin:0;}
-.mod-mini .go{margin-top:14px;font-size:12px;font-weight:700;color:var(--text-hi);display:flex;align-items:center;gap:6px;}
+/* A2: bumped from 44px/20px - these cards now span 3x their old width */
+.mod-mini .mod-icon{width:54px;height:54px;border-radius:16px;}
+.mod-mini .mod-icon svg{width:25px;height:25px;}
+.mod-mini h2{font-size:21px;font-weight:700;margin:0 0 3px;}
+.mod-mini .sub{font-size:13px;color:var(--text-mid);margin:0;}
+.mod-mini .go{margin-top:18px;font-size:13px;font-weight:700;color:var(--text-hi);display:flex;align-items:center;gap:6px;}
 
-.issue-box{margin-top:12px;padding:10px 12px;border-radius:10px;background:rgba(255,194,103,0.07);
-  border:1px solid rgba(255,194,103,0.22);font-size:11.5px;color:var(--text-mid);}
+.issue-box{margin-top:16px;padding:13px 16px;border-radius:12px;background:rgba(255,194,103,0.07);
+  border:1px solid rgba(255,194,103,0.22);font-size:13px;color:var(--text-mid);}
 .issue-box b{color:var(--amber);}
 
 .donut-wrap{display:flex;gap:14px;align-items:center;margin-top:4px;}
@@ -411,10 +428,10 @@ footer{max-width:1220px;margin:0 auto;padding:24px 24px 0;font-size:11.5px;color
           <div id="pvDonut"></div>
           <div style="flex-grow:1;">
             <div class="mini-stats" style="margin:0;">
-              <div><span class="val" id="pvOver" style="font-size:19px;color:var(--amber);">…</span><span class="lbl">Over 60d</span></div>
-              <div><span class="val" id="pvSevere" style="font-size:19px;color:var(--red);">…</span><span class="lbl">Severe (90d+)</span></div>
+              <div><span class="val" id="pvOver" style="font-size:26px;color:var(--amber);">…</span><span class="lbl">Over 60d</span></div>
+              <div><span class="val" id="pvSevere" style="font-size:26px;color:var(--red);">…</span><span class="lbl">Severe (90d+)</span></div>
             </div>
-            <div style="font-size:11px;color:var(--text-mid);margin-top:8px;" id="pvOldest">…</div>
+            <div style="font-size:13px;color:var(--text-mid);margin-top:12px;" id="pvOldest">…</div>
           </div>
         </div>
         <div class="src">Source: MB Age Report · <span id="pvSrc">…</span></div>
@@ -456,16 +473,6 @@ footer{max-width:1220px;margin:0 auto;padding:24px 24px 0;font-size:11.5px;color
       <div class="src">Source: <span id="prodMonthSrc">…</span></div>
     </div>
   </div>
-  </div>
-
-  <div class="external reveal">
-    <div class="ext-label">Other plant systems</div>
-    <div class="ext-row" style="grid-template-columns:1fr;">
-      <a class="ext-item glass" href="production/skd/index.html" target="_blank" rel="noopener">
-        <span>Production Dashboard<small>Assembly floor signage, live</small></span>
-        <span class="arrow">↗</span>
-      </a>
-    </div>
   </div>
 
 </div>
@@ -621,20 +628,21 @@ function ringSvg(pct, color){
   </svg>`;
 }
 function donutSvg(segments, total){
-  const c = 2 * Math.PI * 32;
+  // A2: bumped 84->116 (r 32->44) - this card now has 3x its old width.
+  const c = 2 * Math.PI * 44;
   let offset = 0;
   const arcs = segments.map(s => {
     const len = total > 0 ? (s.value/total)*c : 0;
-    const arc = `<circle cx="42" cy="42" r="32" fill="none" stroke="${s.color}" stroke-width="9"
-      stroke-dasharray="${len} ${c}" stroke-dashoffset="${-offset}" transform="rotate(-90 42 42)"/>`;
+    const arc = `<circle cx="58" cy="58" r="44" fill="none" stroke="${s.color}" stroke-width="11"
+      stroke-dasharray="${len} ${c}" stroke-dashoffset="${-offset}" transform="rotate(-90 58 58)"/>`;
     offset += len;
     return arc;
   }).join('');
-  return `<svg width="84" height="84" viewBox="0 0 84 84" style="flex-shrink:0;">
-    <circle cx="42" cy="42" r="32" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="9"/>
+  return `<svg width="116" height="116" viewBox="0 0 116 116" style="flex-shrink:0;">
+    <circle cx="58" cy="58" r="44" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="11"/>
     ${arcs}
-    <text x="42" y="39" fill="#f5f8fd" font-size="18" font-weight="800" text-anchor="middle">${total}</text>
-    <text x="42" y="54" fill="#6f7c96" font-size="8.5" text-anchor="middle">total</text>
+    <text x="58" y="54" fill="#f5f8fd" font-size="24" font-weight="800" text-anchor="middle">${total}</text>
+    <text x="58" y="72" fill="#6f7c96" font-size="11" text-anchor="middle">total</text>
   </svg>`;
 }
 
