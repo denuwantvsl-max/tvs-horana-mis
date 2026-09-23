@@ -129,6 +129,19 @@ h1{font-size:32px;font-weight:800;margin:0;letter-spacing:-0.02em;
 .legend .li{display:flex;align-items:center;gap:6px;}
 .legend .sw{width:10px;height:10px;border-radius:3px;flex-shrink:0;}
 
+.range-picker{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+.range-picker input[type=date]{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);
+  border-radius:8px;padding:5px 8px;font-size:11.5px;color:var(--text-hi);font-family:inherit;
+  color-scheme:dark;}
+.range-picker input[type=date]:focus{outline:none;border-color:rgba(94,230,207,0.45);}
+.range-picker .range-sep{font-size:11px;color:var(--text-low);}
+.range-btn{padding:6px 13px;font-size:11.5px;font-weight:600;border-radius:8px;cursor:pointer;
+  font-family:inherit;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.04);color:var(--text-mid);
+  transition:all 0.15s ease;}
+.range-btn:hover{color:var(--text-hi);border-color:rgba(255,255,255,0.22);}
+.range-btn.apply{background:linear-gradient(135deg, rgba(94,230,207,0.22), rgba(111,163,255,0.10));color:#fff;border-color:transparent;}
+.range-active-note{font-size:11px;color:var(--teal);margin-bottom:8px;}
+
 svg text{font-family:inherit;}
 .chart-tip{position:fixed;z-index:999;pointer-events:none;padding:9px 13px;border-radius:10px;
   font-size:12px;line-height:1.6;color:var(--text-hi);white-space:nowrap;
@@ -183,6 +196,15 @@ footer{max-width:1220px;margin:0 auto;padding:20px 24px 0;font-size:11.5px;color
       <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>Direct Pass Rate — Trend</h2>
     </div>
     <div class="sub">Actual direct-pass % per category over time, against each category's own target. Builds up as more daily reports come in.</div>
+    <div class="range-picker">
+      <span class="range-sep">Custom range:</span>
+      <input type="date" id="trendFrom">
+      <span class="range-sep">to</span>
+      <input type="date" id="trendTo">
+      <button class="range-btn apply" id="trendRangeApply">Apply</button>
+      <button class="range-btn" id="trendRangeClear">Clear</button>
+    </div>
+    <div class="range-active-note" id="trendRangeNote" style="display:none;"></div>
     <div class="legend" id="trendLegend"></div>
     <div id="trendChart"></div>
   </div>
@@ -310,14 +332,33 @@ function renderCategoryCards(p){
   }).join('');
 }
 
-function renderTrend(p){
+let trendGlobal = [];
+let trendRangeState = { from: null, to: null };
+
+function filterByRange(series, from, to){
+  if (!from && !to) return series;
+  return series.filter(t => (!from || t.date >= from) && (!to || t.date <= to));
+}
+
+function renderTrend(fullTrend){
   const chartBox = document.getElementById('trendChart');
   const legendBox = document.getElementById('trendLegend');
-  const trend = (p.trend || []).filter(t => CAT_ORDER.some(c => t[c] && t[c].passActualPct !== null));
+  const ranged = filterByRange(fullTrend || [], trendRangeState.from, trendRangeState.to);
+  const trend = ranged.filter(t => CAT_ORDER.some(c => t[c] && t[c].passActualPct !== null));
   legendBox.innerHTML = CAT_ORDER.map(c => `<div class="li"><span class="sw" style="background:${CAT_COLORS[c]}"></span>${c}</div>`).join('');
 
+  const note = document.getElementById('trendRangeNote');
+  const hasRange = !!(trendRangeState.from || trendRangeState.to);
+  if (hasRange) {
+    note.style.display = 'block';
+    note.textContent = '📅 Showing ' + (trendRangeState.from || 'earliest') + ' to ' + (trendRangeState.to || 'latest') +
+      ' (' + trend.length + ' day' + (trend.length === 1 ? '' : 's') + ' with data)';
+  } else {
+    note.style.display = 'none';
+  }
+
   if (trend.length < 2) {
-    chartBox.innerHTML = '<div class="empty-note" style="text-align:center;padding:30px 0;">Need at least 2 days of reports to draw a trend — check back once more reports come in.</div>';
+    chartBox.innerHTML = '<div class="empty-note" style="text-align:center;padding:30px 0;">Need at least 2 days of reports to draw a trend — check back once more reports come in, or widen the selected range.</div>';
     return;
   }
 
@@ -380,7 +421,26 @@ async function load(){
     formatProvenance(p);
     renderKPIs(p);
     renderCategoryCards(p);
-    renderTrend(p);
+    trendGlobal = p.trend || [];
+    renderTrend(trendGlobal);
+
+    const trendFromEl = document.getElementById('trendFrom');
+    const trendToEl = document.getElementById('trendTo');
+    if (trendGlobal.length) {
+      const dates = trendGlobal.map(t => t.date).sort();
+      trendFromEl.min = trendToEl.min = dates[0];
+      trendFromEl.max = trendToEl.max = dates[dates.length - 1];
+    }
+    document.getElementById('trendRangeApply').addEventListener('click', () => {
+      trendRangeState.from = trendFromEl.value || null;
+      trendRangeState.to = trendToEl.value || null;
+      renderTrend(trendGlobal);
+    });
+    document.getElementById('trendRangeClear').addEventListener('click', () => {
+      trendRangeState.from = null; trendRangeState.to = null;
+      trendFromEl.value = ''; trendToEl.value = '';
+      renderTrend(trendGlobal);
+    });
   } catch (err) {
     document.getElementById('dateLabel').textContent = 'Error loading data';
     document.getElementById('provenance').textContent = 'Could not load Quality data: ' + err;
