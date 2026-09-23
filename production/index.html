@@ -101,6 +101,23 @@ h1{font-size:32px;font-weight:800;margin:0;letter-spacing:-0.02em;
   cursor:pointer;transition:all 0.15s ease;background:none;border:none;font-family:inherit;}
 .toggle-btn.active{background:linear-gradient(135deg, rgba(94,230,207,0.22), rgba(111,163,255,0.10));color:#fff;}
 
+/* Custom date-range picker - sits alongside the granularity toggle on
+   charts backed by full daily history. When a range is applied it
+   overrides the granularity buttons' 16-bucket cap so the whole
+   picked window renders. */
+.range-picker{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.range-picker input[type=date]{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);
+  border-radius:8px;padding:5px 8px;font-size:11.5px;color:var(--text-hi);font-family:inherit;
+  color-scheme:dark;}
+.range-picker input[type=date]:focus{outline:none;border-color:rgba(94,230,207,0.45);}
+.range-picker .range-sep{font-size:11px;color:var(--text-low);}
+.range-btn{padding:6px 13px;font-size:11.5px;font-weight:600;border-radius:8px;cursor:pointer;
+  font-family:inherit;border:1px solid rgba(255,255,255,0.12);background:rgba(255,255,255,0.04);color:var(--text-mid);
+  transition:all 0.15s ease;}
+.range-btn:hover{color:var(--text-hi);border-color:rgba(255,255,255,0.22);}
+.range-btn.apply{background:linear-gradient(135deg, rgba(94,230,207,0.22), rgba(111,163,255,0.10));color:#fff;border-color:transparent;}
+.range-active-note{font-size:11px;color:var(--teal);margin-bottom:8px;}
+
 .legend{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:14px;font-size:11.5px;color:var(--text-mid);}
 .legend .li{display:flex;align-items:center;gap:6px;}
 .legend .sw{width:10px;height:10px;border-radius:3px;flex-shrink:0;}
@@ -179,6 +196,15 @@ footer{max-width:1220px;margin:0 auto;padding:20px 24px 0;font-size:11.5px;color
       </div>
     </div>
     <div class="sub">Planned quantity vs. actual units produced, plant-wide. Aggregated from the real daily log — sparse or partial periods reflect actual reporting gaps, not a display issue.</div>
+    <div class="range-picker" style="margin-bottom:12px;">
+      <span class="range-sep">Custom range:</span>
+      <input type="date" id="planFrom">
+      <span class="range-sep">to</span>
+      <input type="date" id="planTo">
+      <button class="range-btn apply" id="planRangeApply">Apply</button>
+      <button class="range-btn" id="planRangeClear">Clear</button>
+    </div>
+    <div class="range-active-note" id="planRangeNote" style="display:none;"></div>
     <div class="legend">
       <div class="li"><span class="sw" style="background:var(--blue)"></span>Planned</div>
       <div class="li"><span class="sw" style="background:var(--teal)"></span>Actual</div>
@@ -345,6 +371,14 @@ function renderKPIs(s){
 
 /* ---------------- Plan vs Actual trend ---------------- */
 let dailySeriesGlobal = [];
+let planRangeState = { from: null, to: null };
+let planGranState = 'daily';
+
+function filterByRange(series, from, to){
+  if (!from && !to) return series;
+  return series.filter(d => (!from || d.date >= from) && (!to || d.date <= to));
+}
+
 function aggregatePlan(series, gran){
   if (gran === 'daily') return series.map(d => ({ label: d.date.slice(5), planned: d.planned, actual: d.actual }));
   const buckets = {};
@@ -368,9 +402,26 @@ function aggregatePlan(series, gran){
 }
 
 function renderPlanChart(gran){
+  planGranState = gran;
   const box = document.getElementById('planChart');
-  const data = aggregatePlan(dailySeriesGlobal, gran).slice(-16);
-  if (!data.length) { box.innerHTML = '<div class="empty-note">No production history available yet.</div>'; return; }
+  const hasRange = !!(planRangeState.from || planRangeState.to);
+  const source = filterByRange(dailySeriesGlobal, planRangeState.from, planRangeState.to);
+  let data = aggregatePlan(source, gran);
+  // A custom range shows its whole span (capped generously so bars
+  // stay legible); no range picked keeps the original "last 16
+  // buckets" behaviour of the granularity toggle.
+  data = hasRange ? data.slice(-120) : data.slice(-16);
+
+  const note = document.getElementById('planRangeNote');
+  if (hasRange) {
+    note.style.display = 'block';
+    note.textContent = '📅 Showing ' + (planRangeState.from || 'earliest') + ' to ' + (planRangeState.to || 'latest') +
+      ' (' + data.length + ' ' + gran + ' bucket' + (data.length === 1 ? '' : 's') + ')';
+  } else {
+    note.style.display = 'none';
+  }
+
+  if (!data.length) { box.innerHTML = '<div class="empty-note">No production data in the selected range.</div>'; return; }
 
   const W = 1100, H = 260, padL = 46, padR = 20, padT = 14, padB = 34;
   const maxVal = Math.max(1, ...data.map(d => Math.max(d.planned, d.actual)));
@@ -865,6 +916,27 @@ async function load(){
     renderCatTrendChart();
     renderModelHierarchy('2W SKD (NTORQ/ICUBE)');
     renderProdChart();
+
+    // Custom date-range picker for the Plan vs Actual chart - bound
+    // to the real earliest/latest logged dates so the picker can't
+    // be set outside what the sheet actually has.
+    const planFromEl = document.getElementById('planFrom');
+    const planToEl = document.getElementById('planTo');
+    if (dailySeriesGlobal.length) {
+      const minDate = dailySeriesGlobal[0].date;
+      const maxDate = dailySeriesGlobal[dailySeriesGlobal.length - 1].date;
+      [planFromEl, planToEl].forEach(inp => { inp.min = minDate; inp.max = maxDate; });
+    }
+    document.getElementById('planRangeApply').addEventListener('click', () => {
+      planRangeState.from = planFromEl.value || null;
+      planRangeState.to = planToEl.value || null;
+      renderPlanChart(planGranState);
+    });
+    document.getElementById('planRangeClear').addEventListener('click', () => {
+      planRangeState.from = null; planRangeState.to = null;
+      planFromEl.value = ''; planToEl.value = '';
+      renderPlanChart(planGranState);
+    });
 
     document.getElementById('catTrendCategoryToggle').addEventListener('click', (e) => {
       const btn = e.target.closest('.toggle-btn'); if (!btn) return;
