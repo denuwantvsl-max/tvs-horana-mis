@@ -88,6 +88,25 @@ h1{font-size:32px;font-weight:800;margin:0;letter-spacing:-0.02em;
 .kpi.warn{--kpi-glow:rgba(255,194,103,0.3);} .kpi.warn .num{color:var(--amber);} .kpi.warn .kpi-icon svg{stroke:var(--amber);}
 .kpi.neutral{--kpi-glow:rgba(178,141,255,0.25);} .kpi.neutral .num{color:var(--violet);} .kpi.neutral .kpi-icon svg{stroke:var(--violet);}
 
+/* Mode info-cards (replaces the old plain "By Production Line" table) */
+.mode-card-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;}
+@media (max-width:900px){.mode-card-grid{grid-template-columns:1fr;}}
+.mode-card{padding:20px 22px;position:relative;overflow:hidden;border-radius:var(--r-lg);
+  background:linear-gradient(160deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+  border:1px solid rgba(255,255,255,0.1);}
+.mode-card .mc-head{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.mode-card .mc-dot{width:11px;height:11px;border-radius:4px;flex-shrink:0;}
+.mode-card .mc-title{font-size:14px;font-weight:700;color:var(--text-hi);line-height:1.25;}
+.mode-card .mc-nums{display:flex;gap:22px;margin-bottom:10px;}
+.mode-card .mc-num .v{font-size:22px;font-weight:800;letter-spacing:-0.02em;}
+.mode-card .mc-num .l{font-size:10.5px;color:var(--text-low);margin-top:2px;}
+.mode-card .mc-bar-track{height:8px;border-radius:6px;background:rgba(255,255,255,0.07);overflow:hidden;margin-bottom:12px;}
+.mode-card .mc-bar-fill{height:100%;border-radius:6px;transition:width 0.6s cubic-bezier(.2,.8,.2,1);}
+.mode-card .mc-foot{display:flex;justify-content:space-between;align-items:center;font-size:11.5px;color:var(--text-mid);
+  padding-top:12px;border-top:1px solid rgba(255,255,255,0.07);}
+.mode-card .mc-foot b{color:var(--text-hi);}
+.mode-card .mc-empty-note{font-size:11px;color:var(--text-low);font-style:italic;margin-top:8px;}
+
 .panel{padding:24px 26px;margin-bottom:20px;transition:border-color 0.25s ease, box-shadow 0.25s ease;}
 .panel:hover{border-color:rgba(94,230,207,0.18);}
 .panel-head{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;margin-bottom:4px;}
@@ -181,9 +200,34 @@ footer{max-width:1220px;margin:0 auto;padding:20px 24px 0;font-size:11.5px;color
 <div class="wrap">
 
   <div class="provenance glass" id="provenance">Loading source information…</div>
-  <div class="data-note glass" id="dataNote"></div>
 
   <div class="kpi-grid" id="kpiGrid"></div>
+
+  <div class="panel glass">
+    <div class="panel-head">
+      <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Models — Regardless of Color</h2>
+      <div class="toggle-group" id="modelCategoryToggle">
+        <button class="toggle-btn active" data-cat="2W SKD (NTORQ/ICUBE)">SKD Ntorq/iQube/Orbiter</button>
+        <button class="toggle-btn" data-cat="2W SKD (JUPITER/SPORT/RAIDER/RTR/ RONIN 225)">Jupiter/Sport/Raider/Apache</button>
+        <button class="toggle-btn" data-cat="2W CKD - DVA">CKD - DVA</button>
+        <button class="toggle-btn" data-cat="3W SKD">3W SKD</button>
+      </div>
+    </div>
+    <div class="sub">Every model (Ntorq, Raider, Jupiter, etc.), combined across all colors, within the selected production line. Click a row to expand and see the individual color/variant breakdown.</div>
+    <div id="modelHierarchy"></div>
+  </div>
+
+  <div class="panel glass">
+    <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V10l5 3V10l5 3V10l5 3v8H3z"/><path d="M3 21h18"/></svg>By Production Line (Mode) — Latest Day</h2>
+    <div class="sub">Planned vs. actual, and output per attendee, broken down by production line.</div>
+    <div id="modeTable"></div>
+  </div>
+
+  <div class="panel glass">
+    <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 13.5a7.97 7.97 0 000-3l2-1.4-2-3.4-2.3.9a8 8 0 00-2.6-1.5L14 2h-4l-.5 2.6a8 8 0 00-2.6 1.5l-2.3-.9-2 3.4 2 1.4a8 8 0 000 3l-2 1.5 2 3.4 2.3-.9a8 8 0 002.6 1.5L10 22h4l.5-2.5a8 8 0 002.6-1.5l2.3.9 2-3.4-2-1.5z"/></svg>Top Models — Latest Day</h2>
+    <div class="sub">Every item code that ran today, ranked by actual output.</div>
+    <div id="modelsTable"></div>
+  </div>
 
   <div class="panel glass">
     <div class="panel-head">
@@ -221,24 +265,13 @@ footer{max-width:1220px;margin:0 auto;padding:20px 24px 0;font-size:11.5px;color
         <button class="toggle-btn" data-gran="monthly">Monthly</button>
       </div>
     </div>
-    <div class="sub">Actual Shift Production ÷ Actual Attendance, compared against your fixed target productivity per line.</div>
+    <div class="sub">Actual Shift Production ÷ Actual Attendance, compared against your fixed target productivity per line. Bar = actual; the vertical marker = target benchmark.</div>
     <div class="legend">
-      <div class="li"><span class="sw" style="background:var(--blue)"></span>Target</div>
-      <div class="li"><span class="sw" style="background:var(--teal)"></span>Actual</div>
+      <div class="li"><span class="sw" style="background:var(--teal)"></span>Actual (at/above target)</div>
+      <div class="li"><span class="sw" style="background:var(--red)"></span>Actual (below target)</div>
+      <div class="li"><span class="sw" style="background:var(--blue)"></span>Target benchmark</div>
     </div>
     <div id="prodChart"></div>
-  </div>
-
-  <div class="panel glass">
-    <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V10l5 3V10l5 3V10l5 3v8H3z"/><path d="M3 21h18"/></svg>By Production Line (Mode) — Latest Day</h2>
-    <div class="sub">Planned vs. actual, and output per attendee, broken down by production line.</div>
-    <div id="modeTable"></div>
-  </div>
-
-  <div class="panel glass">
-    <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 13.5a7.97 7.97 0 000-3l2-1.4-2-3.4-2.3.9a8 8 0 00-2.6-1.5L14 2h-4l-.5 2.6a8 8 0 00-2.6 1.5l-2.3-.9-2 3.4 2 1.4a8 8 0 000 3l-2 1.5 2 3.4 2.3-.9a8 8 0 002.6 1.5L10 22h4l.5-2.5a8 8 0 002.6-1.5l2.3.9 2-3.4-2-1.5z"/></svg>Top Models — Latest Day</h2>
-    <div class="sub">Every item code that ran today, ranked by actual output.</div>
-    <div id="modelsTable"></div>
   </div>
 
   <div class="panel glass">
@@ -246,8 +279,8 @@ footer{max-width:1220px;margin:0 auto;padding:20px 24px 0;font-size:11.5px;color
       <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>Output Over Time — By Production Line</h2>
       <div style="display:flex; gap:10px; flex-wrap:wrap;">
         <div class="toggle-group" id="catTrendCategoryToggle">
-          <button class="toggle-btn active" data-cat="2W SKD (NTORQ/ICUBE)">SKD Ntorq/iQube</button>
-          <button class="toggle-btn" data-cat="2W SKD (JUPITER/SPORT/RAIDER/RTR/ RONIN 225)">SKD Jupiter/Sport/Raider</button>
+          <button class="toggle-btn active" data-cat="2W SKD (NTORQ/ICUBE)">SKD Ntorq/iQube/Orbiter</button>
+          <button class="toggle-btn" data-cat="2W SKD (JUPITER/SPORT/RAIDER/RTR/ RONIN 225)">Jupiter/Sport/Raider/Apache</button>
           <button class="toggle-btn" data-cat="2W CKD - DVA">CKD - DVA</button>
           <button class="toggle-btn" data-cat="3W SKD">3W SKD</button>
         </div>
@@ -268,20 +301,6 @@ footer{max-width:1220px;margin:0 auto;padding:20px 24px 0;font-size:11.5px;color
 
   <div class="panel glass">
     <div class="panel-head">
-      <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Models — Regardless of Color</h2>
-      <div class="toggle-group" id="modelCategoryToggle">
-        <button class="toggle-btn active" data-cat="2W SKD (NTORQ/ICUBE)">SKD Ntorq/iQube</button>
-        <button class="toggle-btn" data-cat="2W SKD (JUPITER/SPORT/RAIDER/RTR/ RONIN 225)">SKD Jupiter/Sport/Raider</button>
-        <button class="toggle-btn" data-cat="2W CKD - DVA">CKD - DVA</button>
-        <button class="toggle-btn" data-cat="3W SKD">3W SKD</button>
-      </div>
-    </div>
-    <div class="sub">Every model (Ntorq, Raider, Jupiter, etc.), combined across all colors, within the selected production line. Click a row to expand and see the individual color/variant breakdown.</div>
-    <div id="modelHierarchy"></div>
-  </div>
-
-  <div class="panel glass">
-    <div class="panel-head">
       <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Overtime — Hours &amp; Output</h2>
       <div class="toggle-group" id="otGranToggle">
         <button class="toggle-btn active" data-gran="daily">Daily</button>
@@ -291,14 +310,20 @@ footer{max-width:1220px;margin:0 auto;padding:20px 24px 0;font-size:11.5px;color
     </div>
     <div class="sub" id="otSub">Overtime hours logged and units produced during OT (after 5:45 p.m.), read directly from the same sheet. Saturdays, Sundays, and Sri Lankan public holidays are flagged separately from regular weekday OT.</div>
     <div class="kpi-grid" id="otKpiGrid" style="margin-bottom:22px;"></div>
-    <div id="otTrendTable"></div>
+    <div class="legend">
+      <div class="li"><span class="sw" style="background:var(--blue)"></span>Weekday OT hours</div>
+      <div class="li"><span class="sw" style="background:var(--amber)"></span>Weekend/holiday OT hours</div>
+    </div>
+    <div id="otTrendChart"></div>
     <div style="height:26px;"></div>
     <div class="panel-head" style="margin-bottom:4px;">
       <h2 style="font-size:13px;">By Production Line — Latest Logged Day</h2>
     </div>
-    <div id="otLineTable"></div>
+    <div id="otLineChart"></div>
     <div class="data-note" id="otHolidayNote" style="margin-top:18px;margin-bottom:0;"></div>
   </div>
+
+  <div class="data-note glass" id="dataNote"></div>
 
   <div class="nav-cards">
     <a class="nav-card glass" href="../index.html">
@@ -318,6 +343,18 @@ const NS = "http://www.w3.org/2000/svg";
 const MODE_COLORS = {};
 const MODE_PALETTE = ["#6fa3ff","#5ee6cf","#ffc267","#ff7a7a","#b28dff","#8fd6ff"];
 function colorForMode(mode, idx){ return MODE_PALETTE[idx % MODE_PALETTE.length]; }
+
+// Display-only label corrections (per Denuwan, 2026-09-23). These map
+// the REAL backend mode keys (as returned by the API and used for all
+// data-cat matching / lookups) to corrected/expanded display text.
+// Never use these as lookup keys - only for what's shown on screen.
+const MODE_DISPLAY_LABELS = {
+  '2W CKD - DVA': '2W CKD - DVA',
+  '2W SKD (NTORQ/ICUBE)': '2W SKD (NTORQ/IQUBE/ORBITER)',
+  '2W SKD (JUPITER/SPORT/RAIDER/RTR/ RONIN 225)': 'JUPITER/SPORT/RAIDER/RTR/Ronin 225/ Apache',
+  '3W SKD': '3W SKD'
+};
+function displayMode(mode){ return MODE_DISPLAY_LABELS[mode] || mode; }
 
 function fmt(n){ return Number(n||0).toLocaleString('en-US', { maximumFractionDigits: 0 }); }
 function fmt1(n){ return Number(n||0).toLocaleString('en-US', { maximumFractionDigits: 1 }); }
@@ -462,44 +499,54 @@ function renderProdChart(){
   const rows = productivityByModeGlobal;
   if (!rows.length) { box.innerHTML = '<div class="empty-note">No productivity data available yet.</div>'; return; }
 
-  const W = 1100, barH = 30, gap = 34, padL = 220, padR = 90, padT = 10;
-  const maxVal = Math.max(1, ...rows.map(m => Math.max(m.target || 0, (m[prodGran] && m[prodGran].actual) || 0)));
-  const H = padT + rows.length * (barH*2 + gap);
+  // Single bar (actual) per mode, with a vertical benchmark line marking
+  // the target - replaces the old two-bars-per-mode layout.
+  const W = 1100, barH = 34, gap = 26, padL = 320, padR = 60, padT = 10;
+  const maxVal = Math.max(1, ...rows.map(m => Math.max(m.target || 0, (m[prodGran] && m[prodGran].actual) || 0))) * 1.15;
+  const H = padT + rows.length * (barH + gap);
   const scale = (W - padL - padR) / maxVal;
 
   const svg = el('svg', { viewBox:`0 0 ${W} ${H}`, width:'100%', height:H, style:'display:block' });
+
   rows.forEach((m, i) => {
-    const y0 = padT + i*(barH*2+gap);
+    const y0 = padT + i*(barH+gap);
     const win = m[prodGran] || {};
-    const lbl = el('text', { x: padL-12, y: y0+barH, 'text-anchor':'end', fill:'#f5f8fd', 'font-size':11.5, 'font-weight':600, 'dominant-baseline':'middle' });
-    lbl.textContent = m.mode;
+    const actVal = win.actual;
+
+    const lbl = el('text', { x: padL-14, y: y0+barH/2, 'text-anchor':'end', fill:'#f5f8fd', 'font-size':11.5, 'font-weight':600, 'dominant-baseline':'middle' });
+    lbl.textContent = displayMode(m.mode);
     svg.appendChild(lbl);
 
-    const targetLen = (m.target||0) * scale;
-    const targetBar = el('rect', { x:padL, y:y0, width:Math.max(2,targetLen), height:barH-6, rx:5, fill:'#6fa3ff', opacity:0.9 });
-    addTip(targetBar, `<b>${m.mode}</b><br>Target: <b>${fmt1(m.target)}</b>`);
-    svg.appendChild(targetBar);
-    const targetTxt = el('text', { x: padL+targetLen+8, y: y0+(barH-6)/2, fill:'#aab6cc', 'font-size':10.5, 'dominant-baseline':'middle' });
-    targetTxt.textContent = 'Target ' + fmt1(m.target);
-    svg.appendChild(targetTxt);
+    // Track (full-width faint background so the bar's proportion reads clearly)
+    svg.appendChild(el('rect', { x:padL, y:y0, width:W-padL-padR, height:barH, rx:8, fill:'rgba(255,255,255,0.045)' }));
 
-    const y1 = y0 + barH;
-    const actVal = win.actual;
-    const actLen = (actVal||0) * scale;
-    const actColor = (actVal !== null && actVal !== undefined && m.target) ? (actVal >= m.target ? '#5ee6cf' : '#ff7a7a') : '#5ee6cf';
     if (actVal !== null && actVal !== undefined) {
-      const actBar = el('rect', { x:padL, y:y1, width:Math.max(2,actLen), height:barH-6, rx:5, fill:actColor, opacity:0.9 });
-      addTip(actBar, `<b>${m.mode}</b><br>Actual: <b>${fmt1(actVal)}</b> (target ${fmt1(m.target)})`);
+      const actLen = Math.max(2, actVal * scale);
+      const onTarget = m.target ? actVal >= m.target : true;
+      const actColor = onTarget ? '#5ee6cf' : '#ff7a7a';
+      const actBar = el('rect', { x:padL, y:y0, width:actLen, height:barH, rx:8, fill:actColor, opacity:0.92 });
+      addTip(actBar, `<b>${displayMode(m.mode)}</b><br>Actual: <b>${fmt1(actVal)}</b><br>Target: <b>${fmt1(m.target)}</b>`);
       svg.appendChild(actBar);
-      const actTxt = el('text', { x: padL+actLen+8, y: y1+(barH-6)/2, fill:'#aab6cc', 'font-size':10.5, 'dominant-baseline':'middle' });
-      actTxt.textContent = 'Actual ' + fmt1(actVal);
+      const actTxt = el('text', { x:padL+actLen+8, y:y0+barH/2, fill:'#aab6cc', 'font-size':11, 'dominant-baseline':'middle' });
+      actTxt.textContent = fmt1(actVal);
       svg.appendChild(actTxt);
     } else {
-      const noneTxt = el('text', { x: padL+4, y: y1+(barH-6)/2, fill:'#6f7c96', 'font-size':10.5, 'dominant-baseline':'middle' });
+      const noneTxt = el('text', { x:padL+10, y:y0+barH/2, fill:'#6f7c96', 'font-size':10.5, 'font-style':'italic', 'dominant-baseline':'middle' });
       noneTxt.textContent = 'No attendance data for this window';
       svg.appendChild(noneTxt);
     }
+
+    // Benchmark target line - a vertical marker crossing the bar, with a
+    // small diamond cap, so the target reads as a threshold rather than
+    // a second competing bar.
+    const targetX = padL + Math.max(0, m.target||0) * scale;
+    const markerGroup = el('g', {});
+    markerGroup.appendChild(el('line', { x1:targetX, x2:targetX, y1:y0-5, y2:y0+barH+5, stroke:'#6fa3ff', 'stroke-width':2.5 }));
+    markerGroup.appendChild(el('polygon', { points:`${targetX-5},${y0-5} ${targetX+5},${y0-5} ${targetX},${y0+3}`, fill:'#6fa3ff' }));
+    addTip(markerGroup, `<b>${displayMode(m.mode)}</b><br>Target benchmark: <b>${fmt1(m.target)}</b>`);
+    svg.appendChild(markerGroup);
   });
+
   box.innerHTML = ''; box.appendChild(svg);
 }
 
@@ -507,27 +554,42 @@ function renderProdChart(){
 function renderModeTable(byModeLatest){
   const box = document.getElementById('modeTable');
   if (!byModeLatest.length) { box.innerHTML = '<div class="empty-note">No mode data for the latest day.</div>'; return; }
-  box.innerHTML = `
-    <table>
-      <thead><tr><th>Mode</th><th></th><th>Planned</th><th>Actual</th><th>Attainment</th><th>Attendance</th><th>Actual Productivity</th><th>Target</th></tr></thead>
-      <tbody>
-        ${byModeLatest.map((m,i) => {
-          const pct = m.outputPct;
-          const pctClass = pct !== null && pct < 100 ? 'short' : (pct !== null && pct > 100 ? 'over' : '');
-          const prodClass = (m.unitsPerAttendee !== null && m.target) ? (m.unitsPerAttendee >= m.target ? 'over' : 'short') : '';
-          return `<tr>
-            <td>${m.mode}</td>
-            <td><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${colorForMode(m.mode,i)};"></span></td>
-            <td>${fmt(m.planned)}</td>
-            <td>${fmt(m.actual)}</td>
-            <td class="${pctClass}">${pct !== null ? fmt1(pct)+'%' : '—'}</td>
-            <td>${m.attendanceActual !== null ? fmt(m.attendanceActual) : '—'}</td>
-            <td class="${prodClass}">${m.unitsPerAttendee !== null ? fmt1(m.unitsPerAttendee) : '—'}</td>
-            <td>${fmt1(m.target)}</td>
-          </tr>`;
-        }).join('')}
-      </tbody>
-    </table>`;
+  box.innerHTML = `<div class="mode-card-grid">
+    ${byModeLatest.map((m,i) => {
+      const pct = m.outputPct;
+      const pctColor = pct !== null && pct < 100 ? 'var(--red)' : (pct !== null && pct > 100 ? 'var(--teal)' : 'var(--text-mid)');
+      const barPct = Math.max(0, Math.min(100, pct === null ? 0 : pct));
+      const prodOk = (m.unitsPerAttendee !== null && m.target) ? m.unitsPerAttendee >= m.target : null;
+      const dot = colorForMode(m.mode,i);
+
+      // Explicit reasons for a missing value instead of a bare dash -
+      // this is the actual answer to "why is there no information":
+      // a mode can legitimately have zero activity (CKD before its
+      // batch starts) or be mid-day with attendance not logged yet
+      // (attendance is never blended live - see the data-note below).
+      let emptyNote = '';
+      if (m.planned === 0 && m.actual === 0) emptyNote = 'No production logged for this line on the latest day.';
+      else if (m.attendanceActual === null) emptyNote = 'Attendance not logged yet for the latest day - productivity can\'t be computed until it is.';
+
+      return `<div class="mode-card">
+        <div class="mc-head">
+          <span class="mc-dot" style="background:${dot}"></span>
+          <span class="mc-title">${displayMode(m.mode)}</span>
+        </div>
+        <div class="mc-nums">
+          <div class="mc-num"><div class="v" style="color:var(--blue)">${fmt(m.planned)}</div><div class="l">PLANNED</div></div>
+          <div class="mc-num"><div class="v" style="color:var(--teal)">${fmt(m.actual)}</div><div class="l">ACTUAL</div></div>
+          <div class="mc-num"><div class="v" style="color:${pctColor}">${pct !== null ? fmt1(pct)+'%' : '—'}</div><div class="l">ATTAINMENT</div></div>
+        </div>
+        <div class="mc-bar-track"><div class="mc-bar-fill" style="width:${barPct}%;background:${pctColor}"></div></div>
+        <div class="mc-foot">
+          <span>Attendance: <b>${m.attendanceActual !== null ? fmt(m.attendanceActual) : '—'}</b></span>
+          <span>Productivity: <b style="${prodOk===null?'':'color:'+(prodOk?'var(--teal)':'var(--red)')}">${m.unitsPerAttendee !== null ? fmt1(m.unitsPerAttendee) : '—'}</b> / target ${fmt1(m.target)}</span>
+        </div>
+        ${emptyNote ? `<div class="mc-empty-note">ℹ️ ${emptyNote}</div>` : ''}
+      </div>`;
+    }).join('')}
+  </div>`;
 }
 
 function renderModelsTable(topModels){
@@ -538,7 +600,7 @@ function renderModelsTable(topModels){
       <thead><tr><th>Mode</th><th>Item Code</th><th>Planned</th><th>Actual</th></tr></thead>
       <tbody>
         ${topModels.map(m => `<tr>
-          <td>${m.mode}</td>
+          <td>${displayMode(m.mode)}</td>
           <td style="font-size:11.5px;">${m.itemCode}</td>
           <td>${fmt(m.planned)}</td>
           <td>${fmt(m.actual)}</td>
@@ -761,7 +823,7 @@ async function loadOT(){
     otDatesSorted = Object.keys(otByDate).sort();
 
     renderOTTrend(otGran);
-    renderOTLineTable();
+    renderOTLineChart();
     document.getElementById('otHolidayNote').textContent =
       '📅 Weekend/holiday days use the Sri Lanka Government Gazette public holiday & Poya calendar for 2026. Moon-dependent dates (Poya, Id-Ul-Fitr, Id-Ul-Alha) may shift by a day pending official confirmation — verify against company HR notices before payroll use.';
   } catch(err){
@@ -797,89 +859,111 @@ function renderOTKpis(rows){
 
 function renderOTTrend(gran){
   otGran = gran;
-  const trendBox = document.getElementById('otTrendTable');
-  if (!otDatesSorted.length) { trendBox.innerHTML = '<div class="empty-note">No overtime data available yet.</div>'; renderOTKpis([]); return; }
+  const box = document.getElementById('otTrendChart');
+  if (!otDatesSorted.length) { box.innerHTML = '<div class="empty-note">No overtime data available yet.</div>'; renderOTKpis([]); return; }
 
+  let rows;
   if (gran === 'daily') {
     const recentDates = otDatesSorted.slice(-14);
-    const rows = recentDates.map(iso => {
+    rows = recentDates.map(iso => {
       const d = otByDate[iso];
       const info = classifyDay(iso);
       const isSpecial = info.type !== 'weekday';
       return {
-        label: iso, info, otHours: d.otHours, otQty: d.otQty,
+        label: iso.slice(5), fullLabel: iso, info, otHours: d.otHours, otQty: d.otQty,
         weekdayHours: isSpecial ? 0 : d.otHours, specialHours: isSpecial ? d.otHours : 0,
       };
     });
-    renderOTKpis(rows);
-    trendBox.innerHTML = `
-      <table>
-        <thead><tr><th>Date</th><th>Day</th><th>OT Hours</th><th>OT Qty Produced</th></tr></thead>
-        <tbody>
-          ${rows.map(r => `<tr>
-            <td>${r.label}</td>
-            <td><span class="daytag ${r.info.type}">${r.info.label}</span></td>
-            <td>${fmt1(r.otHours)}</td>
-            <td>${fmt(r.otQty)}</td>
-          </tr>`).join('')}
-        </tbody>
-      </table>`;
-    return;
+  } else {
+    const buckets = {};
+    otDatesSorted.forEach(iso => {
+      const key = otBucketKey(iso, gran);
+      const d = otByDate[iso];
+      const info = classifyDay(iso);
+      const isSpecial = info.type !== 'weekday';
+      if (!buckets[key]) buckets[key] = { otHours:0, otQty:0, weekdayHours:0, specialHours:0 };
+      buckets[key].otHours += d.otHours;
+      buckets[key].otQty += d.otQty;
+      if (isSpecial) buckets[key].specialHours += d.otHours; else buckets[key].weekdayHours += d.otHours;
+    });
+    const keys = Object.keys(buckets).sort();
+    const limit = gran === 'weekly' ? 10 : 12;
+    rows = keys.slice(-limit).map(k => ({ label:k, fullLabel:k, ...buckets[k] }));
   }
-
-  // weekly / monthly: bucket, split weekday vs weekend/holiday hours within each bucket
-  const buckets = {};
-  otDatesSorted.forEach(iso => {
-    const key = otBucketKey(iso, gran);
-    const d = otByDate[iso];
-    const info = classifyDay(iso);
-    const isSpecial = info.type !== 'weekday';
-    if (!buckets[key]) buckets[key] = { otHours:0, otQty:0, weekdayHours:0, specialHours:0 };
-    buckets[key].otHours += d.otHours;
-    buckets[key].otQty += d.otQty;
-    if (isSpecial) buckets[key].specialHours += d.otHours; else buckets[key].weekdayHours += d.otHours;
-  });
-  const keys = Object.keys(buckets).sort();
-  const limit = gran === 'weekly' ? 10 : 12;
-  const shown = keys.slice(-limit);
-  const rows = shown.map(k => ({ label:k, ...buckets[k] }));
   renderOTKpis(rows);
-  trendBox.innerHTML = `
-    <table>
-      <thead><tr><th>${gran === 'weekly' ? 'Week' : 'Month'}</th><th></th><th>Weekday OT Hrs</th><th>Weekend/Holiday OT Hrs</th><th>Total OT Hrs</th><th>OT Qty Produced</th></tr></thead>
-      <tbody>
-        ${rows.map(r => `<tr>
-          <td>${r.label}</td><td></td>
-          <td>${fmt1(r.weekdayHours)}</td>
-          <td>${fmt1(r.specialHours)}</td>
-          <td>${fmt1(r.otHours)}</td>
-          <td>${fmt(r.otQty)}</td>
-        </tr>`).join('')}
-      </tbody>
-    </table>`;
+
+  // Stacked bar chart: weekday hours (blue) + weekend/holiday hours
+  // (amber) stacked per bucket, replacing the old plain table.
+  const W = 1100, H = 240, padL = 42, padR = 20, padT = 14, padB = 34;
+  const maxVal = Math.max(1, ...rows.map(r => r.otHours));
+  const groupW = (W-padL-padR) / rows.length;
+  const barW = Math.min(34, groupW*0.5);
+  const scaleY = (H-padT-padB)/maxVal;
+
+  const svg = el('svg', { viewBox:`0 0 ${W} ${H}`, width:'100%', height:H, style:'display:block' });
+  for (let g=0; g<=4; g++) {
+    const y = padT+(H-padT-padB)*(1-g/4);
+    svg.appendChild(el('line', { x1:padL, x2:W-padR, y1:y, y2:y, stroke:'rgba(255,255,255,0.06)', 'stroke-width':1 }));
+    const t = el('text', { x:padL-8, y:y+3, 'text-anchor':'end', fill:'#6f7c96', 'font-size':9.5 });
+    t.textContent = fmt1(maxVal*g/4);
+    svg.appendChild(t);
+  }
+  rows.forEach((r,i) => {
+    const cx = padL + groupW*i + groupW/2;
+    const wdH = r.weekdayHours*scaleY, spH = r.specialHours*scaleY;
+    if (r.weekdayHours > 0) {
+      const wdBar = el('rect', { x:cx-barW/2, y:H-padB-wdH, width:barW, height:Math.max(0,wdH), fill:'#6fa3ff', opacity:0.9 });
+      addTip(wdBar, `<b>${r.fullLabel}</b><br>Weekday OT: <b>${fmt1(r.weekdayHours)}h</b>`);
+      svg.appendChild(wdBar);
+    }
+    if (r.specialHours > 0) {
+      const spBar = el('rect', { x:cx-barW/2, y:H-padB-wdH-spH, width:barW, height:Math.max(0,spH), fill:'#ffc267', opacity:0.9 });
+      addTip(spBar, `<b>${r.fullLabel}</b><br>Weekend/holiday OT: <b>${fmt1(r.specialHours)}h</b>`);
+      svg.appendChild(spBar);
+    }
+    if (r.otHours === 0) {
+      const zeroDot = el('circle', { cx, cy:H-padB, r:2.5, fill:'rgba(255,255,255,0.2)' });
+      svg.appendChild(zeroDot);
+    }
+    const t = el('text', { x:cx, y:H-10, 'text-anchor':'middle', fill:'#6f7c96', 'font-size':9.5 });
+    t.textContent = r.label;
+    svg.appendChild(t);
+  });
+  box.innerHTML = ''; box.appendChild(svg);
 }
 
-function renderOTLineTable(){
-  const box = document.getElementById('otLineTable');
+function renderOTLineChart(){
+  const box = document.getElementById('otLineChart');
   if (!otDatesSorted.length) { box.innerHTML = '<div class="empty-note">No overtime data available yet.</div>'; return; }
   const latestIso = otDatesSorted[otDatesSorted.length - 1];
   const info = classifyDay(latestIso);
   const byMode = otByDate[latestIso].byMode;
   const modes = Object.keys(byMode);
   if (!modes.length) { box.innerHTML = '<div class="empty-note">No overtime logged on the latest day.</div>'; return; }
-  box.innerHTML = `
-    <div class="sub" style="margin-bottom:10px;">${latestIso} <span class="daytag ${info.type}" style="margin-left:6px;">${info.label}</span></div>
-    <table>
-      <thead><tr><th>Mode</th><th></th><th>OT Hours</th><th>OT Qty Produced</th></tr></thead>
-      <tbody>
-        ${modes.map((mode,i) => `<tr>
-          <td>${mode}</td>
-          <td><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${colorForMode(mode,i)};"></span></td>
-          <td>${fmt1(byMode[mode].otHours)}</td>
-          <td>${fmt(byMode[mode].otQty)}</td>
-        </tr>`).join('')}
-      </tbody>
-    </table>`;
+
+  const W = 1100, barH = 28, gap = 22, padL = 320, padR = 70, padT = 10;
+  const maxVal = Math.max(1, ...modes.map(mo => byMode[mo].otHours));
+  const H = padT + modes.length * (barH+gap);
+  const scale = (W-padL-padR) / (maxVal*1.15);
+
+  const svg = el('svg', { viewBox:`0 0 ${W} ${H}`, width:'100%', height:H, style:'display:block' });
+  modes.forEach((mode,i) => {
+    const y0 = padT + i*(barH+gap);
+    const hrs = byMode[mode].otHours, qty = byMode[mode].otQty;
+    const lbl = el('text', { x:padL-14, y:y0+barH/2, 'text-anchor':'end', fill:'#f5f8fd', 'font-size':11.5, 'font-weight':600, 'dominant-baseline':'middle' });
+    lbl.textContent = displayMode(mode);
+    svg.appendChild(lbl);
+    svg.appendChild(el('rect', { x:padL, y:y0, width:W-padL-padR, height:barH, rx:8, fill:'rgba(255,255,255,0.045)' }));
+    const len = Math.max(2, hrs*scale);
+    const bar = el('rect', { x:padL, y:y0, width:len, height:barH, rx:8, fill:colorForMode(mode,i), opacity:0.9 });
+    addTip(bar, `<b>${displayMode(mode)}</b><br>OT hours: <b>${fmt1(hrs)}</b><br>OT qty produced: <b>${fmt(qty)}</b>`);
+    svg.appendChild(bar);
+    const txt = el('text', { x:padL+len+8, y:y0+barH/2, fill:'#aab6cc', 'font-size':11, 'dominant-baseline':'middle' });
+    txt.textContent = fmt1(hrs) + 'h · ' + fmt(qty) + ' units';
+    svg.appendChild(txt);
+  });
+  box.innerHTML = `<div class="sub" style="margin-bottom:12px;">${latestIso} <span class="daytag ${info.type}" style="margin-left:6px;">${info.label}</span></div>`;
+  box.appendChild(svg);
 }
 
 document.getElementById('otGranToggle').addEventListener('click', (e) => {
