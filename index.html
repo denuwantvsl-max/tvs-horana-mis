@@ -167,6 +167,31 @@ h1{font-size:38px;font-weight:800;margin:0;letter-spacing:-0.02em;white-space:pr
 .mod-stat .val{font-size:21px;font-weight:800;color:var(--text-hi);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .mod-stat .lbl{font-size:10px;color:var(--text-mid);margin-top:4px;text-transform:uppercase;letter-spacing:0.05em;}
 
+.mod-stat-hero{padding:16px 18px;border-radius:14px;margin-bottom:12px;
+  background:linear-gradient(135deg, rgba(178,141,255,0.14), rgba(178,141,255,0.03));
+  border:1px solid rgba(178,141,255,0.3);}
+.mod-stat-hero .val{font-size:19px;font-weight:800;color:var(--text-hi);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mod-stat-hero .lbl{font-size:10px;color:var(--violet);margin-top:4px;text-transform:uppercase;letter-spacing:0.05em;font-weight:700;}
+
+.stat-carousel{overflow:hidden;}
+.stat-track{display:flex;transition:transform 0.7s cubic-bezier(.4,0,.2,1);}
+.stat-slide{min-width:100%;display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.stat-dots{display:flex;gap:6px;justify-content:center;margin-top:12px;}
+.stat-dots .dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.16);
+  transition:background 0.3s ease, transform 0.3s ease;cursor:pointer;}
+.stat-dots .dot.active{background:var(--violet);transform:scale(1.3);}
+@media (prefers-reduced-motion:reduce){
+  .stat-track{transition:none;transform:none !important;display:block;}
+  .stat-slide{margin-bottom:12px;}
+  .stat-dots{display:none;}
+}
+
+.bar-row.dual .bar-val{width:100px;}
+.bar-row.dual .bar-track{position:relative;}
+.bar-row.dual .bar-fill{position:absolute;top:0;left:0;}
+.bar-row.dual .bar-fill.ghost{background:rgba(255,255,255,0.14);}
+.bar-val small{display:block;font-size:9px;color:var(--text-low);font-weight:500;margin-top:1px;}
+
 .photo-band{margin-top:8px;padding:28px 32px;position:relative;overflow:hidden;}
 .pb-label{font-size:10.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--teal);font-weight:700;margin-bottom:8px;}
 .pb-title{font-size:16.5px;font-weight:600;line-height:1.45;color:var(--text-hi);max-width:600px;}
@@ -456,16 +481,31 @@ footer{max-width:1220px;margin:0 auto;padding:24px 24px 0;font-size:11.5px;color
     </div>
     <div class="mf-right">
       <div class="mf-right-label">On the floor right now <span id="prodDate"></span></div>
-      <div class="mod-stats">
-        <div class="mod-stat"><div class="val" id="prodUnits">…</div><div class="lbl">Units built today</div></div>
-        <div class="mod-stat"><div class="val" id="prodPct">…</div><div class="lbl">Of daily plan</div></div>
-        <div class="mod-stat"><div class="val" id="prodAtt">…</div><div class="lbl">Attendance</div></div>
-        <div class="mod-stat"><div class="val" id="prodTop">…</div><div class="lbl">Top model today</div></div>
+      <div class="mod-stat-hero">
+        <div class="val" id="prodTop">…</div>
+        <div class="lbl">Top model today</div>
+      </div>
+      <div class="stat-carousel" id="statCarousel">
+        <div class="stat-track" id="statTrack">
+          <div class="stat-slide">
+            <div class="mod-stat"><div class="val" id="skd2wUnits">…</div><div class="lbl">SKD 2W · Units today</div></div>
+            <div class="mod-stat"><div class="val" id="skd2wPct">…</div><div class="lbl">SKD 2W · Of daily plan</div></div>
+          </div>
+          <div class="stat-slide">
+            <div class="mod-stat"><div class="val" id="skd3wUnits">…</div><div class="lbl">SKD 3W · Units today</div></div>
+            <div class="mod-stat"><div class="val" id="skd3wPct">…</div><div class="lbl">SKD 3W · Of daily plan</div></div>
+          </div>
+          <div class="stat-slide">
+            <div class="mod-stat"><div class="val" id="ckdBatchPct">…</div><div class="lbl">CKD · Of batch target</div></div>
+            <div class="mod-stat"><div class="val" id="ckdDailyPct">…</div><div class="lbl">CKD · Of daily plan</div></div>
+          </div>
+        </div>
+        <div class="stat-dots" id="statDots"></div>
       </div>
       <div class="src">Source: DATA BY PROD EXE sheet · <span id="prodSrc">…</span></div>
     </div>
     <div class="mf-monthly">
-      <div class="mf-right-label">Planned production <select id="prodMonthSelect" class="month-select"></select></div>
+      <div class="mf-right-label">Production <select id="prodMonthSelect" class="month-select"></select></div>
       <div class="val" id="prodMonthTotal" style="font-size:22px;font-weight:800;margin-bottom:10px;">…</div>
       <div id="prodMonthBars"></div>
       <div class="src">Source: <span id="prodMonthSrc">…</span></div>
@@ -614,6 +654,21 @@ function barsHtml(entries){
       <span class="bar-val">${e.value.toLocaleString()}</span>
     </div>`).join('');
 }
+function dualBarsHtml(entries){
+  const max = Math.max(1, ...entries.map(e => Math.max(e.planned, e.actual)));
+  return entries.map(e => {
+    const pct = e.planned > 0 ? Math.round(e.actual / e.planned * 100) : (e.actual > 0 ? 100 : 0);
+    return `
+    <div class="bar-row dual">
+      <span class="bar-lbl">${e.label}</span>
+      <div class="bar-track">
+        <div class="bar-fill ghost" style="width:${Math.round(e.planned/max*100)}%;"></div>
+        <div class="bar-fill" style="width:${Math.round(e.actual/max*100)}%;background:${e.color};"></div>
+      </div>
+      <span class="bar-val">${e.actual.toLocaleString()}<small>of ${e.planned.toLocaleString()} · ${pct}%</small></span>
+    </div>`;
+  }).join('');
+}
 function ringSvg(pct, color){
   const p = Math.max(0, Math.min(200, pct));
   const c = 2 * Math.PI * 38;
@@ -678,24 +733,80 @@ fetch(API_URL + '?module=delivery').then(r => r.json()).then(d => {
   el('delivSrc').textContent = src ? formatAgo(src.receivedAt) : (latest || 'unknown');
 }).catch(() => {});
 
-// ---- Production (daily "on the floor" stats — unchanged source/logic) ----
+// ---- Production (daily "on the floor" stats) ----
+const SKD_2W_MODES = ['2W SKD (NTORQ/ICUBE)', '2W SKD (JUPITER/SPORT/RAIDER/RTR/ RONIN 225)'];
 fetch(API_URL + '?module=production').then(r => r.json()).then(d => {
-  const t = (d.summary && d.summary.totals) || {};
   const el = id => document.getElementById(id);
-  if (!el('prodUnits')) return;
-  el('prodUnits').textContent = (t.actual !== undefined && t.actual !== null) ? t.actual : '—';
-  el('prodPct').textContent = (t.outputPct !== null && t.outputPct !== undefined) ? Math.round(t.outputPct) + '%' : '—';
-  el('prodAtt').textContent = (t.attendanceActual !== undefined && t.attendanceActual !== null)
-    ? (t.attendanceActual + ' / ' + (t.attendancePlanned || '—')) : '—';
+  if (!el('skd2wUnits')) return;
+  const byMode = {};
+  (d.byModeLatest || []).forEach(m => { byMode[m.mode] = m; });
+
+  // SKD 2W — the two 2W sub-modes summed together.
+  let skd2wActual = 0, skd2wPlanned = 0;
+  SKD_2W_MODES.forEach(mo => { const m = byMode[mo]; if (m) { skd2wActual += m.actual || 0; skd2wPlanned += m.planned || 0; } });
+  el('skd2wUnits').textContent = skd2wActual || '—';
+  el('skd2wPct').textContent = skd2wPlanned > 0 ? Math.round(skd2wActual / skd2wPlanned * 100) + '%' : '—';
+
+  // SKD 3W
+  const m3w = byMode['3W SKD'];
+  el('skd3wUnits').textContent = m3w ? (m3w.actual || 0) : '—';
+  el('skd3wPct').textContent = (m3w && m3w.planned > 0) ? Math.round(m3w.actual / m3w.planned * 100) + '%' : '—';
+
+  // CKD
+  const ckd = d.ckd || {};
+  const mCkd = byMode['2W CKD - DVA'];
+  el('ckdBatchPct').textContent = (ckd.pctComplete !== null && ckd.pctComplete !== undefined) ? ckd.pctComplete + '%' : '—';
+  el('ckdDailyPct').textContent = (mCkd && mCkd.outputPct !== null && mCkd.outputPct !== undefined) ? Math.round(mCkd.outputPct) + '%' : '—';
+
+  // Top model today — kept as-is (already SKD-led on volume).
   const top = (d.topModels && d.topModels[0]) ? d.topModels[0] : null;
   el('prodTop').textContent = top ? (top.itemCode.length > 20 ? top.itemCode.slice(0, 18) + '…' : top.itemCode) : '—';
+
   if (d.summary && d.summary.latestDate) el('prodDate').textContent = 'as of ' + d.summary.latestDate;
   el('prodSrc').textContent = (d.summary && d.summary.sheetLastUpdated) ? formatAgo(d.summary.sheetLastUpdated) : 'unknown';
+
+  startStatCarousel();
 }).catch(() => {
-  ['prodUnits','prodPct','prodAtt','prodTop'].forEach(k => { const e = document.getElementById(k); if (e) e.textContent = '—'; });
+  ['skd2wUnits','skd2wPct','skd3wUnits','skd3wPct','ckdBatchPct','ckdDailyPct','prodTop'].forEach(k => { const e = document.getElementById(k); if (e) e.textContent = '—'; });
 });
 
-// ---- Production — planned by month (SKD PRODUCTION sheet; see Code.gs Part 11) ----
+// Auto-swiping carousel for the SKD 2W / SKD 3W / CKD stat slides —
+// slides sideways every ~4.5s, loops continuously, pauses on hover so
+// a person reading a number doesn't have it slide away mid-read.
+// Respects prefers-reduced-motion (CSS switches the track to a static
+// stacked list and hides the dots in that case — see the stylesheet).
+function startStatCarousel(){
+  if (reduceMotion) return;
+  const track = document.getElementById('statTrack');
+  const dotsWrap = document.getElementById('statDots');
+  if (!track || track.dataset.carouselInit) return;
+  track.dataset.carouselInit = '1';
+  const slides = track.children.length;
+  let idx = 0, timer = null;
+
+  dotsWrap.innerHTML = Array.from({length: slides}, (_, i) => `<span class="dot${i === 0 ? ' active' : ''}"></span>`).join('');
+  const dots = [...dotsWrap.children];
+
+  function show(i){
+    idx = i;
+    track.style.transform = `translateX(-${idx * 100}%)`;
+    dots.forEach((d, j) => d.classList.toggle('active', j === idx));
+  }
+  function next(){ show((idx + 1) % slides); }
+  function start(){ timer = setInterval(next, 4500); }
+  function stop(){ if (timer) clearInterval(timer); }
+
+  dots.forEach((d, i) => d.addEventListener('click', () => { show(i); stop(); start(); }));
+  const carousel = document.getElementById('statCarousel');
+  carousel.addEventListener('mouseenter', stop);
+  carousel.addEventListener('mouseleave', start);
+
+  start();
+}
+
+// ---- Production by month — Plan vs Actual (see Code.gs Part 11: full
+// history from DATA BY PROD EXE, current month overlaid live from the
+// SKD PRODUCTION sheet) ----
 fetch(API_URL + '?module=productionMonthly').then(r => r.json()).then(d => {
   const el = id => document.getElementById(id);
   const sel = el('prodMonthSelect');
@@ -709,16 +820,15 @@ fetch(API_URL + '?module=productionMonthly').then(r => r.json()).then(d => {
   function render(monthKey){
     const m = d.byMonth[monthKey];
     if (!m) return;
-    el('prodMonthTotal').textContent = m.plannedTotal.toLocaleString() + ' units planned';
+    const pct = m.plannedTotal > 0 ? Math.round(m.actualTotal / m.plannedTotal * 100) : 0;
+    el('prodMonthTotal').textContent = m.actualTotal.toLocaleString() + ' of ' + m.plannedTotal.toLocaleString() + ' units (' + pct + '%)';
     const order = ['2W CKD - DVA','2W SKD (NTORQ/ICUBE)','2W SKD (JUPITER/SPORT/RAIDER/RTR/ RONIN 225)','3W SKD'];
-    const entries = order.map(cat => ({ label: CATEGORY_LABELS[cat], value: m.planned[cat] || 0, color: CATEGORY_COLORS[cat] }));
-    el('prodMonthBars').innerHTML = barsHtml(entries);
+    const entries = order.map(cat => ({ label: CATEGORY_LABELS[cat], planned: m.planned[cat] || 0, actual: m.actual[cat] || 0, color: CATEGORY_COLORS[cat] }));
+    el('prodMonthBars').innerHTML = dualBarsHtml(entries);
+    el('prodMonthSrc').textContent = (m.sourceLabel || 'unknown source');
   }
   render(d.latestMonth);
   sel.addEventListener('change', () => render(sel.value));
-
-  const src = d.source || {};
-  el('prodMonthSrc').textContent = (src.label || 'SKD PRODUCTION sheet') + ' · ' + (src.lastUpdated ? formatAgo(src.lastUpdated) : 'unknown');
 }).catch(() => {
   const t = document.getElementById('prodMonthTotal'); if (t) t.textContent = '—';
 });
