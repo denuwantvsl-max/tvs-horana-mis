@@ -290,7 +290,22 @@ footer{max-width:1220px;margin:0 auto;padding:24px 24px 0;font-size:11.5px;color
   .row-sub{grid-column:1 !important;grid-row:4 !important;grid-template-columns:1fr !important;}
   .mod-feature{grid-column:1 !important;grid-row:2 !important;}
 }
-.flow-grid .mod-feature{grid-template-columns:1fr;gap:20px;}
+/* FIX (2026-09-25, per Denuwan - Production card content cropped on
+   mobile): grid-template-columns:1fr resolves to minmax(auto,1fr) by
+   default, so this single column couldn't shrink below the widest
+   child's own min-content width - specifically the stat carousel
+   (.stat-track holds 3 full-width slides side by side for the slide
+   animation, so it wants to be ~3x the card's width). That forced
+   the WHOLE row (mf-left, mf-right, mf-monthly) out to ~521px
+   regardless of the ~340px actually available on a phone, and
+   .mod-feature's own overflow:hidden then silently clipped the
+   excess - exactly the "cropped" look reported. minmax(0,1fr)
+   removes that implicit auto-minimum, letting the column (and
+   everything in it) actually shrink to fit; min-width:0 on the two
+   halves is the same fix applied directly to them as a second line
+   of defense. */
+.flow-grid .mod-feature{grid-template-columns:minmax(0,1fr);gap:20px;}
+.flow-grid .mod-feature .mf-left,.flow-grid .mod-feature .mf-right,.flow-grid .mod-feature .mf-monthly{min-width:0;}
 /* FIX (2026-09-23, A2): row-sub was pinned to grid-column:2 only, the
    same ~1.55fr width as the Production card above it - columns 1 and
    3 sat empty for this whole row (the big dark margins either side of
