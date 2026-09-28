@@ -171,6 +171,11 @@ footer{max-width:1220px;margin:0 auto;padding:24px 24px 0;font-size:11.5px;color
   #lt-dots{position:absolute;bottom:5vh;display:flex;gap:1vw;}
   .lt-dot{width:1.1vh;height:1.1vh;border-radius:50%;background:rgba(255,255,255,0.2);transition:all 0.4s;}
   .lt-dot.on{background:var(--violet);width:3vh;border-radius:1vh;}
+  /* Video slide: takes over the whole screen (brand, countdown, dots and toggle button stay on top) */
+  #lunchTakeover.lt-video{background:#000;}
+  #lunchTakeover.lt-video #lt-slide{position:absolute;inset:0;width:100%;height:100%;max-width:none;transform:none;}
+  #lunchTakeover.lt-video #lt-icon{width:100%;height:100%;max-width:none;margin:0;}
+  #lunchTakeover.lt-video #lt-brand,#lunchTakeover.lt-video #lt-timer,#lunchTakeover.lt-video #lt-dots{z-index:5;text-shadow:0 0 1vh rgba(0,0,0,0.8);}
   #ltToggleBtn{position:fixed;bottom:2vh;left:50%;transform:translateX(-50%);z-index:600;background:var(--blue);color:#fff;border:none;border-radius:1vh;padding:1.3vh 2.5vw;font-size:1.6vh;font-weight:800;cursor:pointer;box-shadow:0 0.5vh 2vh rgba(0,0,0,0.4);}
   #ltToggleBtn:hover{opacity:0.9;}
 
@@ -382,7 +387,8 @@ function ltShowSlide(i){
     const iconEl=document.getElementById("lt-icon");
     if(s.video){
       iconEl.classList.add("lt-icon-img");
-      iconEl.innerHTML=`<video id="lt-video" src="${s.video}" autoplay playsinline style="width:100%;height:100%;object-fit:contain;border-radius:1vh;"></video>`;
+      document.getElementById("lunchTakeover").classList.add("lt-video");
+      iconEl.innerHTML=`<video id="lt-video" src="${s.video}" autoplay playsinline style="width:100%;height:100%;object-fit:contain;background:#000;"></video>`;
       document.getElementById("lt-title-en").textContent="";
       document.getElementById("lt-title-si").textContent="";
       document.getElementById("lt-sub-en").textContent="";
@@ -393,6 +399,7 @@ function ltShowSlide(i){
       v.onended=()=>{if(ltActive){ltIdx=(ltIdx+1)%ltSlides.length;ltShowSlide(ltIdx);}};
       ltScheduleAdvance(75000); // fallback if the video can't play for some reason
     } else if(s.img){
+      document.getElementById("lunchTakeover").classList.remove("lt-video");
       iconEl.classList.add("lt-icon-img");
       iconEl.innerHTML=`<img src="${s.img}" style="width:100%;height:100%;object-fit:contain;border-radius:1vh;">`;
       document.getElementById("lt-title-en").textContent="";
@@ -401,6 +408,7 @@ function ltShowSlide(i){
       document.getElementById("lt-sub-si").textContent="";
       ltScheduleAdvance(9000);
     } else {
+      document.getElementById("lunchTakeover").classList.remove("lt-video");
       iconEl.classList.remove("lt-icon-img");
       iconEl.innerHTML=LT_ICONS[s.icon];
       document.getElementById("lt-title-en").textContent=s.en;
@@ -424,7 +432,7 @@ function ltStart(type){
 }
 function ltStop(){
   if(!ltActive)return;ltActive=false;ltCurrentType=null;
-  document.getElementById("lunchTakeover").classList.remove("active");
+  document.getElementById("lunchTakeover").classList.remove("active","lt-video");
   ltClearAdvance();
 }
 function ltUpdateTimer(mins){document.getElementById("lt-timer-n").textContent=fmtCD(mins);}
