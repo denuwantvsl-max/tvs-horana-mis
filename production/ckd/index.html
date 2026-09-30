@@ -801,10 +801,25 @@ setInterval(tick, 1000); tick();
 // A row with a blank date but its own item/plan (second item code on the
 // same day, e.g. 19 Oct Black -> MGreen changeover) inherits the date above.
 // A row with a blank date and NO item/plan (stray label) is ignored.
-fetch(CSV_URL).then(r => {
+// 2026-09-30: live refresh. The page re-reads the sheet every 60s (no
+// manual reload needed). It only re-renders when the sheet content (or the
+// date) actually changed, so dials don't re-animate every minute.
+const REFRESH_MS = 60000;
+let ckdLastSig = null, ckdLoading = false;
+function fmtClock(d){ return d.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit', second:'2-digit' }); }
+function loadCKD(){
+if (ckdLoading) return; ckdLoading = true;
+fetch(CSV_URL + '&_=' + Date.now(), { cache: 'no-store' }).then(r => {
   if (!r.ok) throw new Error('HTTP ' + r.status);
   return r.text();
 }).then(text => {
+  const sigDay = new Date(); const sig = text + '|' + sigDay.getFullYear() + '-' + sigDay.getMonth() + '-' + sigDay.getDate();
+  if (sig === ckdLastSig){
+    document.getElementById('sheetSrc').textContent = `Source: CKD Dashboard tab, DATA BY PROD EXE sheet · live, auto-refresh every 60s · last checked ${fmtClock(new Date())} (no change)`;
+    return;
+  }
+  const firstLoad = ckdLastSig === null;
+  ckdLastSig = sig;
   const rows = parseCSV(text).filter(r => r.some(c => c && c.trim()));
   if (rows.length < 2) throw new Error('No data rows');
   const headers = rows[0];
@@ -1192,17 +1207,27 @@ fetch(CSV_URL).then(r => {
   const sc = document.getElementById('pvaScroll');
   if (todayTr && sc) sc.scrollTop = Math.max(0, todayTr.offsetTop - 150);
 
-  document.getElementById('sheetSrc').textContent = `Source: CKD Dashboard tab, DATA BY PROD EXE sheet · loaded ${new Date().toLocaleTimeString('en-GB')}`;
+  document.getElementById('sheetSrc').textContent = `Source: CKD Dashboard tab, DATA BY PROD EXE sheet · live, auto-refresh every 60s · ${firstLoad ? 'loaded' : 'updated'} ${fmtClock(new Date())}`;
 
 }).catch(err => {
+  if (ckdLastSig !== null){
+    // keep the last good data on screen; just note the failed refresh
+    document.getElementById('sheetSrc').textContent = `Source: CKD Dashboard tab · refresh failed at ${fmtClock(new Date())} (${err.message}), retrying in 60s`;
+    return;
+  }
   document.getElementById('statusHead').textContent = 'Could not load the CKD Dashboard sheet';
   document.getElementById('statusSub').textContent = 'Check the sheet is shared as "Anyone with the link – Viewer". (' + err.message + ')';
   document.getElementById('statusBanner').className = 'status-banner glass reveal in behind';
   document.getElementById('sheetSrc').textContent = 'Source: CKD Dashboard tab — fetch failed';
   document.getElementById('scheduleBody').innerHTML = '<tr><td colspan="7" style="color:var(--text-low);">Could not load data.</td></tr>';
-});
+}).finally(() => { ckdLoading = false; });
+}
+loadCKD();
+setInterval(loadCKD, REFRESH_MS);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) loadCKD(); });
 
 // ---------------- Productivity / attendance (activates once Galhena logs CKD-DVA rows) ----------------
+function loadCKDPerf(){
 fetch(API_URL + '?module=production').then(r => r.json()).then(d => {
   const modes = d.byModeLatest || [];
   const ckd = modes.find(m => (m.mode||'').indexOf('CKD') !== -1);
@@ -1216,6 +1241,9 @@ fetch(API_URL + '?module=production').then(r => r.json()).then(d => {
     </div>
     <div class="src-line">Source: DATA BY PROD EXE sheet · as of ${d.summary && d.summary.latestDate || '—'}</div>`;
 }).catch(() => {});
+}
+loadCKDPerf();
+setInterval(loadCKDPerf, 5 * 60000); // Apps Script API: every 5 min
 </script>
 </body>
 </html>
