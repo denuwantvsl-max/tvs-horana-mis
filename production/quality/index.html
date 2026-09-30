@@ -69,6 +69,12 @@ h1{font-size:32px;font-weight:800;margin:0;letter-spacing:-0.02em;
 .provenance{padding:14px 20px;margin-bottom:14px;font-size:12.5px;color:var(--text-mid);
   display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
 .provenance b{color:var(--text-hi);}
+.provenance select{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.14);border-radius:8px;
+  padding:5px 9px;font-size:12px;color:var(--text-hi);font-family:inherit;color-scheme:dark;cursor:pointer;}
+.provenance select:focus{outline:none;border-color:rgba(94,230,207,0.45);}
+.provenance .sep{color:var(--text-low);}
+.issue-tag{display:inline-block;margin-left:6px;font-size:10.5px;padding:1px 7px;border-radius:100px;
+  background:rgba(255,255,255,0.07);color:var(--text-mid);}
 
 .data-note{padding:13px 18px;margin-bottom:20px;font-size:12px;color:var(--amber);
   border-left:2px solid var(--amber);background:rgba(255,194,103,0.06);}
@@ -185,7 +191,7 @@ footer{max-width:1220px;margin:0 auto;padding:20px 24px 0;font-size:11.5px;color
 <div class="wrap">
 
   <div class="provenance glass" id="provenance">Loading source information…</div>
-  <div class="data-note glass" id="dateCaveatNote">⚠️ Kalpa's Quality Dashboard file has no date field of its own — the date shown is the day the email was <b>received</b>, not a date stated in the report. Cross-checked against actual production: no exact match has been found on any day so far, so treat dates here as approximate until Kalpa adds a real date to the report.</div>
+  <div class="data-note glass" id="dateCaveatNote" style="display:none;"></div>
 
   <div class="kpi-grid" id="kpiGrid"></div>
 
@@ -222,7 +228,7 @@ footer{max-width:1220px;margin:0 auto;padding:20px 24px 0;font-size:11.5px;color
 
 </div>
 
-<footer>Production quantities shown here are Quality's own reported figures. Where a category's quantity could be cross-checked against the real SKD PRODUCTION sheet for that date, any mismatch is flagged directly on that category's card. CKD is not cross-checked (its line mapping isn't confirmed yet). Issues and tester name are only shown when Kalpa actually fills them in — most days so far he hasn't.</footer>
+<footer>Source: Charith Danushka's daily "DAILLY QUALITY LEVEL" email (Quality team, under Kalpa Siriwardena), saved to Drive › Quality Emails and parsed hourly. Each report is dated by the date written on the sheet itself (the previous working day), not the day the email arrived — a Friday report that arrives on Monday is filed under Friday. Direct pass % is Quality's own stated figure. Where a category's production quantity could be cross-checked against the real SKD PRODUCTION sheet for that date, any mismatch is flagged on that category's card. CKD is not cross-checked. A category with no quantities filled in is shown as not reported, even if a pass % was left in the sheet.</footer>
 
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbzJFWD_AQc8UwEkVHcb3q9lDmzoMcO-fq9qDX3wIEAoUi8gIZN09Uxbbjfj3Z30spjjpw/exec?module=quality";
@@ -230,6 +236,7 @@ const NS = "http://www.w3.org/2000/svg";
 const CAT_COLORS = { SKD: '#5ee6cf', CKD: '#ffc267', '3W': '#6fa3ff' };
 const CAT_ORDER = ['SKD', 'CKD', '3W'];
 
+function esc(v){ return String(v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function fmt(n){ return (n === null || n === undefined) ? '—' : Number(n).toLocaleString('en-US', { maximumFractionDigits: 0 }); }
 function pct(n){ return (n === null || n === undefined) ? '—' : (n * 100).toFixed(0) + '%'; }
 function el(tag, attrs){ const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); return e; }
@@ -275,7 +282,7 @@ function renderKPIs(p){
     <div class="kpi glass info"><div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${icons.prod}</svg></div><div class="num">${fmt(prodTotal)}</div><div class="label">Total production (reported)</div></div>
     <div class="kpi glass ${defTotal > 0 ? 'warn' : 'ok'}"><div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${icons.def}</svg></div><div class="num">${fmt(defTotal)}</div><div class="label">Total defective</div></div>
     <div class="kpi glass ${overallPass !== null && overallPass < 0.9 ? 'warn' : 'ok'}"><div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${icons.pass}</svg></div><div class="num">${pct(overallPass)}</div><div class="label">Overall direct pass rate</div></div>
-    <div class="kpi glass ${anyMismatch ? 'bad' : 'ok'}"><div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${icons.check}</svg></div><div class="num">${reporting}/3</div><div class="label">${anyMismatch ? 'Categories reporting — qty mismatch found' : 'Categories reporting today'}</div></div>
+    <div class="kpi glass ${anyMismatch ? 'bad' : 'ok'}"><div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${icons.check}</svg></div><div class="num">${reporting}/3</div><div class="label">${anyMismatch ? 'Categories reporting — qty mismatch found' : 'Categories reported'}</div></div>
   `;
 }
 
@@ -286,8 +293,8 @@ function renderCategoryCards(p){
     const d = cats[cat];
     if (!d) {
       return `<div class="glass cat-card no-data">
-        <div class="cat-title">${cat} <span class="pill">No data</span></div>
-        <div class="empty-note">No report received for this category on the latest date.</div>
+        <div class="cat-title">${cat} <span class="pill">Not reported</span></div>
+        <div class="empty-note">${cat === 'CKD' ? 'CKD not in production — no figures reported for this date.' : 'No production / defective quantities reported for this date.'}</div>
       </div>`;
     }
     const passPct = d.passActualPct !== null ? d.passActualPct * 100 : 0;
@@ -306,11 +313,14 @@ function renderCategoryCards(p){
       mismatchHtml = `<div class="mismatch-box ok" style="opacity:0.7;">No production data found for that date to cross-check against.</div>`;
     }
 
-    const issuesHtml = d.issues && d.issues.length
-      ? `<ul class="issues-list">${d.issues.map(i => `<li>${i}</li>`).join('')}</ul>`
-      : `<div class="empty-note">No issues logged for this report.</div>`;
+    const details = (d.issueDetails && d.issueDetails.length)
+      ? d.issueDetails
+      : (d.issues || []).map(t => ({ text: t, model: '', qty: null }));
+    const issuesHtml = details.length
+      ? `<ul class="issues-list">${details.map(i => `<li>${esc(i.text)}${i.model ? `<span class="issue-tag">${esc(i.model)}</span>` : ''}${(i.qty !== null && i.qty !== undefined && i.qty !== '') ? `<span class="issue-tag">× ${esc(i.qty)}</span>` : ''}</li>`).join('')}</ul>`
+      : `<div class="empty-note">${d.defectiveQty ? 'No major issues listed for this report.' : 'No issues logged for this report.'}</div>`;
 
-    const testerHtml = d.tester ? `<div class="tester-line">Tester: <b>${d.tester}</b></div>` : '';
+    const testerHtml = d.tester ? `<div class="tester-line">Tester of the day: <b>${esc(d.tester)}</b></div>` : '';
 
     return `<div class="glass cat-card">
       <div class="cat-title">${cat} <span class="pill">${cat === 'CKD' && d.productionQty === null ? 'No production' : 'Reporting'}</span></div>
@@ -405,22 +415,66 @@ function renderTrend(fullTrend){
   chartBox.appendChild(svg);
 }
 
+function fmtDate(d){ return d ? new Date(d + 'T00:00:00').toLocaleDateString('en-US', { dateStyle: 'medium' }) : '—'; }
+function fmtReceived(iso){
+  if (!iso) return null;
+  const dt = new Date(iso);
+  if (isNaN(dt.getTime())) return null;
+  return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+let qualityPayload = null;
+let selectedDate = null;
+
+function reportFor(date){
+  const p = qualityPayload || {};
+  if (p.reports && p.reports[date]) return p.reports[date];
+  return { date: p.latestDate, dateSource: p.dateSource, receivedAt: p.latestReceivedAt, byCategory: p.byCategory || {} };
+}
+
 function formatProvenance(p){
   const box = document.getElementById('provenance');
-  const when = p.latestDate ? new Date(p.latestDate + 'T00:00:00').toLocaleDateString('en-US', { dateStyle: 'medium' }) : '—';
-  box.innerHTML = `📋 Latest report: <b>${when}</b> (email-received date). ${(p.trend || []).length} day(s) of history accumulated so far.`;
+  const dates = (p.availableDates && p.availableDates.length) ? p.availableDates.slice().reverse() : (p.latestDate ? [p.latestDate] : []);
+  if (!dates.length) {
+    box.innerHTML = '📋 No quality reports received yet from Charith\'s daily email.';
+    return;
+  }
+  const r = reportFor(selectedDate);
+  const recv = fmtReceived(r.receivedAt);
+  const opts = dates.map(d => `<option value="${d}"${d === selectedDate ? ' selected' : ''}>${fmtDate(d)}${d === p.latestDate ? ' (latest)' : ''}</option>`).join('');
+  box.innerHTML = `📋 Quality report for <select id="reportDateSel">${opts}</select>` +
+    `<span class="sep">·</span> date as stated on Charith's sheet` +
+    (recv ? ` <span class="sep">·</span> email received <b>${recv}</b>` : '') +
+    ` <span class="sep">·</span> ${dates.length} day(s) of history`;
+  document.getElementById('reportDateSel').addEventListener('change', e => {
+    selectedDate = e.target.value;
+    renderSelected();
+  });
+}
+
+function renderSelected(){
+  const p = qualityPayload;
+  const r = reportFor(selectedDate);
+  document.getElementById('dateLabel').textContent = selectedDate ? fmtDate(selectedDate) : 'No data yet';
+  const note = document.getElementById('dateCaveatNote');
+  if (r.dateSource === 'email-received' || (!p.reports && p.dateCaveat)) {
+    note.style.display = 'block';
+    note.innerHTML = '⚠️ This report had no date written on the sheet — the date shown is the day the email was <b>received</b>, not the production date.';
+  } else {
+    note.style.display = 'none';
+  }
+  formatProvenance(p);
+  renderKPIs(r);
+  renderCategoryCards(r);
 }
 
 async function load(){
   try {
     const res = await fetch(API_URL);
     const p = await res.json();
-    document.getElementById('dateLabel').textContent = p.latestDate
-      ? new Date(p.latestDate + 'T00:00:00').toLocaleDateString('en-US', { dateStyle: 'medium' })
-      : 'No data yet';
-    formatProvenance(p);
-    renderKPIs(p);
-    renderCategoryCards(p);
+    qualityPayload = p;
+    selectedDate = p.latestDate || null;
+    renderSelected();
     trendGlobal = p.trend || [];
     renderTrend(trendGlobal);
 
