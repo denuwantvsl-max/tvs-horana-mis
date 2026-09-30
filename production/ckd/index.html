@@ -85,6 +85,45 @@ h1{font-size:46px;font-weight:800;margin:0;letter-spacing:-0.02em;
 .next-card[data-accent="blue"]{border-color:rgba(111,163,255,0.18);}
 .next-card[data-accent="amber"]{border-color:rgba(255,194,103,0.30);background:linear-gradient(160deg, rgba(255,194,103,0.08), var(--glass-fill-2));}
 .side-col{display:flex;flex-direction:column;gap:20px;min-width:0;}
+.reveal.in{opacity:1;transform:none;}
+.target-note{margin-top:14px;font-size:12px;color:var(--text-mid);text-align:center;padding:8px 12px;border-radius:10px;background:rgba(255,255,255,0.04);border:1px dashed rgba(255,255,255,0.12);}
+.target-note b{color:var(--amber);}
+.h3-sub{text-transform:none;letter-spacing:0;font-weight:500;color:var(--text-low);}
+.pbar-row{display:grid;grid-template-columns:230px minmax(0,1fr) 150px;gap:16px;align-items:center;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.06);}
+.pbar-row:last-child{border-bottom:none;}
+@media (max-width:820px){.pbar-row{grid-template-columns:1fr;gap:6px;}}
+.pbar-name b{font-size:15px;display:block;} .pbar-name span{font-size:11.5px;color:var(--text-mid);}
+.pbar-track{position:relative;height:22px;border-radius:11px;background:rgba(255,255,255,0.06);overflow:visible;}
+.pbar-plan{position:absolute;left:0;top:0;bottom:0;border-radius:11px;background:rgba(255,255,255,0.12);}
+.pbar-act{position:absolute;left:0;top:4px;bottom:4px;border-radius:8px;background:var(--teal);min-width:0;transition:width 0.9s ease;}
+.pbar-act.risk{background:var(--amber);} .pbar-act.behind{background:var(--red);}
+.pbar-pct{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:11px;font-weight:700;color:var(--text-hi);}
+.pbar-meta{text-align:right;font-size:12px;color:var(--text-mid);}
+.pbar-meta b{font-size:16px;color:var(--text-hi);display:block;}
+.bar-legend{display:flex;gap:18px;margin-top:12px;flex-wrap:wrap;font-size:10.5px;color:var(--text-mid);}
+.bar-legend span{display:flex;align-items:center;gap:6px;}
+.bar-legend i{width:14px;height:8px;border-radius:4px;display:inline-block;}
+.lg-act{background:var(--teal);} .lg-plan{background:rgba(255,255,255,0.18);} .lg-tgt{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.2);}
+.pva-scroll{max-height:560px;overflow:auto;border-radius:12px;border:1px solid rgba(255,255,255,0.06);}
+table.pva{font-size:12.5px;min-width:860px;}
+table.pva td:last-child{white-space:normal;min-width:190px;}
+.next-card .batch-top{flex-wrap:wrap;}
+table.pva th{position:sticky;top:0;background:#12151f;z-index:2;padding:9px 10px;}
+table.pva thead tr:nth-child(2) th{top:33px;}
+table.pva th.grp{text-align:center;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,0.1);}
+table.pva th.b1{color:var(--violet);} table.pva th.b2{color:var(--blue);}
+table.pva td{padding:8px 10px;white-space:nowrap;}
+table.pva td.num{text-align:right;font-variant-numeric:tabular-nums;}
+table.pva td.b1{background:rgba(178,141,255,0.04);} table.pva td.b2{background:rgba(111,163,255,0.04);}
+table.pva td.muted{color:var(--text-low);}
+table.pva td.pos{color:var(--teal);font-weight:700;} table.pva td.neg{color:var(--red);font-weight:700;}
+table.pva tr.today td{background:rgba(94,230,207,0.10);border-top:1px solid rgba(94,230,207,0.5);border-bottom:1px solid rgba(94,230,207,0.5);}
+table.pva tr.today td:first-child{box-shadow:inset 3px 0 0 var(--teal);}
+table.pva tr.insp-ministry td{background:rgba(178,141,255,0.10);}
+table.pva tr.insp-customs td{background:rgba(255,194,103,0.10);}
+table.pva tr.off td{color:var(--text-low);}
+table.pva tr.cont td:first-child{color:var(--text-low);padding-left:22px;}
+.today-chip{display:inline-block;margin-left:6px;font-size:9px;font-weight:800;padding:2px 6px;border-radius:5px;background:var(--teal);color:#062;text-transform:uppercase;}
 .batch-top .sub.insp-line{color:var(--amber);font-weight:700;}
 .type-chip{display:inline-block;font-size:10px;font-weight:800;padding:3px 9px;border-radius:6px;text-transform:uppercase;letter-spacing:0.04em;}
 .type-chip.ministry{background:rgba(178,141,255,0.16);color:var(--violet);}
@@ -248,8 +287,9 @@ footer{max-width:1220px;margin:0 auto;padding:24px 24px 0;font-size:11.5px;color
       <div class="batch-stats">
         <div><span class="v" id="primaryDays">—</span><span class="l" id="primaryDaysLbl">Days to inspection</span></div>
         <div><span class="v" id="primaryNeeded">—</span><span class="l">Units still needed</span></div>
-        <div><span class="v" id="primaryRate">—</span><span class="l" id="primaryRateLbl">Today's target</span></div>
+        <div><span class="v" id="primaryRate">—</span><span class="l" id="primaryRateLbl">Today's plan target</span></div>
       </div>
+      <div class="target-note">Daily target is <b>not fixed</b>. It follows the sheet plan for each day (<span id="targetRange">45–75</span> units/day), so it changes day to day.</div>
       <div class="dial-legend">
         <span><i style="background:var(--teal);"></i> Cumulative actual</span>
         <span><i style="background:rgba(255,255,255,0.55);"></i> Plan-to-date marker</span>
@@ -291,6 +331,26 @@ footer{max-width:1220px;margin:0 auto;padding:24px 24px 0;font-size:11.5px;color
       </div>
     </div>
     </div>
+  </div>
+
+  <div class="schedule glass reveal in">
+    <h3>Batch progress to inspection</h3>
+    <div id="progressBars"><div style="color:var(--text-low);font-size:13px;">Loading…</div></div>
+    <div class="bar-legend"><span><i class="lg-act"></i> Actual (cumulative)</span><span><i class="lg-plan"></i> Plan to date</span><span><i class="lg-tgt"></i> Inspection target</span></div>
+  </div>
+
+  <div class="schedule glass reveal in">
+    <h3>Daily plan vs actual <span class="h3-sub">(CKD Dashboard sheet, live)</span></h3>
+    <div class="pva-scroll" id="pvaScroll">
+      <table class="pva">
+        <thead>
+          <tr><th rowspan="2">Date</th><th rowspan="2">Item code</th><th colspan="2" class="grp">Day</th><th colspan="2" class="grp b1">Batch 01 (cumulative)</th><th colspan="2" class="grp b2">Batch 02 (cumulative)</th><th rowspan="2">Variance</th><th rowspan="2">Inspection / remarks</th></tr>
+          <tr><th>Plan</th><th>Actual</th><th class="b1">Plan</th><th class="b1">Actual</th><th class="b2">Plan</th><th class="b2">Actual</th></tr>
+        </thead>
+        <tbody id="pvaBody"><tr><td colspan="10" style="color:var(--text-low);">Loading…</td></tr></tbody>
+      </table>
+    </div>
+    <div class="src-line">Variance = total cumulative actual minus total cumulative plan (Batch 01 + 02), shown once actuals are entered. Today's row is highlighted.</div>
   </div>
 
   <div class="schedule glass reveal in">
@@ -1012,6 +1072,89 @@ fetch(CSV_URL).then(r => {
       </tr>`;
     }).join('');
   }
+  // ---- Daily target range note (from the sheet's own Planed Qty values) ----
+  const dayTotals = {};
+  entries.forEach(e => { if (e.planned) { const k = dayKey(e.date); dayTotals[k] = (dayTotals[k] || 0) + e.planned; } });
+  const dt = Object.values(dayTotals);
+  if (dt.length) document.getElementById('targetRange').textContent = Math.min(...dt) + '–' + Math.max(...dt);
+
+  // ---- Batch progress bars (Batch 01, Batch 02, Customs) ----
+  function barRow(name, sub, a, typeLbl){
+    if (!a || !a.target) return '';
+    const pct = Math.min(100, a.cumActual / a.target * 100);
+    const planPct = Math.min(100, a.cumPlanToday / a.target * 100);
+    const st = statusOf(a);
+    const cls = st.tagClass === 'risk' ? 'risk' : (st.tagClass === 'behind' ? 'behind' : '');
+    const days = a.inspectionDate ? (a.inspectionDate < today ? 'done' : `${a.daysRemaining} day${a.daysRemaining===1?'':'s'} left`) : '';
+    return `<div class="pbar-row">
+      <div class="pbar-name"><b>${name}</b><span>${sub}</span></div>
+      <div class="pbar-track" title="Plan to date ${a.cumPlanToday} · Actual ${a.cumActual} · Target ${a.target}">
+        <div class="pbar-plan" style="width:${planPct}%"></div>
+        <div class="pbar-act ${cls}" style="width:${pct}%"></div>
+        <div class="pbar-pct">${a.cumActual.toLocaleString()} / ${a.target.toLocaleString()} (${Math.round(pct)}%)</div>
+      </div>
+      <div class="pbar-meta"><b>${a.inspectionDate ? fmtDate(a.inspectionDate) : '—'}</b>${typeLbl} · ${days}</div>
+    </div>`;
+  }
+  document.getElementById('progressBars').innerHTML =
+    barRow('Batch 01', a1 ? a1.item : '', a1, 'Ministry') +
+    barRow('Batch 02', a2 ? a2.item : '', a2, 'Ministry') +
+    barRow('Customs (all batches)', 'Batch 01 + Batch 02', aC, 'Customs') ||
+    '<div style="color:var(--text-low);font-size:13px;">No batch data in the sheet yet.</div>';
+
+  // ---- Daily plan vs actual table (every sheet row, in sheet order) ----
+  const fmtN = v => v === null || v === undefined ? '' : Number(v).toLocaleString();
+  let rp1 = 0, rp2 = 0, ra1 = 0, ra2 = 0, prevAct = 0, prevDateKey = null;
+  const actByDay = {};
+  // pass 1: cumulative actual (both batches) at end of each day, for day-actual deltas
+  entries.forEach(e => {
+    if (e.actual01 !== null) ra1 = e.actual01;
+    if (e.actual02 !== null) ra2 = e.actual02;
+    if (e.actual01 !== null || e.actual02 !== null) actByDay[dayKey(e.date)] = ra1 + ra2;
+  });
+  ra1 = 0; ra2 = 0;
+  const dayKeys = Object.keys(actByDay).sort();
+  const pvaRows = entries.map(e => {
+    const k = dayKey(e.date);
+    const cont = k === prevDateKey;
+    prevDateKey = k;
+    if (e.plan01 !== null) rp1 = e.plan01;
+    if (e.plan02 !== null) rp2 = e.plan02;
+    if (e.actual01 !== null) ra1 = e.actual01;
+    if (e.actual02 !== null) ra2 = e.actual02;
+    const hasAct = e.actual01 !== null || e.actual02 !== null;
+    const variance = hasAct ? (ra1 + ra2) - (rp1 + rp2) : null;
+    let dayAct = null;
+    if (!cont && actByDay[k] !== undefined){
+      const i = dayKeys.indexOf(k);
+      dayAct = actByDay[k] - (i > 0 ? actByDay[dayKeys[i-1]] : 0);
+    }
+    const dayPlan = cont ? e.planned : (dayTotals[k] || null);
+    const insp = inspections.find(i => i.date.getTime() === e.date.getTime() && i.label === e.inspection);
+    const cls = [
+      e.date.getTime() === today.getTime() ? 'today' : '',
+      insp ? 'insp-' + insp.type : '',
+      !e.item && !insp ? 'off' : '',
+      cont ? 'cont' : ''
+    ].filter(Boolean).join(' ');
+    const remark = insp ? `<span class="type-chip ${insp.type}">${TYPE_NAME[insp.type]}</span> ${e.inspection}` : e.inspection;
+    const dateCell = cont ? '↳ same day' : fmtDate(e.date) + (e.date.getTime() === today.getTime() ? '<span class="today-chip">Today</span>' : '');
+    return `<tr class="${cls}">
+      <td>${dateCell}</td>
+      <td>${e.item || '<span class="muted">—</span>'}</td>
+      <td class="num">${cont ? fmtN(e.planned) + ' <span style="color:var(--text-low)">(of day)</span>' : fmtN(dayPlan)}</td>
+      <td class="num">${dayAct !== null ? fmtN(dayAct) : ''}</td>
+      <td class="num b1">${fmtN(e.plan01)}</td><td class="num b1">${fmtN(e.actual01)}</td>
+      <td class="num b2">${fmtN(e.plan02)}</td><td class="num b2">${fmtN(e.actual02)}</td>
+      <td class="num ${variance === null ? '' : (variance >= 0 ? 'pos' : 'neg')}">${variance === null ? '' : (variance > 0 ? '+' : '') + variance}</td>
+      <td>${remark || ''}</td>
+    </tr>`;
+  });
+  document.getElementById('pvaBody').innerHTML = pvaRows.join('') || '<tr><td colspan="10" style="color:var(--text-low);">No rows in the sheet yet.</td></tr>';
+  const todayTr = document.querySelector('#pvaBody tr.today');
+  const sc = document.getElementById('pvaScroll');
+  if (todayTr && sc) sc.scrollTop = Math.max(0, todayTr.offsetTop - 150);
+
   document.getElementById('sheetSrc').textContent = `Source: CKD Dashboard tab, DATA BY PROD EXE sheet · loaded ${new Date().toLocaleTimeString('en-GB')}`;
 
 }).catch(err => {
