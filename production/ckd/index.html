@@ -248,7 +248,7 @@ footer{max-width:1220px;margin:0 auto;padding:24px 24px 0;font-size:11.5px;color
       <div class="batch-stats">
         <div><span class="v" id="primaryDays">—</span><span class="l" id="primaryDaysLbl">Days to inspection</span></div>
         <div><span class="v" id="primaryNeeded">—</span><span class="l">Units still needed</span></div>
-        <div><span class="v" id="primaryRate">—</span><span class="l">Required /day</span></div>
+        <div><span class="v" id="primaryRate">—</span><span class="l" id="primaryRateLbl">Today's target</span></div>
       </div>
       <div class="dial-legend">
         <span><i style="background:var(--teal);"></i> Cumulative actual</span>
@@ -270,6 +270,7 @@ footer{max-width:1220px;margin:0 auto;padding:24px 24px 0;font-size:11.5px;color
       <div class="next-stats">
         <div><span class="v" id="nextDays">—</span> days to inspection</div>
         <div><span class="v" id="nextNeeded">—</span> units needed</div>
+        <div><span class="v" id="nextToday">—</span> today's target</div>
       </div>
     </div>
     <div class="next-card glass reveal in" id="customsCard" data-accent="amber" style="display:none;">
@@ -286,6 +287,7 @@ footer{max-width:1220px;margin:0 auto;padding:24px 24px 0;font-size:11.5px;color
       <div class="next-stats">
         <div><span class="v" id="customsDays">—</span> days to customs inspection</div>
         <div><span class="v" id="customsNeeded">—</span> units needed (Batch 01 + 02)</div>
+        <div><span class="v" id="customsToday">—</span> today's target (line total)</div>
       </div>
     </div>
     </div>
@@ -716,6 +718,7 @@ fetch(CSV_URL).then(r => {
   const cPlan02 = findCol(headers, 'plan batch 02');
   const cActual02 = findCol(headers, 'actual batch 02');
   const cInspect = findCol(headers, 'inspection date', 'remarks');
+  const cPlanned = findCol(headers, 'planed qty', 'planned qty');
 
   const today = new Date(); today.setHours(0,0,0,0);
   const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
@@ -729,6 +732,7 @@ fetch(CSV_URL).then(r => {
       plan01: parseNum(r[cPlan01]), actual01: parseNum(r[cActual01]),
       plan02: parseNum(r[cPlan02]), actual02: parseNum(r[cActual02]),
       inspection: (r[cInspect]||'').trim(),
+      planned: cPlanned === -1 ? null : parseNum(r[cPlanned]),
       seq: idx
     };
     if (e.date) { lastDate = e.date; entries.push(e); return; }
@@ -742,6 +746,9 @@ fetch(CSV_URL).then(r => {
   }
   const t1 = buildTrack('plan01','actual01');
   const t2 = buildTrack('plan02','actual02');
+  const todayRows = entries.filter(e => e.date.getTime() === today.getTime());
+  const lineTodayTarget = todayRows.reduce((s, e) => s + (e.planned || 0), 0);
+  const todayRemark = todayRows.map(e => e.inspection).filter(t => t && !/\d/.test(t)).join(' · ');
   const maxPlan1 = t1.length ? Math.max(...t1.map(r => r.plan)) : 0;
   const maxPlan2 = t2.length ? Math.max(...t2.map(r => r.plan)) : 0;
 
@@ -816,6 +823,7 @@ fetch(CSV_URL).then(r => {
     return {
       item: itemLabel(uniqItems(track)), cumActual, cumPlanToday, variance,
       planPrev: planAsOf(track, yesterday), hasActual: track.some(r => r.actual !== null),
+      todayTarget: Math.max(0, planAsOf(track, today) - planAsOf(track, yesterday)),
       recentRate, requiredRate, daysRemaining, unitsNeeded, complete,
       target: finalTarget,
       inspectionDate: nextInspect ? nextInspect.date : null,
@@ -838,6 +846,7 @@ fetch(CSV_URL).then(r => {
     aC = {
       item: itemLabel(uniqItems(t1.concat(t2))), cumActual, cumPlanToday,
       planPrev: planAsOf(t1, yesterday) + planAsOf(t2, yesterday),
+      todayTarget: Math.max(0, planAsOf(t1, today) - planAsOf(t1, yesterday)) + Math.max(0, planAsOf(t2, today) - planAsOf(t2, yesterday)),
       hasActual: t1.concat(t2).some(r => r.actual !== null),
       target: customsInsp.target, inspectionDate: customsInsp.date, inspectionType: 'customs',
       daysRemaining: Math.max(0, Math.round((customsInsp.date - today)/86400000)),
@@ -887,7 +896,8 @@ fetch(CSV_URL).then(r => {
   if (batchComplete && primary.inspectionDate){
     sub = `${pick.name}: ${primary.cumActual.toLocaleString()} of ${primary.target.toLocaleString()} units complete, ahead of ${fmtDate(primary.inspectionDate)}.`;
   } else if (primary.inspectionDate){
-    sub = `${pick.name} on ${fmtDate(primary.inspectionDate)}: ${primary.unitsNeeded.toLocaleString()} units needed (${primary.daysRemaining} day${primary.daysRemaining===1?'':'s'} left) · required ~${primary.requiredRate}/day`;
+    const todayTxt = lineTodayTarget > 0 ? `today's target ${lineTodayTarget} units` : (todayRemark ? `no production today (${todayRemark})` : 'no production planned today');
+    sub = `${pick.name} on ${fmtDate(primary.inspectionDate)}: ${primary.unitsNeeded.toLocaleString()} units needed (${primary.daysRemaining} day${primary.daysRemaining===1?'':'s'} left) · ${todayTxt}`;
   }
   const banner = document.getElementById('statusBanner');
   banner.className = 'status-banner glass reveal in ' + statusClass;
@@ -925,7 +935,7 @@ fetch(CSV_URL).then(r => {
   document.getElementById('primaryDays').textContent = primaryA && primaryA.daysRemaining !== null ? primaryA.daysRemaining : '—';
   document.getElementById('primaryDaysLbl').textContent = primaryA && primaryA.inspectionType ? `Days to ${TYPE_NAME[primaryA.inspectionType].toLowerCase()} insp.` : 'Days to inspection';
   document.getElementById('primaryNeeded').textContent = primaryA && primaryA.unitsNeeded !== null ? primaryA.unitsNeeded.toLocaleString() : '—';
-  document.getElementById('primaryRate').textContent = primaryA && primaryA.requiredRate !== null ? primaryA.requiredRate : '—';
+  document.getElementById('primaryRate').textContent = primaryA ? primaryA.todayTarget : '—';
   animateDial('primaryDial', (primaryA && primaryA.target) || 1, primaryA ? primaryA.cumActual : 0, primaryA ? primaryA.cumPlanToday : 0, s1.color, s1.complete, true);
 
   const s2 = statusOf(nextA);
@@ -935,6 +945,7 @@ fetch(CSV_URL).then(r => {
   document.getElementById('nextTargetNum').textContent = ' / ' + (nextA && nextA.target !== null ? nextA.target.toLocaleString() : '—');
   document.getElementById('nextVal').textContent = nextA ? nextA.cumActual.toLocaleString() : '0';
   document.getElementById('nextDays').textContent = nextA && nextA.daysRemaining !== null ? nextA.daysRemaining : '—';
+  document.getElementById('nextToday').textContent = nextA ? nextA.todayTarget : '—';
   document.getElementById('nextNeeded').textContent = nextA && nextA.unitsNeeded !== null ? nextA.unitsNeeded.toLocaleString() : '—';
   animateDial('nextDial', (nextA && nextA.target) || 1, nextA ? nextA.cumActual : 0, nextA ? nextA.cumPlanToday : 0, s2.color, s2.complete, false);
 
@@ -951,6 +962,7 @@ fetch(CSV_URL).then(r => {
     document.getElementById('customsTargetNum').textContent = ' / ' + aC.target.toLocaleString();
     document.getElementById('customsDays').textContent = aC.daysRemaining;
     document.getElementById('customsNeeded').textContent = aC.unitsNeeded.toLocaleString();
+    document.getElementById('customsToday').textContent = lineTodayTarget;
     animateDial('customsDial', aC.target || 1, aC.cumActual, aC.cumPlanToday, sC.color, sC.complete, false);
   } else {
     cCard.style.display = 'none';
