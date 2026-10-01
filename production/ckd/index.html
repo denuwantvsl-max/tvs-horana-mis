@@ -1007,6 +1007,7 @@ fetch(CSV_URL + '&_=' + Date.now(), { cache: 'no-store' }).then(r => {
   // gives the inspection quantity: a unit count ("576 Ministry Inspection
   // Batch 01") and/or a percentage ("Ministry Inspection Batch 01 80%").
   // Batch size (720 / 1080) still comes from the plan columns.
+  const MINISTRY_INSPECTION_PCT = 80;
   const sizeOf = b => b === 1 ? maxPlan1 : (b === 2 ? maxPlan2 : maxPlan1 + maxPlan2);
   const inspections = entries
     .filter(e => e.inspection)
@@ -1030,6 +1031,11 @@ fetch(CSV_URL + '&_=' + Date.now(), { cache: 'no-store' }).then(r => {
         else batch = Math.abs(target - maxPlan1) <= Math.abs(target - maxPlan2) ? 1 : 2;
       }
       if (target === null && pct !== null && batch !== null) target = Math.round(sizeOf(batch) * pct / 100);
+      // Agreed rule (Madura, 30 Sep): Ministry inspection happens at 80% of the batch. When the sheet
+      // names the batch by its full size ("720 Ministry Inspection Batch 01"), inspect at 80% of it.
+      // An explicit other qty ("600 ...") or % ("... 90%") in the text still overrides this.
+      if (type === 'ministry' && pct === null && batch !== null && batch !== 'all' && target === sizeOf(batch))
+        target = Math.round(sizeOf(batch) * MINISTRY_INSPECTION_PCT / 100);
       if (target === null || batch === null) return null;
       const size = sizeOf(batch);
       return { date: e.date, target, batch, type, label: txt, size, pct: size ? Math.round(target / size * 100) : null };
