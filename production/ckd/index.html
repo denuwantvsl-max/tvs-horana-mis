@@ -86,8 +86,6 @@ h1{font-size:46px;font-weight:800;margin:0;letter-spacing:-0.02em;
 .next-card[data-accent="amber"]{border-color:rgba(255,194,103,0.30);background:linear-gradient(160deg, rgba(255,194,103,0.08), var(--glass-fill-2));}
 .side-col{display:flex;flex-direction:column;gap:20px;min-width:0;}
 /* ---------- view switch ---------- */
-.tabbar a.k-active,.tabbar a.d-active{}
-body.kiosk .tabbar a.k-active, body.detail .tabbar a.d-active{color:#fff;background:linear-gradient(135deg, rgba(178,141,255,0.20), rgba(255,122,122,0.08));}
 body.kiosk .d-only{display:none !important;}
 .h1-sub{font-size:0.55em;font-weight:700;}
 header .tabbar{max-width:none;margin:12px 0 0;padding:0;}
@@ -97,7 +95,14 @@ body.detail .wrap{display:flex;flex-direction:column;}
 body.detail .status-banner{order:0;} body.detail .pva-section{order:1;} body.detail .k-bottom{order:2;} body.detail .ckd-layout{order:3;margin-top:8px;} body.detail .perf-card{order:4;}
 body.detail .k-bottom{display:block;}
 
-/* ---------- KIOSK: one 23" screen (1920x1080), no scrolling ---------- */
+/* ---------- KIOSK: one 23" screen (1920x1080), no scrolling ----------
+   Left: main batch gauge (big) | middle: Next-up + Customs gauges stacked |
+   right: progress bars, inspection schedule, this-week plan vs actual. */
+.view-toggle{margin-left:auto;flex-shrink:0;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.18);color:var(--text-hi);
+  font:inherit;font-size:13px;font-weight:700;padding:8px 16px;border-radius:100px;cursor:pointer;}
+.view-toggle:hover{background:rgba(255,255,255,0.14);}
+body.kiosk .d-only-inline, body.detail .k-only-inline{display:none;}
+body.detail .k-only{display:none !important;}
 body.kiosk{height:100vh;min-height:0;overflow:hidden;display:flex;flex-direction:column;}
 body.kiosk header{max-width:none;width:100%;padding:10px 26px 6px;align-items:center;flex:none;}
 body.kiosk .brand{margin-bottom:2px;font-size:10px;}
@@ -110,64 +115,75 @@ body.kiosk .clock-time{font-size:34px;line-height:1.1;}
 body.kiosk .clock-date{font-size:13px;margin-top:0;}
 body.kiosk .clock-status{font-size:13px;margin-top:2px;}
 body.kiosk .safety-strip{flex:none;margin:0 26px 8px;padding:7px 18px;}
-body.kiosk .wrap{flex:1;min-height:0;max-width:none;width:100%;padding:0 26px 12px;display:flex;flex-direction:column;gap:10px;}
-body.kiosk .status-banner{flex:none;margin:0;padding:9px 20px;}
+body.kiosk .wrap{flex:1;min-height:0;max-width:none;width:100%;padding:0 26px 12px;
+  display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);gap:10px;}
+body.kiosk .status-banner{grid-column:1 / -1;margin:0;padding:8px 14px 8px 20px;}
 body.kiosk .status-banner .txt b{font-size:19px;}
 body.kiosk .status-banner .txt div{font-size:14px;margin-top:1px;}
-body.kiosk .ckd-layout{flex:1;min-height:0;margin:0;grid-template-columns:1.35fr 1fr 1fr;align-items:stretch;gap:10px;}
-body.kiosk .side-col{display:contents;}
+body.kiosk .ckd-layout{min-height:0;margin:0;grid-template-columns:minmax(0,1fr) minmax(300px,0.56fr);align-items:stretch;gap:10px;}
+body.kiosk .side-col{min-height:0;gap:10px;}
+body.kiosk .side-col > .next-card{flex:1 1 0;}
 body.kiosk .primary-card, body.kiosk .next-card{display:flex;flex-direction:column;min-height:0;padding:12px 18px;}
 body.kiosk .batch-top{margin-bottom:0;}
 body.kiosk .next-label{margin-bottom:4px;}
-body.kiosk .dial-wrap{flex:1;min-height:0;margin:2px 0;}
+body.kiosk .dial-wrap{flex:1;min-height:0;margin:4px 0;}
 body.kiosk .dial-wrap > div[id$="Dial"]{width:100%;height:100%;display:flex;align-items:center;justify-content:center;}
 body.kiosk .dial-wrap svg{width:100% !important;height:100% !important;max-width:none !important;}
-body.kiosk .batch-stats{margin-top:4px;padding-top:8px;}
-body.kiosk .batch-stats .v{font-size:30px;line-height:1.1;}
-body.kiosk .batch-stats .l{font-size:10.5px;}
-body.kiosk .target-note{margin-top:6px;padding:4px 10px;font-size:11.5px;}
-body.kiosk .dial-legend{margin-top:5px;gap:14px;}
-body.kiosk .next-stats{margin-top:4px;padding-top:8px;font-size:13px;}
-body.kiosk .next-stats > div{margin-bottom:2px;}
-body.kiosk .next-stats .v{font-size:17px;}
-body.kiosk .k-bottom{flex:none;display:grid;grid-template-columns:1fr 1.1fr;gap:10px;}
+body.kiosk .batch-stats{margin-top:4px;padding-top:10px;}
+body.kiosk .batch-stats .v{font-size:34px;line-height:1.1;}
+body.kiosk .batch-stats .l{font-size:11px;}
+body.kiosk .target-note{margin-top:8px;padding:5px 10px;font-size:12px;}
+body.kiosk .dial-legend{margin-top:6px;gap:14px;}
+body.kiosk .next-stats{margin-top:4px;padding-top:8px;font-size:12.5px;}
+body.kiosk .next-stats > div{margin-bottom:1px;}
+body.kiosk .next-stats .v{font-size:15px;}
+body.kiosk .k-bottom{min-height:0;display:flex;flex-direction:column;gap:10px;}
 body.kiosk .k-bottom .schedule{margin:0;padding:10px 18px 8px;}
 body.kiosk .k-bottom .schedule h3{margin:0 0 2px;font-size:11px;}
-body.kiosk .pbar-row{grid-template-columns:140px minmax(0,1fr) 175px;gap:12px;padding:15px 0 5px;}
-body.kiosk .pbar-meta{white-space:nowrap;}
-body.kiosk .k-bottom td{white-space:nowrap;}
-body.kiosk .next-card .batch-top{flex-wrap:nowrap;}
-body.kiosk .batch-top > div:nth-child(2){min-width:0;}
+body.kiosk .week-section{flex:1;min-height:0;overflow:hidden;}
+body.kiosk .pbar-row{grid-template-columns:120px minmax(0,1fr) 170px;gap:12px;padding:15px 0 5px;}
 body.kiosk .pbar-name b{font-size:14px;}
 body.kiosk .pbar-name span{display:block;font-size:10.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-body.kiosk .pbar-meta{font-size:11px;} body.kiosk .pbar-meta b{font-size:14px;}
+body.kiosk .pbar-meta{font-size:11px;white-space:nowrap;} body.kiosk .pbar-meta b{font-size:14px;}
 body.kiosk .bar-legend{margin-top:4px;}
-body.kiosk .k-bottom table{font-size:13px;}
-body.kiosk .k-bottom th{padding:6px 8px;}
-body.kiosk .k-bottom td{padding:8px 8px;}
-body.kiosk .k-bottom th:nth-child(6), body.kiosk .k-bottom td:nth-child(6){display:none;}
+body.kiosk .k-bottom table{font-size:12.5px;}
+body.kiosk .k-bottom th{padding:5px 7px;font-size:9.5px;}
+body.kiosk .k-bottom td{padding:6px 7px;white-space:nowrap;}
+body.kiosk .k-bottom #scheduleBody td:nth-child(5){white-space:normal;line-height:1.25;}
+body.kiosk .k-bottom th:nth-child(6), body.kiosk .k-bottom #scheduleBody td:nth-child(6){display:none;}
+body.kiosk table.week th:nth-child(6){display:table-cell;}
 body.kiosk .k-hide{display:none;}
 body.kiosk .src-line{margin-top:4px;font-size:10.5px;}
-/* shorter screens (e.g. 1366x768 or browser not full-screen) */
+table.week td.num, table.week th:not(:first-child){text-align:right;}
+table.week td.pos{color:var(--teal);font-weight:700;} table.week td.neg{color:var(--red);font-weight:700;}
+table.week tr.today td{background:rgba(94,230,207,0.12);}
+table.week tr.today td:first-child{box-shadow:inset 3px 0 0 var(--teal);}
+table.week tr.insp-ministry td{background:rgba(178,141,255,0.10);}
+table.week tr.insp-customs td{background:rgba(255,194,103,0.10);}
+table.week tr.off td{color:var(--text-low);}
+table.week .type-chip{font-size:9px;padding:2px 6px;margin-left:4px;}
 @media (max-height:900px){
-  body.kiosk .target-note{display:none;}
-  body.kiosk .dial-legend, body.kiosk .bar-legend{display:none;}
-  body.kiosk .k-bottom .schedule{padding:8px 16px 6px;}
+  body.kiosk .target-note, body.kiosk .dial-legend, body.kiosk .bar-legend{display:none;}
   body.kiosk .pbar-row{padding:13px 0 3px;}
-  body.kiosk .k-bottom td{padding:6px 8px;}
-  body.kiosk .batch-stats .v{font-size:24px;}
+  body.kiosk .batch-stats .v{font-size:26px;}
 }
 @media (max-width:1500px){
-  body.kiosk .k-bottom table{font-size:11.5px;}
-  body.kiosk .k-bottom th{font-size:9.5px;padding:5px 6px;}
-  body.kiosk .k-bottom td{padding:6px 6px;}
-  body.kiosk .pbar-row{grid-template-columns:110px minmax(0,1fr) 150px;}
-  body.kiosk .next-stats{font-size:12px;}
+  body.kiosk .wrap{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);}
+  body.kiosk .k-bottom table{font-size:11px;}
+  body.kiosk .pbar-row{grid-template-columns:90px minmax(0,1fr) 140px;}
+  body.kiosk .next-stats{font-size:11.5px;}
 }
 @media (max-height:760px){
-  body.kiosk .dial-legend, body.kiosk .bar-legend{display:none;}
   body.kiosk header .tabbar{display:none;}
 }
+/* small screens (not the 23" 1080p target): drop the lowest-priority panels so gauges keep their size */
+@media (max-width:1500px), (max-height:820px){
+  body.kiosk .week-section{display:none;}
+  body.kiosk .k-bottom #scheduleBody td:nth-child(5), body.kiosk .k-bottom th:nth-child(5){display:none;}
+  body.kiosk .next-card .batch-top{flex-wrap:nowrap;}
+  body.kiosk .batch-top .sub.insp-line{font-size:11px;}
+}
+
 
 .reveal.in{opacity:1;transform:none;}
 .target-note{margin-top:14px;font-size:12px;color:var(--text-mid);text-align:center;padding:8px 12px;border-radius:10px;background:rgba(255,255,255,0.04);border:1px dashed rgba(255,255,255,0.12);}
@@ -318,18 +334,19 @@ footer{max-width:1220px;margin:0 auto;padding:24px 24px 0;font-size:11.5px;color
 <script>
 // Two views of the same page: "kiosk" (default, one 23" shop-floor screen, no scrolling)
 // and "detail" (index.html?view=plan or plan.html: full scrollable plan-vs-actual lists).
-document.body.className = (/[?&]view=plan\b/.test(location.search) || /plan\.html$/.test(location.pathname)) ? 'detail' : 'kiosk';
+// One CKD page. Default = shop-floor view (fits one 23" screen, no scroll).
+// "Full details" button (or #details in the URL) expands the same page to the scrollable detail view.
+document.body.className = (/^#details/.test(location.hash) || /[?&]view=plan\b/.test(location.search)) ? 'detail' : 'kiosk';
 </script>
 <div class="bg-mesh"></div>
 
 <header>
   <div>
     <div class="brand"><a class="back-link" href="../index.html">← Production</a> · CKD-DVA</div>
-    <h1>2W CKD Production<span class="d-only h1-sub"> · Plan vs Actual</span></h1>
+    <h1>2W CKD Production</h1>
     <div class="tabbar">
       <a href="../index.html">Overview</a>
-      <a class="k-active" href="index.html">CKD Screen</a>
-      <a class="d-active" href="index.html?view=plan">CKD Plan vs Actual</a>
+      <a class="active" href="index.html">CKD Production</a>
       <a href="../skd/index.html" target="_blank" rel="noopener">SKD Production ↗</a>
       <a href="../pending-vehicles/index.html">Pending Vehicles</a>
       <a href="../quality/index.html">Quality</a>
@@ -364,6 +381,7 @@ document.body.className = (/[?&]view=plan\b/.test(location.search) || /plan\.htm
   <div class="status-banner glass reveal in safe" id="statusBanner">
     <div class="dot"></div>
     <div class="txt"><b id="statusHead">Loading batch schedule…</b><div id="statusSub">Reading CKD Dashboard sheet</div></div>
+    <button class="view-toggle" id="viewToggle" type="button" onclick="toggleView()"><span class="k-only-inline">Full details ▾</span><span class="d-only-inline">▴ Shop-floor view</span></button>
   </div>
 
   <div class="ckd-layout">
@@ -444,6 +462,13 @@ document.body.className = (/[?&]view=plan\b/.test(location.search) || /plan\.htm
     <div class="src-line" id="sheetSrc">Source: CKD Dashboard tab · …</div>
   </div>
 
+    <div class="schedule glass reveal in k-only week-section">
+      <h3>Daily plan vs actual · this week</h3>
+      <table class="week">
+        <thead><tr><th>Date</th><th>Day plan</th><th>Day actual</th><th>Cum. plan</th><th>Cum. actual</th><th>Variance</th></tr></thead>
+        <tbody id="weekBody"><tr><td colspan="6" style="color:var(--text-low);">Loading…</td></tr></tbody>
+      </table>
+    </div>
   </div>
 
   <div class="schedule glass reveal in d-only pva-section">
@@ -719,8 +744,6 @@ function dialArc(g, a0, a1, r){
 function dialAnchor(ang){ const c = Math.cos(ang*Math.PI/180); return c > 0.35 ? 'start' : (c < -0.35 ? 'end' : 'middle'); }
 function buildDial(id, target, statusColor, big, opts){
   opts = opts || {};
-  // Kiosk: every dial is drawn large (fills its card), so use full labels on all of them
-  if (document.body.classList.contains('kiosk')) big = true;
   const g = dialGeom(big);
   const ang = v => DIAL_START + (Math.max(0, Math.min(target, v)) / target) * DIAL_SWEEP;
   const parts = [];
@@ -903,6 +926,13 @@ setInterval(tick, 1000); tick();
 // 2026-09-30: live refresh. The page re-reads the sheet every 60s (no
 // manual reload needed). It only re-renders when the sheet content (or the
 // date) actually changed, so dials don't re-animate every minute.
+function toggleView(){
+  const toDetail = document.body.classList.contains('kiosk');
+  document.body.className = toDetail ? 'detail' : 'kiosk';
+  history.replaceState(null, '', toDetail ? '#details' : location.pathname + location.search.replace(/[?&]view=plan\b/, ''));
+  window.scrollTo(0, 0);
+  if (typeof ckdLastSig !== 'undefined') { ckdLastSig = null; loadCKD(); } // re-draw gauges at the new size
+}
 const REFRESH_MS = 60000;
 let ckdLastSig = null, ckdLoading = false;
 function fmtClock(d){ return d.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit', second:'2-digit' }); }
@@ -1304,6 +1334,7 @@ fetch(CSV_URL + '&_=' + Date.now(), { cache: 'no-store' }).then(r => {
   });
   ra1 = 0; ra2 = 0;
   const dayKeys = Object.keys(actByDay).sort();
+  const pvaDays = [];
   const pvaRows = entries.map(e => {
     const k = dayKey(e.date);
     const cont = k === prevDateKey;
@@ -1328,6 +1359,8 @@ fetch(CSV_URL + '&_=' + Date.now(), { cache: 'no-store' }).then(r => {
       cont ? 'cont' : ''
     ].filter(Boolean).join(' ');
     const remark = insp ? `<span class="type-chip ${insp.type}">${TYPE_NAME[insp.type]}</span> ${e.inspection}` : e.inspection;
+    if (!cont) pvaDays.push({ date: e.date, plan: dayPlan, act: dayAct, cumPlan: rp1 + rp2, cumAct: hasAct ? ra1 + ra2 : null, variance, insp, remark: e.inspection });
+    else if (pvaDays.length) { const last = pvaDays[pvaDays.length-1]; last.cumPlan = rp1 + rp2; if (hasAct) { last.cumAct = ra1 + ra2; last.variance = variance; } }
     const dateCell = cont ? '↳ same day' : fmtDate(e.date) + (e.date.getTime() === today.getTime() ? '<span class="today-chip">Today</span>' : '');
     return `<tr class="${cls}">
       <td>${dateCell}</td>
@@ -1341,6 +1374,22 @@ fetch(CSV_URL + '&_=' + Date.now(), { cache: 'no-store' }).then(r => {
     </tr>`;
   });
   document.getElementById('pvaBody').innerHTML = pvaRows.join('') || '<tr><td colspan="10" style="color:var(--text-low);">No rows in the sheet yet.</td></tr>';
+  // Shop-floor "this week" mini table: 5 days back to 3 days ahead of today
+  {
+    const ti = pvaDays.findIndex(d => d.date.getTime() === today.getTime());
+    let from = ti >= 0 ? ti - 5 : pvaDays.findIndex(d => d.date > today) - 5;
+    if (from < 0) from = 0;
+    const win = pvaDays.slice(from, from + 9);
+    document.getElementById('weekBody').innerHTML = win.map(d => {
+      const isToday = d.date.getTime() === today.getTime();
+      const cls = [isToday ? 'today' : '', d.insp ? 'insp-' + d.insp.type : '', !d.plan && !d.insp ? 'off' : ''].filter(Boolean).join(' ');
+      const tag = d.insp ? ` <span class="type-chip ${d.insp.type}">${TYPE_NAME[d.insp.type]}</span>` : (d.remark && !d.plan ? ` <span style="color:var(--text-low)">${d.remark}</span>` : '');
+      return `<tr class="${cls}"><td>${fmtDate(d.date)}${isToday ? '<span class="today-chip">Today</span>' : ''}${tag}</td>
+        <td class="num">${d.plan ? fmtN(d.plan) : '—'}</td><td class="num">${d.act !== null ? fmtN(d.act) : ''}</td>
+        <td class="num">${fmtN(d.cumPlan)}</td><td class="num">${d.cumAct !== null ? fmtN(d.cumAct) : ''}</td>
+        <td class="num ${d.variance === null ? '' : (d.variance >= 0 ? 'pos' : 'neg')}">${d.variance === null ? '' : (d.variance > 0 ? '+' : '') + d.variance}</td></tr>`;
+    }).join('') || '<tr><td colspan="6" style="color:var(--text-low);">No rows in the sheet yet.</td></tr>';
+  }
   const todayTr = document.querySelector('#pvaBody tr.today');
   const sc = document.getElementById('pvaScroll');
   if (todayTr && sc) sc.scrollTop = Math.max(0, todayTr.offsetTop - 150);
