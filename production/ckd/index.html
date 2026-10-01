@@ -456,7 +456,7 @@ document.body.className = (/^#details/.test(location.hash) || /[?&]view=plan\b/.
   <div class="schedule glass reveal in">
     <h3>Ministry &amp; customs inspection schedule</h3>
     <table>
-      <thead><tr><th>Inspection</th><th>Batch · item</th><th>Inspection qty</th><th>Inspection date</th><th>Plan reaches qty</th><th>Plan (as of today)</th><th>Actual</th><th>Status</th></tr></thead>
+      <thead><tr><th>Inspection</th><th>Batch · item</th><th>Inspection qty</th><th>Inspection date</th><th>Projected by insp. day</th><th>Plan (as of today)</th><th>Actual</th><th>Status</th></tr></thead>
       <tbody id="scheduleBody"><tr><td colspan="8" style="color:var(--text-low);">Loading…</td></tr></tbody>
     </table>
     <div class="src-line" id="sheetSrc">Source: CKD Dashboard tab · …</div>
@@ -1261,16 +1261,20 @@ fetch(CSV_URL + '&_=' + Date.now(), { cache: 'no-store' }).then(r => {
       who = 'Batch ' + String(insp.batch).padStart(2,'0') + ' (' + insp.size.toLocaleString() + ')';
       planHit = (track.find(r => r.plan >= insp.target) || {}).date || null;
     }
-    return { item, who, type: insp.type, target: insp.target, pct: insp.pct, date: insp.date, planToday, planPrev, actual, planHit };
+    // Projection to END of inspection day = built so far + remaining plan up to that day
+    // (counted from the last day that has an actual entered, so a lead/lag carries through).
+    const trk = insp.batch === 'all' ? t1.concat(t2) : (tracksByBatch[insp.batch] || []);
+    let lastAct = null; trk.forEach(r => { if (r.actual !== null && r.date <= today && (!lastAct || r.date > lastAct)) lastAct = r.date; });
+    const pAt = d => insp.batch === 'all' ? planAsOf(t1, d) + planAsOf(t2, d) : planAsOf(trk, d);
+    const projected = lastAct ? actual + Math.max(0, pAt(insp.date) - pAt(lastAct)) : pAt(insp.date);
+    return { item, who, type: insp.type, target: insp.target, pct: insp.pct, date: insp.date, planToday, planPrev, actual, planHit, projected };
   }).sort((a,b) => a.date - b.date);
-  // Plan check: inspection happens during the day, so the qty should be planned complete by the END OF THE PREVIOUS working day.
+  // Inspection qty is counted to the END of the inspection day (Denuwan, 1 Oct).
   function planHitCell(c){
-    if (!c.planHit) return '<span class="tag behind">Not in plan</span>';
-    const dayBefore = new Date(c.date); dayBefore.setDate(dayBefore.getDate() - 1);
-    const txt = 'end of ' + fmtDate(c.planHit);
-    if (c.planHit <= dayBefore) return `<span style="color:var(--teal)">${txt}</span>`;
-    if (c.planHit.getTime() === c.date.getTime()) return `<span style="color:var(--amber)">${txt} · same day</span>`;
-    return `<span style="color:var(--red)">${txt} · after insp.</span>`;
+    if (c.date < today) return '<span style="color:var(--text-low)">—</span>';
+    const p = c.projected;
+    if (p >= c.target) return `<span style="color:var(--teal)">${p.toLocaleString()} ✓</span>`;
+    return `<span style="color:var(--red)">${p.toLocaleString()} · ${ (c.target - p).toLocaleString() } short</span>`;
   }
   const tbody = document.getElementById('scheduleBody');
   if (!checkpoints.length){
