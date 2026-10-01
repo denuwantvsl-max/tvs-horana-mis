@@ -100,6 +100,9 @@ h1{font-size:46px;font-weight:800;margin:0;letter-spacing:-0.02em;
 .pbar-pct{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:11px;font-weight:700;color:var(--text-hi);}
 .pbar-meta{text-align:right;font-size:12px;color:var(--text-mid);}
 .pbar-meta b{font-size:16px;color:var(--text-hi);display:block;}
+.pbar-insp{position:absolute;top:-5px;bottom:-5px;width:3px;margin-left:-1.5px;background:#ffc267;border-radius:2px;}
+.pbar-insp span{position:absolute;top:-16px;left:50%;transform:translateX(-50%);font-size:10px;font-weight:800;color:#ffc267;white-space:nowrap;}
+.pbar-row{padding-top:20px;}
 .bar-legend{display:flex;gap:18px;margin-top:12px;flex-wrap:wrap;font-size:10.5px;color:var(--text-mid);}
 .bar-legend span{display:flex;align-items:center;gap:6px;}
 .bar-legend i{width:14px;height:8px;border-radius:4px;display:inline-block;}
@@ -286,7 +289,7 @@ footer{max-width:1220px;margin:0 auto;padding:24px 24px 0;font-size:11.5px;color
       </div>
       <div class="batch-stats">
         <div><span class="v" id="primaryDays">—</span><span class="l" id="primaryDaysLbl">Days to inspection</span></div>
-        <div><span class="v" id="primaryNeeded">—</span><span class="l">Units still needed</span></div>
+        <div><span class="v" id="primaryNeeded">—</span><span class="l" id="primaryNeededLbl">Units needed for inspection</span></div>
         <div><span class="v" id="primaryRate">—</span><span class="l" id="primaryRateLbl">Today's plan target</span></div>
       </div>
       <div class="target-note">Daily target is <b>not fixed</b>. It follows the sheet plan for each day (<span id="targetRange">45–75</span> units/day), so it changes day to day.</div>
@@ -311,7 +314,7 @@ footer{max-width:1220px;margin:0 auto;padding:24px 24px 0;font-size:11.5px;color
       </div>
       <div class="next-stats">
         <div><span class="v" id="nextDays">—</span> days to inspection</div>
-        <div><span class="v" id="nextNeeded">—</span> units needed</div>
+        <div><span class="v" id="nextNeeded">—</span> <span id="nextNeededLbl">units needed for inspection</span></div>
         <div><span class="v" id="nextToday">—</span> today's target</div>
       </div>
     </div>
@@ -336,9 +339,9 @@ footer{max-width:1220px;margin:0 auto;padding:24px 24px 0;font-size:11.5px;color
   </div>
 
   <div class="schedule glass reveal in">
-    <h3>Batch progress to inspection</h3>
+    <h3>Batch progress &amp; inspection points</h3>
     <div id="progressBars"><div style="color:var(--text-low);font-size:13px;">Loading…</div></div>
-    <div class="bar-legend"><span><i class="lg-act"></i> Actual (cumulative)</span><span><i class="lg-plan"></i> Plan to date</span><span><i class="lg-tgt"></i> Inspection target</span></div>
+    <div class="bar-legend"><span><i class="lg-act"></i> Actual (cumulative)</span><span><i class="lg-plan"></i> Plan to date</span><span><i class="lg-tgt"></i> Batch size</span><span><i style="background:#ffc267;width:3px;height:12px;border-radius:1px;"></i> Inspection qty</span></div>
   </div>
 
   <div class="schedule glass reveal in">
@@ -358,8 +361,8 @@ footer{max-width:1220px;margin:0 auto;padding:24px 24px 0;font-size:11.5px;color
   <div class="schedule glass reveal in">
     <h3>Ministry &amp; customs inspection schedule</h3>
     <table>
-      <thead><tr><th>Inspection</th><th>Batch · item</th><th>Target</th><th>Inspection date</th><th>Plan (as of today)</th><th>Actual</th><th>Status</th></tr></thead>
-      <tbody id="scheduleBody"><tr><td colspan="7" style="color:var(--text-low);">Loading…</td></tr></tbody>
+      <thead><tr><th>Inspection</th><th>Batch · item</th><th>Inspection qty</th><th>Inspection date</th><th>Plan reaches qty</th><th>Plan (as of today)</th><th>Actual</th><th>Status</th></tr></thead>
+      <tbody id="scheduleBody"><tr><td colspan="8" style="color:var(--text-low);">Loading…</td></tr></tbody>
     </table>
     <div class="src-line" id="sheetSrc">Source: CKD Dashboard tab · …</div>
   </div>
@@ -873,26 +876,39 @@ fetch(CSV_URL + '&_=' + Date.now(), { cache: 'no-store' }).then(r => {
     return prefix + items.map(shortItem).join(' + ');
   }
 
+  // 2026-09-30: Ministry inspections now happen at 80% of each batch
+  // (agreed with Madura: B01 576 on 7 Oct, B02 864 on 21 Oct). The H text
+  // gives the inspection quantity: a unit count ("576 Ministry Inspection
+  // Batch 01") and/or a percentage ("Ministry Inspection Batch 01 80%").
+  // Batch size (720 / 1080) still comes from the plan columns.
+  const sizeOf = b => b === 1 ? maxPlan1 : (b === 2 ? maxPlan2 : maxPlan1 + maxPlan2);
   const inspections = entries
     .filter(e => e.inspection)
     .map(e => {
       const txt = e.inspection;
-      const m = txt.match(/(\d[\d,]*)/);
-      const target = m ? parseInt(m[1].replace(/,/g,''), 10) : null;
       const type = /custom/i.test(txt) ? 'customs' : (/ministry/i.test(txt) ? 'ministry' : 'inspection');
       const bm = txt.match(/batch\s*0*(\d+)/i);
+      const pm = txt.match(/(\d+(?:\.\d+)?)\s*%/);
+      const pct = pm ? parseFloat(pm[1]) : null;
+      // unit count = first number that is not the batch number and not a percentage
+      const stripped = txt.replace(/batch\s*0*\d+/ig, ' ').replace(/\d+(?:\.\d+)?\s*%/g, ' ');
+      const m = stripped.match(/(\d[\d,]*)/);
+      let target = m ? parseInt(m[1].replace(/,/g,''), 10) : null;
       let batch = null;
-      if (target !== null){
-        if (bm) batch = +bm[1];
-        else if (type === 'customs') batch = 'all';
-        else if (target === maxPlan1) batch = 1;
-        else if (target === maxPlan2) batch = 2;
+      if (bm) batch = +bm[1];
+      else if (type === 'customs') batch = 'all';
+      else if (target !== null){
+        if (target === maxPlan1 || target === Math.round(maxPlan1 * 0.8)) batch = 1;
+        else if (target === maxPlan2 || target === Math.round(maxPlan2 * 0.8)) batch = 2;
         else if (target === maxPlan1 + maxPlan2) batch = 'all';
         else batch = Math.abs(target - maxPlan1) <= Math.abs(target - maxPlan2) ? 1 : 2;
       }
-      return { date: e.date, target, batch, type, label: txt };
+      if (target === null && pct !== null && batch !== null) target = Math.round(sizeOf(batch) * pct / 100);
+      if (target === null || batch === null) return null;
+      const size = sizeOf(batch);
+      return { date: e.date, target, batch, type, label: txt, size, pct: size ? Math.round(target / size * 100) : null };
     })
-    .filter(i => i.target !== null);
+    .filter(Boolean);
 
   const TYPE_NAME = { ministry: 'Ministry', customs: 'Customs', inspection: 'Inspection' };
 
@@ -913,8 +929,12 @@ fetch(CSV_URL + '&_=' + Date.now(), { cache: 'no-store' }).then(r => {
     const cumActual = lastActualRow ? lastActualRow.actual : 0;
     const cumPlanToday = planTodayRow ? planTodayRow.plan : 0;
     const variance = cumActual - cumPlanToday;
-    const finalTarget = nextInspect ? nextInspect.target : (track[track.length-1] ? track[track.length-1].plan : null);
-    const complete = finalTarget !== null && cumActual >= finalTarget;
+    const batchSize = track.length ? Math.max(...track.map(r => r.plan)) : null;
+    const inspTarget = nextInspect ? nextInspect.target : batchSize;
+    const complete = batchSize !== null && cumActual >= batchSize;      // whole batch built
+    const inspReady = inspTarget !== null && cumActual >= inspTarget;  // inspection qty reached
+    // first date the plan reaches the inspection qty (to check the plan supports the inspection date)
+    const planHit = inspTarget !== null ? (track.find(r => r.plan >= inspTarget) || {}).date || null : null;
 
     let recentRate = null;
     const withActual = track.filter(r => r.actual !== null);
@@ -936,8 +956,8 @@ fetch(CSV_URL + '&_=' + Date.now(), { cache: 'no-store' }).then(r => {
       item: itemLabel(uniqItems(track)), cumActual, cumPlanToday, variance,
       planPrev: planAsOf(track, yesterday), hasActual: track.some(r => r.actual !== null),
       todayTarget: Math.max(0, planAsOf(track, today) - planAsOf(track, yesterday)),
-      recentRate, requiredRate, daysRemaining, unitsNeeded, complete,
-      target: finalTarget,
+      recentRate, requiredRate, daysRemaining, unitsNeeded, complete, inspReady, planHit,
+      target: batchSize, inspTarget,
       inspectionDate: nextInspect ? nextInspect.date : null,
       inspectionType: nextInspect ? nextInspect.type : null,
       asOf: lastActualRow ? lastActualRow.date : null,
@@ -965,7 +985,10 @@ fetch(CSV_URL + '&_=' + Date.now(), { cache: 'no-store' }).then(r => {
       unitsNeeded: Math.max(0, customsInsp.target - cumActual),
       requiredRate: DAILY_CAPACITY,
       recentRate: (r1 === null && r2 === null) ? null : (r1 || 0) + (r2 || 0),
-      complete: cumActual >= customsInsp.target
+      complete: cumActual >= customsInsp.target,
+      inspReady: cumActual >= customsInsp.target,
+      inspTarget: customsInsp.target,
+      planHit: null
     };
   }
 
@@ -976,7 +999,7 @@ fetch(CSV_URL + '&_=' + Date.now(), { cache: 'no-store' }).then(r => {
     a2 && { a: a2, name: `Batch 02 ${tName(a2)} inspection` },
     aC && { a: aC, name: `Customs inspection (all batches)` }
   ].filter(Boolean);
-  const upcoming = candidates.filter(c => c.a.inspectionDate && c.a.inspectionDate >= today && !c.a.complete)
+  const upcoming = candidates.filter(c => c.a.inspectionDate && c.a.inspectionDate >= today && !c.a.inspReady)
                              .sort((x,y) => x.a.inspectionDate - y.a.inspectionDate);
   const pick = upcoming[0] || candidates.sort((x,y) => (y.a.inspectionDate||0) - (x.a.inspectionDate||0))[0];
   if (!pick) throw new Error('Could not determine an active batch');
@@ -1000,12 +1023,15 @@ fetch(CSV_URL + '&_=' + Date.now(), { cache: 'no-store' }).then(r => {
   let statusClass = 'safe', head = 'On plan', sub = '';
   const gapTxt = primary.planPrev - primary.cumActual;
   if (batchComplete) { statusClass='safe'; head='🎉 ' + pick.name + ' target reached'; }
+  else if (primary.inspReady) { statusClass='safe'; head='✅ ' + pick.name + ' quantity reached'; }
   else if (pace === 'notstarted') { statusClass='safe'; head='CKD production started — first day of plan'; }
   else if (pace === 'nodata') { statusClass='risk'; head='Actuals not entered yet'; }
   else if (pace === 'onplan') { statusClass='safe'; head='On plan for the next inspection'; }
   else if (pace === 'risk') { statusClass='risk'; head=`Slightly behind plan — ${gapTxt} units short`; }
   else { statusClass='behind'; head=`Behind plan — ${gapTxt} units short, action needed`; }
-  if (batchComplete && primary.inspectionDate){
+  if (primary.inspReady && primary.inspectionDate && !batchComplete){
+    sub = `${primary.cumActual.toLocaleString()} built, inspection qty ${primary.inspTarget.toLocaleString()} reached for ${fmtDate(primary.inspectionDate)}.`;
+  } else if (batchComplete && primary.inspectionDate){
     sub = `${pick.name}: ${primary.cumActual.toLocaleString()} of ${primary.target.toLocaleString()} units complete, ahead of ${fmtDate(primary.inspectionDate)}.`;
   } else if (primary.inspectionDate){
     const todayTxt = lineTodayTarget > 0 ? `today's target ${lineTodayTarget} units` : (todayRemark ? `no production today (${todayRemark})` : 'no production planned today');
@@ -1033,7 +1059,8 @@ fetch(CSV_URL + '&_=' + Date.now(), { cache: 'no-store' }).then(r => {
   }
   function inspLine(a){
     if (!a || !a.inspectionDate) return 'Inspection date not set';
-    return `${TYPE_NAME[a.inspectionType] || 'Inspection'} inspection · ${fmtDate(a.inspectionDate)}`;
+    const q = (a.inspTarget && a.target && a.inspTarget < a.target) ? ` · at ${a.inspTarget.toLocaleString()} (${Math.round(a.inspTarget / a.target * 100)}%)` : '';
+    return `${TYPE_NAME[a.inspectionType] || 'Inspection'} inspection · ${fmtDate(a.inspectionDate)}${q}`;
   }
 
   const s1 = statusOf(primaryA);
@@ -1046,6 +1073,7 @@ fetch(CSV_URL + '&_=' + Date.now(), { cache: 'no-store' }).then(r => {
   document.getElementById('primaryVal').textContent = primaryA ? primaryA.cumActual.toLocaleString() : '0';
   document.getElementById('primaryDays').textContent = primaryA && primaryA.daysRemaining !== null ? primaryA.daysRemaining : '—';
   document.getElementById('primaryDaysLbl').textContent = primaryA && primaryA.inspectionType ? `Days to ${TYPE_NAME[primaryA.inspectionType].toLowerCase()} insp.` : 'Days to inspection';
+  document.getElementById('primaryNeededLbl').textContent = primaryA && primaryA.inspTarget ? `Units needed for insp. (${primaryA.inspTarget.toLocaleString()})` : 'Units needed for inspection';
   document.getElementById('primaryNeeded').textContent = primaryA && primaryA.unitsNeeded !== null ? primaryA.unitsNeeded.toLocaleString() : '—';
   document.getElementById('primaryRate').textContent = primaryA ? primaryA.todayTarget : '—';
   animateDial('primaryDial', (primaryA && primaryA.target) || 1, primaryA ? primaryA.cumActual : 0, primaryA ? primaryA.cumPlanToday : 0, s1.color, s1.complete, true, { mark80: true });
@@ -1058,6 +1086,7 @@ fetch(CSV_URL + '&_=' + Date.now(), { cache: 'no-store' }).then(r => {
   document.getElementById('nextVal').textContent = nextA ? nextA.cumActual.toLocaleString() : '0';
   document.getElementById('nextDays').textContent = nextA && nextA.daysRemaining !== null ? nextA.daysRemaining : '—';
   document.getElementById('nextToday').textContent = nextA ? nextA.todayTarget : '—';
+  document.getElementById('nextNeededLbl').textContent = nextA && nextA.inspTarget ? `units needed for inspection (${nextA.inspTarget.toLocaleString()})` : 'units needed for inspection';
   document.getElementById('nextNeeded').textContent = nextA && nextA.unitsNeeded !== null ? nextA.unitsNeeded.toLocaleString() : '—';
   animateDial('nextDial', (nextA && nextA.target) || 1, nextA ? nextA.cumActual : 0, nextA ? nextA.cumPlanToday : 0, s2.color, s2.complete, false, { mark80: true });
 
@@ -1083,26 +1112,37 @@ fetch(CSV_URL + '&_=' + Date.now(), { cache: 'no-store' }).then(r => {
   // ---- Schedule table: every inspection checkpoint (Ministry per batch + Customs combined) ----
   const tracksByBatch = { 1: t1, 2: t2 };
   const checkpoints = inspections.map(insp => {
-    let item, planToday, planPrev, actual, who;
+    let item, planToday, planPrev, actual, who, planHit = null;
     if (insp.batch === 'all'){
       item = itemLabel(uniqItems(t1.concat(t2)));
       planToday = planAsOf(t1, today) + planAsOf(t2, today);
       planPrev = planAsOf(t1, yesterday) + planAsOf(t2, yesterday);
       actual = actualAsOf(t1, today) + actualAsOf(t2, today);
       who = 'All batches';
+      { const comb = {}; [...t1, ...t2].forEach(r => { const k = r.date.getTime(); comb[k] = 1; }); const ks = Object.keys(comb).map(Number).sort((x,y)=>x-y); for (const k of ks){ const d = new Date(k); if (planAsOf(t1, d) + planAsOf(t2, d) >= insp.target){ planHit = d; break; } } }
     } else {
       const track = tracksByBatch[insp.batch] || [];
       item = itemLabel(uniqItems(track));
       planToday = planAsOf(track, today);
       planPrev = planAsOf(track, yesterday);
       actual = actualAsOf(track, today);
-      who = 'Batch ' + String(insp.batch).padStart(2,'0');
+      who = 'Batch ' + String(insp.batch).padStart(2,'0') + ' (' + insp.size.toLocaleString() + ')';
+      planHit = (track.find(r => r.plan >= insp.target) || {}).date || null;
     }
-    return { item, who, type: insp.type, target: insp.target, date: insp.date, planToday, planPrev, actual };
+    return { item, who, type: insp.type, target: insp.target, pct: insp.pct, date: insp.date, planToday, planPrev, actual, planHit };
   }).sort((a,b) => a.date - b.date);
+  // Plan check: inspection happens during the day, so the qty should be planned complete by the END OF THE PREVIOUS working day.
+  function planHitCell(c){
+    if (!c.planHit) return '<span class="tag behind">Not in plan</span>';
+    const dayBefore = new Date(c.date); dayBefore.setDate(dayBefore.getDate() - 1);
+    const txt = 'end of ' + fmtDate(c.planHit);
+    if (c.planHit <= dayBefore) return `<span style="color:var(--teal)">${txt}</span>`;
+    if (c.planHit.getTime() === c.date.getTime()) return `<span style="color:var(--amber)">${txt} · same day</span>`;
+    return `<span style="color:var(--red)">${txt} · after insp.</span>`;
+  }
   const tbody = document.getElementById('scheduleBody');
   if (!checkpoints.length){
-    tbody.innerHTML = '<tr><td colspan="7" style="color:var(--text-low);">No inspection dates found in the sheet yet.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" style="color:var(--text-low);">No inspection dates found in the sheet yet.</td></tr>';
   } else {
     tbody.innerHTML = checkpoints.map(c => {
       const done = c.date < today;
@@ -1116,8 +1156,9 @@ fetch(CSV_URL + '&_=' + Date.now(), { cache: 'no-store' }).then(r => {
       return `<tr>
         <td><span class="type-chip ${c.type}">${TYPE_NAME[c.type]}</span></td>
         <td>${c.who} · ${c.item}</td>
-        <td>${c.target.toLocaleString()}</td>
+        <td><b>${c.target.toLocaleString()}</b>${c.pct && c.pct < 100 ? ` <span style="color:var(--text-low)">(${c.pct}%)</span>` : ''}</td>
         <td>${fmtDate(c.date)}</td>
+        <td>${planHitCell(c)}</td>
         <td>${c.planToday.toLocaleString()}</td>
         <td>${c.actual.toLocaleString()}</td>
         <td><span class="tag ${tag}">${tagText}</span></td>
@@ -1137,15 +1178,16 @@ fetch(CSV_URL + '&_=' + Date.now(), { cache: 'no-store' }).then(r => {
     const planPct = Math.min(100, a.cumPlanToday / a.target * 100);
     const st = statusOf(a);
     const cls = st.tagClass === 'risk' ? 'risk' : (st.tagClass === 'behind' ? 'behind' : '');
-    const days = a.inspectionDate ? (a.inspectionDate < today ? 'done' : `${a.daysRemaining} day${a.daysRemaining===1?'':'s'} left`) : '';
+    const days = a.inspectionDate ? (a.inspectionDate < today ? 'date passed' : `${a.daysRemaining} day${a.daysRemaining===1?'':'s'} left`) : '';
     return `<div class="pbar-row">
       <div class="pbar-name"><b>${name}</b><span>${sub}</span></div>
       <div class="pbar-track" title="Plan to date ${a.cumPlanToday} · Actual ${a.cumActual} · Target ${a.target}">
         <div class="pbar-plan" style="width:${planPct}%"></div>
         <div class="pbar-act ${cls}" style="width:${pct}%"></div>
+        ${a.inspTarget && a.inspTarget < a.target ? `<div class="pbar-insp" style="left:${a.inspTarget / a.target * 100}%" title="Inspection qty ${a.inspTarget}"><span>Insp. ${a.inspTarget.toLocaleString()}</span></div>` : ''}
         <div class="pbar-pct">${a.cumActual.toLocaleString()} / ${a.target.toLocaleString()} (${Math.round(pct)}%)</div>
       </div>
-      <div class="pbar-meta"><b>${a.inspectionDate ? fmtDate(a.inspectionDate) : '—'}</b>${typeLbl} · ${days}</div>
+      <div class="pbar-meta"><b>${a.inspectionDate ? fmtDate(a.inspectionDate) : '—'}</b>${typeLbl}${a.inspTarget && a.inspTarget < a.target ? ' @ ' + Math.round(a.inspTarget / a.target * 100) + '%' : ''} · ${days}</div>
     </div>`;
   }
   document.getElementById('progressBars').innerHTML =
@@ -1219,7 +1261,7 @@ fetch(CSV_URL + '&_=' + Date.now(), { cache: 'no-store' }).then(r => {
   document.getElementById('statusSub').textContent = 'Check the sheet is shared as "Anyone with the link – Viewer". (' + err.message + ')';
   document.getElementById('statusBanner').className = 'status-banner glass reveal in behind';
   document.getElementById('sheetSrc').textContent = 'Source: CKD Dashboard tab — fetch failed';
-  document.getElementById('scheduleBody').innerHTML = '<tr><td colspan="7" style="color:var(--text-low);">Could not load data.</td></tr>';
+  document.getElementById('scheduleBody').innerHTML = '<tr><td colspan="8" style="color:var(--text-low);">Could not load data.</td></tr>';
 }).finally(() => { ckdLoading = false; });
 }
 loadCKD();
