@@ -328,6 +328,56 @@ footer{max-width:1220px;margin:0 auto;padding:24px 24px 0;font-size:11.5px;color
   #ltToggleBtn{position:fixed;bottom:2vh;left:50%;transform:translateX(-50%);z-index:600;background:var(--blue);color:#fff;border:none;border-radius:1vh;padding:1.3vh 2.5vw;font-size:1.6vh;font-weight:800;cursor:pointer;box-shadow:0 0.5vh 2vh rgba(0,0,0,0.4);}
   #ltToggleBtn:hover{opacity:0.9;}
 
+
+/* ---------- MOBILE (phones / narrow windows) ----------
+   The shop-floor view locks the page to one 1080p screen. Below 900px
+   that is undone: normal scrolling page, cards stacked in reading order
+   (banner, main gauge, next-up, customs, progress, schedule, this week).
+   Tables scroll sideways inside their card instead of squeezing. */
+@media (max-width:900px){
+  html,body,body.kiosk,body.detail{height:auto;min-height:100vh;overflow-y:auto;overflow-x:hidden;display:block;}
+  header,body.kiosk header{padding:14px 14px 8px;flex-direction:column;align-items:stretch;gap:10px;}
+  h1,body.kiosk h1{font-size:26px;}
+  header .tabbar{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin-top:8px;}
+  header .tabbar::-webkit-scrollbar{display:none;}
+  .tabbar a,body.kiosk .tabbar a{white-space:nowrap;padding:6px 12px;font-size:12px;}
+  .clock-widget,body.kiosk .clock-widget{gap:12px;justify-content:flex-start;}
+  .clock-badge{text-align:left;}
+  .analog-wrap svg,body.kiosk .analog-wrap svg{width:56px;height:56px;}
+  .clock-time,body.kiosk .clock-time{font-size:28px;}
+  .clock-date,.clock-status{font-size:12.5px;}
+  .safety-strip,body.kiosk .safety-strip{margin:0 12px 10px;}
+  .wrap,body.kiosk .wrap{display:flex;flex-direction:column;gap:10px;padding:0 12px 24px;max-width:none;}
+  .status-banner,body.kiosk .status-banner{flex-wrap:wrap;margin:0;padding:12px 14px;gap:10px;}
+  .status-banner .txt{flex:1 1 220px;}
+  .status-banner .txt b,body.kiosk .status-banner .txt b{font-size:17px;}
+  .status-banner .txt div,body.kiosk .status-banner .txt div{font-size:13px;}
+  .view-toggle{margin-left:0;width:100%;}
+  .ckd-layout,body.kiosk .ckd-layout{display:flex;flex-direction:column;gap:10px;margin:0;}
+  .side-col,body.kiosk .side-col{display:flex;flex-direction:column;gap:10px;}
+  body.kiosk .side-col > .next-card{flex:none;}
+  .primary-card,.next-card,body.kiosk .primary-card,body.kiosk .next-card{min-height:auto;}
+  .primary-card,.next-card,body.kiosk .primary-card,body.kiosk .next-card{padding:14px 16px;}
+  body.kiosk .dial-wrap,.dial-wrap{flex:none;margin:6px 0;}
+  body.kiosk .dial-wrap > div[id$="Dial"]{height:auto;}
+  .dial-wrap svg,body.kiosk .dial-wrap svg{width:100% !important;height:auto !important;max-width:420px !important;}
+  .batch-top h3{font-size:20px;}
+  .batch-stats,body.kiosk .batch-stats{gap:6px;}
+  .batch-stats .v,body.kiosk .batch-stats .v{font-size:24px;}
+  .batch-stats .l,body.kiosk .batch-stats .l{font-size:9.5px;}
+  .target-note,body.kiosk .target-note{display:block;font-size:11.5px;}
+  .dial-legend,body.kiosk .dial-legend,body.kiosk .bar-legend{display:flex;gap:10px;}
+  .k-bottom,body.kiosk .k-bottom{display:flex;flex-direction:column;gap:10px;}
+  .schedule,body.kiosk .k-bottom .schedule{margin:0;padding:14px 14px 10px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  body.kiosk .week-section{display:block;flex:none;}
+  body.kiosk .k-bottom #scheduleBody td:nth-child(5),body.kiosk .k-bottom th:nth-child(5){display:table-cell;}
+  .pbar-row,body.kiosk .pbar-row{grid-template-columns:1fr;gap:6px;padding:20px 0 8px;}
+  .pbar-meta,body.kiosk .pbar-meta{text-align:left;white-space:normal;}
+  .pbar-name span,body.kiosk .pbar-name span{white-space:normal;}
+  .k-bottom table,body.kiosk .k-bottom table{font-size:12px;}
+  .perf-card{margin:0;padding:14px;}
+  footer{padding:12px 14px 24px;}
+}
 </style>
 </head>
 <body>
