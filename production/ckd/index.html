@@ -747,6 +747,10 @@ function findCol(headers, ...needles){
   }
   return -1;
 }
+function findColAll(headers, ...needles){
+  const lower = headers.map(h => (h||'').toLowerCase().trim());
+  return lower.findIndex(h => needles.every(n => h.includes(n)));
+}
 function parseNum(v){ const n = parseFloat(String(v||'').replace(/,/g,'')); return isNaN(n) ? null : n; }
 const MONTHS = ['january','february','march','april','may','june','july','august','september','october','november','december'];
 // FIX (2026-09-20): new Date(string) is unreliable across ambiguous
@@ -1008,20 +1012,36 @@ fetch(CSV_URL + '&_=' + Date.now(), { cache: 'no-store' }).then(r => {
   const cActual01 = findCol(headers, 'actual batch 01');
   const cPlan02 = findCol(headers, 'plan batch 02');
   const cActual02 = findCol(headers, 'actual batch 02');
+  // 2026-10-02: the sheet now has daily-entry columns ("Actual Qty - Batch 0N") feeding the
+  // cumulative formula columns ("Actual Batch 0N Sum"). Those formulas are filled down to the
+  // bottom of the sheet, so future/blank rows carry the last cumulative. A cumulative value only
+  // counts as an actual when a daily qty was entered on that row (or the cumulative itself changed).
+  const cDay01 = findColAll(headers, 'actual qty', 'batch 01');
+  const cDay02 = findColAll(headers, 'actual qty', 'batch 02');
   const cInspect = findCol(headers, 'inspection date', 'remarks');
   const cPlanned = findCol(headers, 'planed qty', 'planned qty');
 
   const today = new Date(); today.setHours(0,0,0,0);
   const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
 
-  let lastDate = null;
+  let lastDate = null, prevCum01 = 0, prevCum02 = 0;
   const entries = [];
+  function enteredActual(r, cDay, cCum, prevCum){
+    const cum = parseNum(r[cCum]);
+    if (cum === null) return null;
+    if (cDay === -1) return cum;                               // no daily column: old layout
+    if (parseNum(r[cDay]) !== null) return cum;                // daily qty entered on this row
+    return cum !== prevCum ? cum : null;                       // cumulative typed/changed directly
+  }
   rows.slice(1).forEach((r, idx) => {
+    const act01 = enteredActual(r, cDay01, cActual01, prevCum01);
+    const act02 = enteredActual(r, cDay02, cActual02, prevCum02);
+    { const c1 = parseNum(r[cActual01]), c2 = parseNum(r[cActual02]); if (c1 !== null) prevCum01 = c1; if (c2 !== null) prevCum02 = c2; }
     const e = {
       date: parseDateCell(r[cDate]),
       item: (r[cItem]||'').trim(),
-      plan01: parseNum(r[cPlan01]), actual01: parseNum(r[cActual01]),
-      plan02: parseNum(r[cPlan02]), actual02: parseNum(r[cActual02]),
+      plan01: parseNum(r[cPlan01]), actual01: act01,
+      plan02: parseNum(r[cPlan02]), actual02: act02,
       inspection: (r[cInspect]||'').trim(),
       planned: cPlanned === -1 ? null : parseNum(r[cPlanned]),
       seq: idx
@@ -1032,8 +1052,16 @@ fetch(CSV_URL + '&_=' + Date.now(), { cache: 'no-store' }).then(r => {
   });
   entries.sort((a,b) => (a.date - b.date) || (a.seq - b.seq));
 
+  // A row belongs to a batch track if it has a plan value for that batch OR an entered actual
+  // (batch built ahead of / beyond its planned rows). Plan carries forward (0 before the batch's plan starts).
   function buildTrack(planKey, actualKey){
-    return entries.filter(e => e[planKey] !== null).map(e => ({ date: e.date, item: e.item, plan: e[planKey], actual: e[actualKey] }));
+    let carry = 0; const out = [];
+    entries.forEach(e => {
+      if (e[planKey] !== null) carry = e[planKey];
+      else if (e[actualKey] === null) return;
+      out.push({ date: e.date, item: e.item, plan: carry, actual: e[actualKey] });
+    });
+    return out;
   }
   const t1 = buildTrack('plan01','actual01');
   const t2 = buildTrack('plan02','actual02');
