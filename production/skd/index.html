@@ -469,19 +469,31 @@ function toM(hm){const[h,m]=hm.split(":").map(Number);return h*60+m;}
 function fmtC(d){return d.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit",second:"2-digit"});}
 function fmtD(d){return d.toLocaleDateString("en-GB",{weekday:"long",day:"2-digit",month:"long",year:"numeric"});}
 function fmtCD(m){const h=Math.floor(m/60),mn=m%60;return(h>0?h+"h ":"")+mn+"m";}
-/* Generate all possible date format variants so we match regardless of
-   whether the sheet uses DD/MM/YYYY, D/M/YYYY, MM/DD/YYYY, or M/D/YYYY */
+/* Date matching. The SKD PRODUCTION sheet (and the Apps Script feed) is MONTH-first
+   (M/D/YYYY or MM/DD/YYYY). The old code also tried DAY-first variants, so on
+   8 Oct "tomorrow" (9 Oct -> "9/10/2026") matched the 10 Sep rows (9/10/2026
+   month-first) and showed September's plan as tomorrow's. Now only month-first
+   text is generated; the last element is the ISO key getRowsByDate compares with. */
 function dateVariants(d){
   const m=d.getMonth()+1, day=d.getDate(), y=d.getFullYear();
   const p=n=>n<10?"0"+n:n;
   return [
-    m+"/"+day+"/"+y,             // 8/14/2026  (M/D/YYYY — Apps Script reformatted dates)
-    day+"/"+m+"/"+y,             // 14/8/2026  (D/M/YYYY)
-    p(day)+"/"+p(m)+"/"+y,       // 14/08/2026 (DD/MM/YYYY — what your sheet currently uses)
-    p(m)+"/"+p(day)+"/"+y,       // 08/14/2026 (MM/DD/YYYY)
-    m+"/"+day+"/"+y,             // M/D/YYYY
-    y+"-"+p(m)+"-"+p(day),       // 2026-08-14 (ISO, just in case)
+    m+"/"+day+"/"+y,             // 8/14/2026
+    p(m)+"/"+p(day)+"/"+y,       // 08/14/2026
+    y+"-"+p(m)+"-"+p(day),       // 2026-08-14 (ISO - key used for matching)
   ];
+}
+/* Row date text -> ISO key. Month-first; only if the first part is >12 is it
+   read as day-first (it cannot be a month). */
+function rowDateKey(s){
+  s=(s||"").trim();
+  let m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if(m)return m[1]+"-"+("0"+m[2]).slice(-2)+"-"+("0"+m[3]).slice(-2);
+  m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if(!m)return "";
+  let mo=+m[1],dy=+m[2];
+  if(mo>12&&dy<=12){const t=mo;mo=dy;dy=t;}
+  return m[3]+"-"+("0"+mo).slice(-2)+"-"+("0"+dy).slice(-2);
 }
 function todayVariants(){return dateVariants(nowSL());}
 function tomorrowVariants(){const d=nowSL();d.setDate(d.getDate()+1);return dateVariants(d);}
@@ -563,8 +575,8 @@ function normalizeRow(r){
 function normalizeRows(rows){return rows.map(normalizeRow);}
 
 function getRowsByDate(rows,variants){
-  const set=new Set(variants.map(v=>v.trim()));
-  return rows.filter(r=>set.has((r.Date||"").trim()));
+  const iso=variants.find(v=>/^\d{4}-\d{2}-\d{2}$/.test(v.trim()));
+  return rows.filter(r=>rowDateKey(r.Date)===iso);
 }
 function classifyRows(rows){const l01=[],l02=[],l3w=[],lOff=[];rows.forEach(r=>{const m=(r.Model||""),ln=(r.Line||"").trim().toLowerCase();if(IS_3W_MODEL(m)||IS_3W_LINE(ln)){l3w.push(r);}else if(ln.includes("offline")){lOff.push(r);}else if(ln.includes("01")){l01.push(r);}else if(ln.includes("02")){l02.push(r);}else{l01.push(r);}});return{l01,l02,l3w,lOff};}
 function aggLine(lr){if(!lr.length)return null;return{plan:lr.reduce((s,r)=>s+(Number(r.Plan)||0),0),actual:lr.reduce((s,r)=>s+(Number(r.Actual)||0),0),hc:Number(lr.find(r=>r.Employee)?.Employee||0),models:lr.map(r=>({name:r.Model,actual:Number(r.Actual)||0,plan:Number(r.Plan)||0})).sort((a,b)=>b.actual-a.actual)};}
@@ -575,7 +587,7 @@ function animScroll(){Object.keys(scrollSt).forEach(id=>{const st=scrollSt[id],v
 const NOTICE_KEY="tvs_dashboard_notices";function loadNotices(){try{return JSON.parse(localStorage.getItem(NOTICE_KEY)||"[]");}catch(e){return[];}}function saveNotices(arr){localStorage.setItem(NOTICE_KEY,JSON.stringify(arr));}
 function addNotice(){const msg=document.getElementById("nfMsg").value.trim();if(!msg)return;const ns=loadNotices();ns.push({id:Date.now(),Message:msg,Message_SI:document.getElementById("nfMsgSi").value.trim(),Tag:document.getElementById("nfTag").value,Active:"Y"});saveNotices(ns);document.getElementById("nfMsg").value="";document.getElementById("nfMsgSi").value="";renderNoticeBoard();}
 function deleteNotice(id){saveNotices(loadNotices().filter(n=>n.id!==id));renderNoticeBoard();}
-let tomorrowData=[];function renderNoticeBoard(){const el=document.getElementById("noticeContent");let html="";if(tomorrowData.length){const{l01,l02,l3w,lOff}=classifyRows(tomorrowData);const all=[...l01.map(r=>({...r,ln:"L01"})),...l02.map(r=>({...r,ln:"L02"})),...l3w.map(r=>({...r,ln:"3W"})),...lOff.map(r=>({...r,ln:"OFF"}))];html+=`<div class="nc-section">Tomorrow's Plan</div><div class="notice-card">`;if(all.length){html+=all.map(r=>`<div class="tmrw-model"><span class="tm-name">${r.Model}</span><span class="tm-qty">${r.Plan||"—"}</span><span class="tm-line">${r.ln}</span></div>`).join("");}else{html+=`<div style="font-size:1.5vh;color:var(--sub);padding:0.5vh 0;">No models planned</div>`;}html+=`</div>`;}const ns=loadNotices().filter(n=>n.Active==="Y");if(ns.length){html+=`<div class="nc-section" style="margin-top:0.8vh;">Notices</div>`;html+=ns.map(n=>{const tag=n.Tag||"info";return`<div class="notice-card"><span class="nc-tag ${tag}">${tag.toUpperCase()}</span><button class="nc-del" onclick="deleteNotice(${n.id})" title="Delete">✕</button><div class="nc-msg">${n.Message}</div></div>`;}).join("");}if(!html){html=`<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--sub);text-align:center;gap:1vh;opacity:.5;"><div style="font-size:2vh;font-weight:700;">No notices posted</div></div>`;}el.innerHTML=html;}
+let tomorrowData=[];function renderNoticeBoard(){const el=document.getElementById("noticeContent");let html="";if(tomorrowData.length){const{l01,l02,l3w,lOff}=classifyRows(tomorrowData);const all=[...l01.map(r=>({...r,ln:"L01"})),...l02.map(r=>({...r,ln:"L02"})),...l3w.map(r=>({...r,ln:"3W"})),...lOff.map(r=>({...r,ln:"OFF"}))];html+=`<div class="nc-section">Tomorrow's Plan</div><div class="notice-card">`;if(all.length){html+=all.map(r=>`<div class="tmrw-model"><span class="tm-name">${r.Model}</span><span class="tm-qty">${r.Plan||"—"}</span><span class="tm-line">${r.ln}</span></div>`).join("");}else{html+=`<div style="font-size:1.5vh;color:var(--sub);padding:0.5vh 0;">No models planned</div>`;}html+=`</div>`;}else{html+=`<div class="nc-section">Tomorrow's Plan</div><div class="notice-card"><div style="font-size:1.5vh;color:var(--sub);padding:0.5vh 0;">Not entered yet</div></div>`;}const ns=loadNotices().filter(n=>n.Active==="Y");if(ns.length){html+=`<div class="nc-section" style="margin-top:0.8vh;">Notices</div>`;html+=ns.map(n=>{const tag=n.Tag||"info";return`<div class="notice-card"><span class="nc-tag ${tag}">${tag.toUpperCase()}</span><button class="nc-del" onclick="deleteNotice(${n.id})" title="Delete">✕</button><div class="nc-msg">${n.Message}</div></div>`;}).join("");}if(!html){html=`<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--sub);text-align:center;gap:1vh;opacity:.5;"><div style="font-size:2vh;font-weight:700;">No notices posted</div></div>`;}el.innerHTML=html;}
 function renderMetrics(l1,l2,l3w,lOff,nM){const p2w=(l1?.plan||0)+(l2?.plan||0)+(lOff?.plan||0),a2w=(l1?.actual||0)+(l2?.actual||0)+(lOff?.actual||0),p3w=(l3w?.plan||0),a3w=(l3w?.actual||0),tP=p2w+p3w,tA=a2w+a3w,tHC=(l1?.hc||0)+(l2?.hc||0)+(l3w?.hc||0)+(lOff?.hc||0),hrs=Math.max(.25,(nM-toM(SHIFT_START))/60),compPct=tP?Math.round((tA/tP)*100):0,c2=Math.round((a2w/CAP_2W)*100),c3=Math.round((a3w/CAP_3W)*100);document.getElementById("ppActual").textContent=tA;document.getElementById("ppPlan").textContent=tP;document.getElementById("planPctBig").textContent=compPct+"%";document.getElementById("planPctBig").style.color=compPct>=80?"var(--good)":compPct>=50?"var(--warn)":"var(--bad)";document.getElementById("pp2wA").textContent=a2w;document.getElementById("pp2wCap").textContent=CAP_2W;document.getElementById("pp3wA").textContent=a3w;document.getElementById("pp3wCap").textContent=CAP_3W;document.getElementById("planBarFill").style.width=Math.min(100,(a2w/CAP_2W)*100)+"%";document.getElementById("planBarMark").style.left=Math.min(100,(p2w/CAP_2W)*100)+"%";const mc=new Set([...(l1?.models||[]),...(l2?.models||[]),...(l3w?.models||[]),...(lOff?.models||[])].map(m=>m.name)).size;const tiles=[{v:compPct+"%",en:"Plan Completion"},{v:c2+"%",en:"2W Capacity"},{v:c3+"%",en:"3W Capacity"},{v:(tA/hrs).toFixed(1),en:"Units / Hour"},{v:tHC,en:"Total Headcount"},{v:mc,en:"Active Models"}];document.getElementById("metricsBar").innerHTML=tiles.map(t=>`<div class="m-tile glass"><div class="mv">${t.v}</div><div class="ml">${t.en}</div></div>`).join("");}
 let allRows=[];async function refreshData(){let src="demo",ok=true;try{if(CONFIG.APPS_SCRIPT_URL){const d=await fetchJSON(CONFIG.APPS_SCRIPT_URL);allRows=normalizeRows((d.production||d).filter(r=>(r.Date||"").trim()!==""));src="appsscript";}}catch(e){console.warn("Apps Script fail:",e);}if(src==="demo"&&CONFIG.DASHBOARD_DATA_CSV_URL){try{allRows=normalizeRows((await fetchCSV(CONFIG.DASHBOARD_DATA_CSV_URL)).filter(r=>(r.Date||"").trim()!==""));src="csv";}catch(e){console.warn("CSV fail:",e);ok=false;}}const today=todayVariants(),tomorrow=tomorrowVariants();let useRows=getRowsByDate(allRows,today);if(!useRows.length&&allRows.length){const ld=allRows[allRows.length-1].Date;useRows=allRows.filter(r=>r.Date===ld);}tomorrowData=getRowsByDate(allRows,tomorrow);const{l01,l02,l3w,lOff}=classifyRows(useRows);const d1=aggLine(l01),d2=aggLine(l02),d3w=aggLine(l3w),dOff=aggLine(lOff);renderLine("01","ring01",d1);renderLine("02","ring02",d2);renderLine("3w","ring3w",d3w);renderLine("Off","ringOff",dOff);renderNoticeBoard();const d=nowSL(),nM=d.getHours()*60+d.getMinutes();renderMetrics(d1,d2,d3w,dOff,nM);const notes={appsscript:ok?"live via Apps Script — ":"fallback — ",csv:ok?"live — ":"offline — ",demo:"demo — "};document.getElementById("syncNote").textContent=(notes[src]||notes.demo)+"last sync "+nowSL().toLocaleTimeString("en-GB");}
 updateClock();setInterval(updateClock,1000);refreshData();setInterval(refreshData,CONFIG.REFRESH_MS);requestAnimationFrame(animScroll);
