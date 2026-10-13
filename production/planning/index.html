@@ -250,10 +250,10 @@ footer{max-width:1220px;margin:0 auto;padding:20px 24px 0;font-size:11.5px;color
 
 </div>
 
-<footer id="foot">Source: TVS Production Planning Master (Google Sheet), read live through the MIS Apps Script. Model blocks and columns are located by header text, so a new model added to the sheet appears here automatically. 2W = CKD DVA + SKD 2W + EV 2W; 3W = EV Max 3W + 3W petrol.</footer>
+<footer id="foot">Source: TVS Production Planning Master (Google Sheet), read live through the MIS Production Planning API (separate Apps Script). Model blocks and columns are located by header text, so a new model added to the sheet appears here automatically. 2W = CKD DVA + SKD 2W + EV 2W; 3W = EV Max 3W + 3W petrol.</footer>
 
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbzJFWD_AQc8UwEkVHcb3q9lDmzoMcO-fq9qDX3wIEAoUi8gIZN09Uxbbjfj3Z30spjjpw/exec?module=planning";
+const API_URL = "https://script.google.com/macros/s/AKfycbyLBA71ar4ikb7zLyI_k_GMd0k9OH3sr2PB5oT5goW19tR3SMUP4kzcDpDfnYN0h-Rg/exec";
 const NS = "http://www.w3.org/2000/svg";
 const GROUP_COLORS = { 'CKD DVA': '#ffc267', 'SKD 2W': '#5ee6cf', 'EV 2W': '#b28dff', '3W': '#6fa3ff' };
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
