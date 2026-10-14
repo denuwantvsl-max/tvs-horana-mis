@@ -359,6 +359,12 @@ details.fold .inner{padding:0 22px 20px;}
     <div class="inner"><div class="tscroll"><table class="mtable" id="dailyTable"></table></div></div>
   </details>
 
+  <div class="panel glass" id="syncPanel">
+    <div class="panel-head"><h2>Data checks &amp; clarifications</h2><span id="syncBadge"></span></div>
+    <div class="sub" id="syncSub"></div>
+    <div id="syncList"></div>
+  </div>
+
   <div class="nav-cards">
     <a class="nav-card glass" href="../">
       <div class="nc-title">← Back to Production Overview</div>
@@ -372,7 +378,7 @@ details.fold .inner{padding:0 22px 20px;}
 
 </div>
 
-<footer id="foot">Source: TVS Production Planning Master (Google Sheet), read live through the MIS Production Planning API (separate Apps Script, read-only). Model blocks and columns are located by header text, so a new model added to the sheet appears here automatically. Forecasts are statistical projections from the sheet's own history, not commitments; they update whenever the sheet does.</footer>
+<footer id="foot">Source: TVS Production Planning Master (Google Sheet), updated every morning from the production executive sheet by the MIS Planning Sync (cross-checked against the SKD sheet), and read live through the MIS Production Planning API (read-only). Model blocks and columns are located by header text, so a new model added to the sheet appears here automatically. Forecasts are statistical projections from the sheet's own history, not commitments; they update whenever the sheet does.</footer>
 
 
 <script>
@@ -381,7 +387,9 @@ details.fold .inner{padding:0 22px 20px;}
 // Dates the plant is known to be closed (Mon-Sat). Source: CKD plan marks 24 Oct 2026 as Poya Day.
 const NON_WORKING = ['2026-10-24'];
 // Periods where a line has NO data in the source (not "zero production"). Excluded from trends and forecasts.
-const KNOWN_GAPS = { CKD: { from: '2026-08-01', to: '2026-09-29', note: 'XL 100 (CKD) figures are not available for 1 Aug – 29 Sep 2026 (the CKD source starts on 30 Sep), so Aug and Sep CKD and total-2W are understated.' } };
+// Periods where a line has NO data in the source (not "zero production"). Excluded from trends and forecasts.
+// (Empty: Aug-Sep 2026 XL 100 was confirmed as genuine 'No Production' in the production executive sheet.)
+const KNOWN_GAPS = {};
 const Z80 = 1.2816; // 80% prediction interval
 
 const LINES = {
@@ -659,13 +667,31 @@ function renderProvenance(){
 }
 
 function renderNotes(){
-  const notes = [];
-  Object.keys(KNOWN_GAPS).forEach(k => notes.push('<b>Data gap · ' + esc(LINES[k].short) + ':</b> ' + esc(KNOWN_GAPS[k].note) + ' Trends and forecasts skip those months.'));
-  const w = DATA.warnings || [];
-  if (w.length) notes.push('<b>' + w.length + ' data check' + (w.length === 1 ? '' : 's') + ' on the sheet</b> — worth a look by whoever maintains it:<ul class="chk-list">' + w.slice(0, 8).map(x => '<li>' + esc(x) + '</li>').join('') + (w.length > 8 ? '<li>…and ' + (w.length - 8) + ' more</li>' : '') + '</ul>');
-  const box = $('checkNote');
-  if (!notes.length){ box.style.display = 'none'; return; }
-  box.style.display = 'block'; box.innerHTML = notes.join('<div style="height:8px"></div>');
+  const box = $('checkNote'); const s = DATA.sync; const n = s && s.open ? s.open.length : 0;
+  if (!n && !(DATA.warnings || []).length){ box.style.display = 'none'; return; }
+  box.style.display = 'block';
+  box.innerHTML = '<b>' + (n ? n + ' data check' + (n === 1 ? '' : 's') + ' need clarification' : (DATA.warnings.length + ' sheet check' + (DATA.warnings.length === 1 ? '' : 's'))) + '</b> — the production executive sheet and the SKD sheet disagree, or something could not be read. <a href="#syncPanel" style="color:#ffc267;font-weight:700">See the list at the bottom ↓</a>';
+}
+function renderSync(){
+  const s = DATA.sync, w = DATA.warnings || [];
+  const badge = $('syncBadge'), sub = $('syncSub'), list = $('syncList');
+  if (!s){
+    badge.innerHTML = '<span class="status na">Not connected</span>';
+    sub.textContent = 'The automatic daily sync from the production executive sheet is not connected yet, so the figures above are as last entered in the Planning Master.';
+    list.innerHTML = w.length ? '<ul class="chk-list">' + w.slice(0, 10).map(x => '<li>' + esc(x) + '</li>').join('') + '</ul>' : ''; return;
+  }
+  const ok = String(s.result || '').toUpperCase() === 'OK', n = (s.open || []).length;
+  badge.innerHTML = '<span class="status ' + (!ok ? 'falling' : n ? 'stopped' : 'rising') + '">' + (!ok ? 'Sync failed' : n ? n + ' open' : 'All clear') + '</span>';
+  sub.innerHTML = 'Master updated automatically every morning from the <b>production executive sheet</b> (primary) and cross-checked against the <b>SKD sheet</b>. Last run <b>' + esc(s.lastRun || '—') + '</b>' + (s.cellsUpdated !== undefined ? ' · ' + esc(s.cellsUpdated) + ' cells updated' : '') + (s.window ? ' · window ' + esc(s.window) : '') + '.' + (!ok && s.message ? '<br><span style="color:var(--red)">' + esc(s.message) + '</span>' : '');
+  let h = '';
+  if (n){
+    h += '<div class="data-note" style="margin:6px 0 12px">Please clarify which figure is correct. Denuwan: open the <b>Sync Review</b> tab of the Planning Master and pick <b>Keep primary / Use secondary / Use this value / Ignore</b> for each row — the next run applies it. Until then the master uses the production executive sheet.</div>';
+    h += '<div class="tscroll"><table class="mtable"><thead><tr><th>Date</th><th>Model</th><th>Prod. exec sheet</th><th>SKD sheet</th><th>What needs clarifying</th></tr></thead><tbody>' +
+      s.open.map(o => '<tr><td>' + (o.date ? esc(o.date.length === 10 ? dayLabel(o.date) : o.date) : '<span class="dim">—</span>') + '</td><td>' + (o.model ? esc(o.model) : '<span class="dim">—</span>') + '</td><td>' + (o.primary === '' || o.primary === undefined ? '<span class="dim">—</span>' : fmt(o.primary)) + '</td><td>' + (o.secondary === '' || o.secondary === undefined ? '<span class="dim">—</span>' : fmt(o.secondary)) + '</td><td style="text-align:left;white-space:normal;color:var(--text-mid)">' + esc(o.text) + '</td></tr>').join('') + '</tbody></table></div>';
+    if (s.openCount > n) h += '<div class="mini-sub">…showing the first ' + n + ' of ' + esc(s.openCount) + '.</div>';
+  } else if (ok) h += '<div class="empty-note">No open items — both sheets agree within tolerance.</div>';
+  if (w.length) h += '<div class="method"><b>Sheet layout checks:</b><ul class="chk-list">' + w.slice(0, 8).map(x => '<li>' + esc(x) + '</li>').join('') + (w.length > 8 ? '<li>…and ' + (w.length - 8) + ' more</li>' : '') + '</ul></div>';
+  list.innerHTML = h;
 }
 
 function renderKpis(){
@@ -1196,7 +1222,7 @@ function renderDailyTable(){
 function render(){
   renderProvenance(); renderNotes(); renderKpis(); renderReading(); renderProjection();
   renderDonut(); renderTopModels(); renderFamilyMix(); renderMovement();
-  renderHistory(); renderRates(); renderMomentum(); renderModelTable(); renderDailyTable();
+  renderHistory(); renderRates(); renderMomentum(); renderModelTable(); renderDailyTable(); renderSync();
 }
 function init(payload){
   if (payload.error){ $('provenance').innerHTML = 'Could not load the planning sheet: <b>' + esc(payload.error) + '</b>'; $('dateLabel').textContent = 'Error'; return; }
