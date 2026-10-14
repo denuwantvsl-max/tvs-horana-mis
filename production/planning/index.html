@@ -7,6 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TVS Lanka — Production Planning</title>
 <style>
+
 :root{
   --bg-0:#030509; --bg-1:#06090f;
   --glass-fill-1:rgba(255,255,255,0.09);
@@ -186,6 +187,84 @@ footer{max-width:1220px;margin:0 auto;padding:20px 24px 0;font-size:11.5px;color
 .chk-list{margin:8px 0 0;padding-left:18px;font-size:11.5px;line-height:1.6;color:var(--text-mid);}
 .chk-list li{margin:2px 0;}
 .mbar{cursor:pointer;}
+
+:root{ --pink:#ff7ac8; --pink-soft:rgba(255,122,200,0.14); --pink-line:rgba(255,122,200,0.55); }
+.btn-view{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:100px;font-size:12px;font-weight:700;
+  color:#ffd3ec;background:linear-gradient(135deg,rgba(255,122,200,0.22),rgba(178,141,255,0.10));border:1px solid var(--pink-line);
+  transition:all .18s ease;white-space:nowrap;}
+.btn-view:hover{border-color:#ff9fd8;transform:translateY(-1px);box-shadow:0 8px 24px -10px rgba(255,122,200,0.6);}
+.btn-view svg{width:14px;height:14px;stroke:var(--pink);}
+.provenance .grow{flex:1;}
+.hero-title{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin:0 0 14px;}
+.hero-title h2{margin:0;font-size:22px;font-weight:800;letter-spacing:-0.01em;}
+.hero-title .tag{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 10px;border-radius:100px;
+  background:rgba(94,230,207,0.10);color:var(--teal);border:1px solid rgba(94,230,207,0.25);}
+.hero-title .tag.pink{background:var(--pink-soft);color:#ffb3df;border-color:var(--pink-line);}
+
+.kpi-grid6{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:22px;}
+@media (max-width:1100px){.kpi-grid6{grid-template-columns:repeat(3,1fr);}}
+@media (max-width:640px){.kpi-grid6{grid-template-columns:repeat(2,1fr);}}
+.k6{padding:16px 16px 12px;position:relative;overflow:hidden;--c:var(--teal);}
+.k6::after{content:"";position:absolute;width:100px;height:100px;border-radius:50%;top:-44px;right:-40px;background:radial-gradient(circle,var(--cg,rgba(94,230,207,.28)),transparent 70%);filter:blur(6px);}
+.k6 .kl{font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text-mid);position:relative;z-index:1;display:flex;align-items:center;gap:7px;}
+.k6 .kl i{width:8px;height:8px;border-radius:3px;background:var(--c);display:inline-block;}
+.k6 .kn{font-size:27px;font-weight:800;letter-spacing:-.02em;margin:6px 0 2px;color:var(--c);position:relative;z-index:1;}
+.k6 .ks{font-size:11px;color:var(--text-mid);position:relative;z-index:1;min-height:30px;}
+.k6 .spark{display:block;margin-top:6px;width:100%;height:30px;position:relative;z-index:1;}
+.chip{display:inline-block;font-size:10.5px;font-weight:700;padding:1px 7px;border-radius:100px;margin-right:4px;}
+.chip.up{background:rgba(94,230,207,.14);color:var(--teal);} .chip.down{background:rgba(255,122,122,.14);color:var(--red);}
+.chip.flat{background:rgba(255,255,255,.08);color:var(--text-mid);} .chip.na{background:rgba(255,255,255,.06);color:var(--text-low);}
+
+.grid-main{display:grid;grid-template-columns:1.25fr 1fr;gap:16px;margin-bottom:0;}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.grid-2{display:grid;grid-template-columns:1.35fr 1fr;gap:16px;}
+.grid-3c{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+@media (max-width:980px){.grid-main,.grid-3,.grid-2,.grid-3c{grid-template-columns:1fr;}}
+.panel.tight{padding:20px 22px;}
+.reading{list-style:none;margin:6px 0 0;padding:0;}
+.reading li{display:flex;gap:11px;padding:9px 0;border-top:1px solid rgba(255,255,255,0.06);font-size:13px;line-height:1.55;color:var(--text-mid);}
+.reading li:first-child{border-top:none;}
+.reading li b{color:var(--text-hi);font-weight:700;}
+.reading .dot{flex:0 0 9px;height:9px;border-radius:50%;margin-top:6px;background:var(--teal);box-shadow:0 0 10px -1px currentColor;}
+.reading .dot.warn{background:var(--amber);} .reading .dot.info{background:var(--blue);} .reading .dot.pink{background:var(--pink);} .reading .dot.bad{background:var(--red);}
+.reading .hl{color:var(--text-hi);font-weight:700;}
+.proj-big{font-size:34px;font-weight:800;letter-spacing:-.02em;color:#ffd3ec;line-height:1.1;}
+.proj-sub{font-size:12px;color:var(--text-mid);margin:3px 0 14px;}
+.proj-rows{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px;}
+.proj-rows div{padding:9px 10px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);font-size:11px;color:var(--text-mid);}
+.proj-rows b{display:block;font-size:15px;color:var(--text-hi);margin-bottom:1px;}
+.slider-row{display:flex;align-items:center;gap:12px;margin-top:14px;font-size:11.5px;color:var(--text-mid);flex-wrap:wrap;}
+.slider-row input[type=range]{flex:1;min-width:140px;accent-color:#ff7ac8;}
+.slider-row b{color:#ffd3ec;min-width:44px;text-align:right;}
+.seg{display:inline-flex;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.10);border-radius:100px;padding:3px;gap:2px;}
+.seg button{border:none;background:transparent;color:var(--text-mid);font:inherit;font-size:11.5px;font-weight:600;padding:5px 13px;border-radius:100px;cursor:pointer;transition:all .15s ease;}
+.seg button:hover{color:var(--text-hi);}
+.seg button.on{color:#fff;background:linear-gradient(135deg,rgba(94,230,207,.28),rgba(111,163,255,.14));box-shadow:inset 0 0 0 1px rgba(94,230,207,.3);}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 0;}
+.statpill{padding:7px 12px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);font-size:11px;color:var(--text-mid);}
+.statpill b{display:block;font-size:14px;color:var(--text-hi);}
+.hbar{display:grid;grid-template-columns:118px 1fr 52px;gap:8px;align-items:center;font-size:11.5px;margin:7px 0;color:var(--text-mid);}
+.hbar .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text-hi);}
+.hbar .tr{height:9px;border-radius:6px;background:rgba(255,255,255,.06);overflow:hidden;}
+.hbar .tr i{display:block;height:100%;border-radius:6px;}
+.hbar .v{text-align:right;font-weight:700;color:var(--text-hi);}
+.legend2{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--text-mid);margin:2px 0 8px;}
+.legend2 .li{display:flex;align-items:center;gap:6px;} .legend2 .sw{width:10px;height:10px;border-radius:3px;display:inline-block;}
+.legend2 .sw.hatch{background:repeating-linear-gradient(45deg,var(--pink) 0 2px,transparent 2px 5px);border:1px solid var(--pink-line);}
+.mini-title{font-size:12px;font-weight:700;color:var(--text-hi);margin-bottom:2px;}
+.mini-sub{font-size:11px;color:var(--text-mid);margin-bottom:6px;min-height:30px;}
+.status{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 9px;border-radius:100px;}
+.status.rising{background:rgba(94,230,207,.14);color:var(--teal);} .status.falling{background:rgba(255,122,122,.14);color:var(--red);}
+.status.steady{background:rgba(255,255,255,.08);color:var(--text-mid);} .status.new{background:var(--pink-soft);color:#ffb3df;}
+.status.stopped{background:rgba(255,194,103,.14);color:var(--amber);} .status.na{background:rgba(255,255,255,.05);color:var(--text-low);}
+details.fold{margin-bottom:20px;} details.fold>summary{cursor:pointer;padding:16px 22px;font-size:14px;font-weight:700;list-style:none;display:flex;align-items:center;gap:10px;}
+details.fold>summary::-webkit-details-marker{display:none;} details.fold>summary::before{content:"▸";color:var(--teal);transition:transform .15s;} details.fold[open]>summary::before{transform:rotate(90deg);}
+details.fold .inner{padding:0 22px 20px;}
+.method{font-size:11.5px;line-height:1.65;color:var(--text-low);margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.06);}
+.method b{color:var(--text-mid);}
+.ftable td.pk,.ftable th.pk{color:#ffd3ec;}
+.sp{height:16px;}
+@media (max-width:700px){.tabbar{overflow-x:auto;-webkit-overflow-scrolling:touch;} .tabbar a{flex:0 0 auto;white-space:nowrap;}}
 </style>
 </head>
 <body>
@@ -214,7 +293,59 @@ footer{max-width:1220px;margin:0 auto;padding:20px 24px 0;font-size:11.5px;color
   <div class="provenance glass" id="provenance">Loading source information…</div>
   <div class="data-note glass" id="checkNote" style="display:none;"></div>
 
-  <div class="kpi-grid" id="kpiGrid"></div>
+  <div class="hero-title" id="heroTitle"></div>
+  <div class="kpi-grid6" id="kpiGrid"></div>
+
+  <div class="grid-main">
+    <div class="panel glass" id="readingPanel"></div>
+    <div class="panel glass" id="projPanel"></div>
+  </div>
+
+  <div class="grid-3">
+    <div class="panel glass tight"><div class="panel-head"><h2>Where the month came from</h2></div><div class="sub" id="donutSub"></div><div id="donut" style="display:flex;justify-content:center;"></div><div class="legend2" id="donutLegend" style="justify-content:center;margin-top:8px;"></div></div>
+    <div class="panel glass tight"><div class="panel-head"><h2>Top models</h2></div><div class="sub" id="topSub"></div><div id="topModels"></div></div>
+    <div class="panel glass tight"><div class="panel-head"><h2>Platform mix over time</h2></div><div class="sub">Share of assembly output (SKD + EV + 3W) by platform, month by month.</div><div id="familyMix"></div><div class="legend2" id="familyLegend"></div></div>
+  </div>
+
+  <div class="panel glass">
+    <div class="panel-head"><h2>Daily movement</h2><div class="seg" id="lineSeg"></div></div>
+    <div class="sub" id="dailySub"></div>
+    <div class="legend2" id="dailyLegend"></div>
+    <div id="dailyChart"></div>
+    <div class="chips" id="dailyChips"></div>
+  </div>
+
+  <div class="grid-2">
+    <div class="panel glass tight"><div class="panel-head"><h2>Pace vs earlier months</h2></div><div class="sub" id="paceSub"></div><div class="legend2" id="paceLegend"></div><div id="paceChart"></div></div>
+    <div class="panel glass tight"><div class="panel-head"><h2>Weekday rhythm</h2></div><div class="sub" id="wkSub"></div><div id="weekdayChart"></div></div>
+  </div>
+
+  <div class="panel glass">
+    <div class="panel-head"><h2>Production calendar heat-map</h2></div>
+    <div class="sub" id="heatSub"></div>
+    <div id="heatChart"></div>
+  </div>
+
+  <div class="panel glass">
+    <div class="panel-head"><h2>History &amp; forecast</h2></div>
+    <div class="sub" id="histSub"></div>
+    <div class="legend2" id="histLegend"></div>
+    <div id="histChart"></div>
+    <div class="tscroll" style="margin-top:12px;"><table class="mtable ftable" id="fcTable"></table></div>
+    <div class="method" id="fcMethod"></div>
+  </div>
+
+  <div class="panel glass">
+    <div class="panel-head"><h2>Run-rate trends</h2></div>
+    <div class="sub">Units per working day (Mon–Sat) each month. Solid = history, hollow = month to date, pink = forecast with its 80% range. The dashed line is what the model carries forward.</div>
+    <div class="grid-3c" id="rateCharts"></div>
+  </div>
+
+  <div class="panel glass">
+    <div class="panel-head"><h2>Model momentum</h2></div>
+    <div class="sub" id="momSub"></div>
+    <div class="tscroll"><table class="mtable" id="momTable"></table></div>
+  </div>
 
   <div class="panel glass">
     <div class="panel-head"><h2>Production by model</h2></div>
@@ -223,19 +354,10 @@ footer{max-width:1220px;margin:0 auto;padding:20px 24px 0;font-size:11.5px;color
     <div class="stock-note" id="stockNote"></div>
   </div>
 
-  <div class="panel glass">
-    <div class="panel-head"><h2>Daily production</h2></div>
-    <div class="sub">Units per production day for the selected month.</div>
-    <div class="legend" id="dailyLegend"></div>
-    <div id="dailyChart"></div>
-    <div class="tscroll" style="margin-top:14px;"><table class="mtable" id="dailyTable"></table></div>
-  </div>
-
-  <div class="panel glass">
-    <div class="panel-head"><h2>Monthly trend</h2></div>
-    <div class="sub">Total units per month (2W + 3W). Click a bar to open that month.</div>
-    <div id="trendChart"></div>
-  </div>
+  <details class="fold glass">
+    <summary>Daily production table</summary>
+    <div class="inner"><div class="tscroll"><table class="mtable" id="dailyTable"></table></div></div>
+  </details>
 
   <div class="nav-cards">
     <a class="nav-card glass" href="../">
@@ -250,28 +372,227 @@ footer{max-width:1220px;margin:0 auto;padding:20px 24px 0;font-size:11.5px;color
 
 </div>
 
-<footer id="foot">Source: TVS Production Planning Master (Google Sheet), read live through the MIS Production Planning API (separate Apps Script). Model blocks and columns are located by header text, so a new model added to the sheet appears here automatically. 2W = CKD DVA + SKD 2W + EV 2W; 3W = EV Max 3W + 3W petrol.</footer>
+<footer id="foot">Source: TVS Production Planning Master (Google Sheet), read live through the MIS Production Planning API (separate Apps Script, read-only). Model blocks and columns are located by header text, so a new model added to the sheet appears here automatically. Forecasts are statistical projections from the sheet's own history, not commitments; they update whenever the sheet does.</footer>
+
 
 <script>
+//#ANALYTICS-START
+// ---------- configuration (edit here, nowhere else) ----------
+// Dates the plant is known to be closed (Mon-Sat). Source: CKD plan marks 24 Oct 2026 as Poya Day.
+const NON_WORKING = ['2026-10-24'];
+// Periods where a line has NO data in the source (not "zero production"). Excluded from trends and forecasts.
+const KNOWN_GAPS = { CKD: { from: '2026-08-01', to: '2026-09-29', note: 'XL 100 (CKD) figures are not available for 1 Aug – 29 Sep 2026 (the CKD source starts on 30 Sep), so Aug and Sep CKD and total-2W are understated.' } };
+const Z80 = 1.2816; // 80% prediction interval
+
+const LINES = {
+  CKD: { label: '2W CKD (XL 100)', short: 'CKD', groups: ['CKD DVA'], color: '#ffc267' },
+  SKD: { label: '2W SKD · Petrol', short: 'SKD Petrol', groups: ['SKD 2W'], color: '#5ee6cf' },
+  EV:  { label: '2W SKD · EV',     short: 'EV', groups: ['EV 2W'], color: '#b28dff' },
+  W3:  { label: '3W SKD',          short: '3W', groups: ['3W'], color: '#6fa3ff' }
+};
+const LINE_KEYS = ['CKD', 'SKD', 'EV', 'W3'];
+
+// ---------- small maths helpers ----------
+function sum(a){ let s = 0; for (const v of a) s += v; return s; }
+function mean(a){ return a.length ? sum(a) / a.length : 0; }
+function sd(a){ if (a.length < 2) return 0; const m = mean(a); return Math.sqrt(sum(a.map(v => (v - m) * (v - m))) / (a.length - 1)); }
+function median(a){ if (!a.length) return 0; const s = a.slice().sort((x, y) => x - y), h = s.length >> 1; return s.length % 2 ? s[h] : (s[h - 1] + s[h]) / 2; }
+function ols(xs, ys){
+  const n = xs.length; if (n < 3) return null;
+  const mx = mean(xs), my = mean(ys);
+  let sxx = 0, sxy = 0; for (let i = 0; i < n; i++){ sxx += (xs[i] - mx) * (xs[i] - mx); sxy += (xs[i] - mx) * (ys[i] - my); }
+  if (!sxx) return null;
+  const b = sxy / sxx, a = my - b * mx;
+  let sse = 0; for (let i = 0; i < n; i++){ const r = ys[i] - (a + b * xs[i]); sse += r * r; }
+  const s = Math.sqrt(sse / (n - 2)), seb = s / Math.sqrt(sxx);
+  return { a, b, s, t: seb ? b / seb : 0, n, mx, sxx };
+}
+
+// ---------- date helpers (all UTC, so the browser time zone never shifts a day) ----------
+function parseYMD(k){ const p = k.split('-'); return { y: +p[0], m: +p[1], d: +p[2] }; }
+function utc(k){ const p = parseYMD(k); return Date.UTC(p.y, p.m - 1, p.d); }
+function dowOf(k){ return new Date(utc(k)).getUTCDay(); } // 0 = Sunday
+function addDays(k, n){ return new Date(utc(k) + n * 86400000).toISOString().slice(0, 10); }
+function daysInMonth(mk){ const p = mk.split('-'); return new Date(Date.UTC(+p[0], +p[1], 0)).getUTCDate(); }
+function monSatBetween(from, to){ let c = 0; for (let k = from; k <= to; k = addDays(k, 1)) if (dowOf(k) !== 0) c++; return c; }
+function monSatInMonth(mk){ return monSatBetween(mk + '-01', mk + '-' + String(daysInMonth(mk)).padStart(2, '0')); }
+function inGap(lineKey, dateKey){ const g = KNOWN_GAPS[lineKey]; return !!g && dateKey >= g.from && dateKey <= g.to; }
+function monthInGap(lineKey, mk){ // gap month = more than half of its Mon-Sat days fall in the gap
+  const g = KNOWN_GAPS[lineKey]; if (!g) return false;
+  const a = mk + '-01', b = mk + '-' + String(daysInMonth(mk)).padStart(2, '0');
+  const from = a > g.from ? a : g.from, to = b < g.to ? b : g.to;
+  if (from > to) return false;
+  return monSatBetween(from, to) > monSatInMonth(mk) / 2;
+}
+
+// ---------- prepare ----------
+function prep(DATA){
+  const grpLine = {}; LINE_KEYS.forEach(l => LINES[l].groups.forEach(g => grpLine[g] = l));
+  const modelGroup = {}; DATA.models.forEach(m => modelGroup[m.key] = m.group);
+  const days = DATA.daily.map(d => {
+    const ln = { CKD: 0, SKD: 0, EV: 0, W3: 0 };
+    Object.keys(d.p).forEach(k => { const l = grpLine[modelGroup[k]]; if (l) ln[l] += d.p[k]; });
+    return { date: d.date, mk: d.date.slice(0, 7), dow: dowOf(d.date), ln: ln, skdT: ln.SKD + ln.EV, asm: ln.SKD + ln.EV + ln.W3,
+      all: ln.CKD + ln.SKD + ln.EV + ln.W3, p: d.p };
+  });
+  const mstats = {};
+  days.forEach(d => {
+    const m = mstats[d.mk] || (mstats[d.mk] = { mk: d.mk, n: 0, ln: { CKD: 0, SKD: 0, EV: 0, W3: 0 }, all: 0, asm: 0, skdT: 0, days: [] });
+    m.days.push(d); if (d.all > 0) m.n++;
+    LINE_KEYS.forEach(l => m.ln[l] += d.ln[l]); m.all += d.all; m.asm += d.asm; m.skdT += d.skdT;
+  });
+  const mks = Object.keys(mstats).sort();
+  const latestDate = days.length ? days[days.length - 1].date : null;
+  const latestMk = latestDate ? latestDate.slice(0, 7) : null;
+  const monthEnd = latestMk ? latestMk + '-' + String(daysInMonth(latestMk)).padStart(2, '0') : null;
+  const latestPartial = !!latestDate && latestDate < monthEnd && monSatBetween(addDays(latestDate, 1), monthEnd) > 0;
+  const firstSeen = {};
+  days.forEach(d => Object.keys(d.p).forEach(k => { if (d.p[k] > 0 && !firstSeen[k]) firstSeen[k] = d.date; }));
+  return { DATA, days, mstats, mks, latestDate, latestMk, monthEnd, latestPartial, firstSeen, modelGroup };
+}
+function dayVal(d, sel){ // sel: ALL | CKD | SKD | EV | W3
+  if (sel === 'ALL') return d.all;
+  return d.ln[sel] || 0;
+}
+// units per Mon-Sat calendar day, per line, for a completed month (or elapsed part of the latest month)
+function elapsedMonSat(P, mk){
+  if (mk === P.latestMk && P.latestPartial) return monSatBetween(mk + '-01', P.latestDate);
+  return monSatInMonth(mk);
+}
+function lineValue(P, mk, key){ // key: CKD | SKD | EV | W3 | SKDT | ASM | ALL
+  const m = P.mstats[mk]; if (!m) return 0;
+  if (key === 'SKDT') return m.skdT; if (key === 'ASM') return m.asm; if (key === 'ALL') return m.all; return m.ln[key];
+}
+function lineRate(P, mk, key){ const e = elapsedMonSat(P, mk); return e ? lineValue(P, mk, key) / e : 0; }
+
+// ---------- forecasting ----------
+// Two candidate rules on run-rate (units per Mon-Sat day): LEVEL = mean of the last 6 months, TREND = straight-line fit.
+// Trend is used only if it is statistically significant (|t| >= 2) AND it beat the flat level in a rolling
+// out-of-sample backtest; otherwise the flat level is used. Range = 80% prediction interval.
+function levelRule(ys){ const lv = mean(ys.slice(-6)); return { kind: 'level', predict: () => lv, sigma: sd(ys), level: lv, n: ys.length, fit: null }; }
+function trendRule(xs, ys){ const f = ols(xs, ys); if (!f) return null; return { kind: 'trend', predict: x => Math.max(0, f.a + f.b * x), sigma: f.s, level: mean(ys.slice(-6)), n: ys.length, fit: f }; }
+function backtestKind(xs, ys, kind){
+  const errs = [];
+  for (let i = 4; i < ys.length; i++){
+    const r = kind === 'trend' ? trendRule(xs.slice(0, i), ys.slice(0, i)) : levelRule(ys.slice(0, i));
+    if (r && ys[i] > 0) errs.push(Math.abs(r.predict(xs[i]) - ys[i]) / ys[i]);
+  }
+  return errs.length ? mean(errs) : null;
+}
+function fitBest(xs, ys){
+  const lvl = levelRule(ys); const tr = ys.length >= 6 ? trendRule(xs, ys) : null;
+  const mapeL = backtestKind(xs, ys, 'level'), mapeT = tr ? backtestKind(xs, ys, 'trend') : null;
+  lvl.fit = tr ? tr.fit : null;
+  const useTrend = !!tr && Math.abs(tr.fit.t) >= 2 && mapeT !== null && mapeL !== null && mapeT < mapeL;
+  const rule = useTrend ? tr : lvl;
+  rule.mapeLevel = mapeL; rule.mapeTrend = mapeT; rule.mape = useTrend ? mapeT : mapeL; rule.tStat = tr ? tr.fit.t : null;
+  return rule;
+}
+function monthIndex(mk){ const p = mk.split('-'); return +p[0] * 12 + (+p[1] - 1); }
+function nextMonths(mk, n){ const out = []; let idx = monthIndex(mk); for (let i = 0; i < n; i++){ idx++; const y = Math.floor(idx / 12), m = idx % 12 + 1; out.push(y + '-' + String(m).padStart(2, '0')); } return out; }
+
+function seriesFor(P, key, completedOnly){
+  const xs = [], ys = [], mkList = [];
+  P.mks.forEach(mk => {
+    if (completedOnly && mk === P.latestMk && P.latestPartial) return;
+    const lineKey = key === 'SKDT' ? 'SKD' : key;
+    if (monthInGap(lineKey === 'W3' ? 'W3' : lineKey, mk)) return;
+    xs.push(monthIndex(mk)); ys.push(lineRate(P, mk, key)); mkList.push(mk);
+  });
+  return { xs, ys, mkList };
+}
+function forecastOutlook(P, horizon){
+  const base = P.latestPartial ? P.latestMk : P.mks[P.mks.length - 1];
+  const targets = nextMonths(base, horizon || 3);
+  const out = { targets, series: {}, total: [] };
+  ['SKDT', 'W3', 'CKD'].forEach(key => {
+    const s = seriesFor(P, key, true);
+    if (s.ys.length < 3){ out.series[key] = null; return; }
+    const rule = fitBest(s.xs, s.ys);
+    const mape = rule.mape;
+    const pts = targets.map(mk => {
+      const days = monSatInMonth(mk), x = monthIndex(mk);
+      const rate = rule.predict(x), band = Z80 * rule.sigma * Math.sqrt(1 + 1 / rule.n);
+      return { mk, days, rate, units: rate * days, lo: Math.max(0, (rate - band) * days), hi: (rate + band) * days, bandUnits: band * days };
+    });
+    out.series[key] = { key, rule, mape, pts, hist: s };
+  });
+  targets.forEach((mk, i) => {
+    let u = 0, v = 0; Object.keys(out.series).forEach(k => { const sr = out.series[k]; if (!sr) return; u += sr.pts[i].units; v += sr.pts[i].bandUnits * sr.pts[i].bandUnits; });
+    const b = Math.sqrt(v);
+    out.total.push({ mk, units: u, lo: Math.max(0, u - b), hi: u + b });
+  });
+  return out;
+}
+
+// ---------- month-end projection (within-month run-rate) ----------
+function projectMonth(P, scale){
+  if (!P.latestPartial) return null;
+  const mk = P.latestMk, last = P.latestDate, end = P.monthEnd;
+  const remaining = [];
+  for (let k = addDays(last, 1); k <= end; k = addDays(k, 1)) if (dowOf(k) !== 0 && NON_WORKING.indexOf(k) < 0) remaining.push(k);
+  const WINDOW = 24; // last 24 Mon-Sat calendar days (~4 weeks)
+  const byDate = {}; P.days.forEach(d => byDate[d.date] = d);
+  const keys = { CKD: 'CKD', SKDT: 'SKDT', W3: 'W3' };
+  const res = { mk, last, remaining: remaining, remainingCount: remaining.length, lines: {}, window: WINDOW };
+  let mtdTot = 0, remTot = 0, varTot = 0;
+  Object.keys(keys).forEach(key => {
+    const vals = [];
+    let k = last, got = 0;
+    while (got < WINDOW && k >= P.days[0].date){
+      if (dowOf(k) !== 0 && NON_WORKING.indexOf(k) < 0){
+        const lineKey = key === 'SKDT' ? 'SKD' : key;
+        if (!inGap(lineKey, k)){ const d = byDate[k]; vals.push(d ? (key === 'SKDT' ? d.skdT : d.ln[key]) : 0); }
+        got++;
+      }
+      k = addDays(k, -1);
+    }
+    const rate = mean(vals), sdd = sd(vals);
+    const mtd = lineValue(P, mk, key);
+    const expRem = rate * (scale || 1) * remaining.length;
+    res.lines[key] = { mtd, rate, sdd, expRem, proj: mtd + expRem, n: vals.length };
+    // range = day-to-day noise + chance the whole run-rate shifts (sd of monthly run-rates)
+    const hs = seriesFor(P, key, true); const sigmaRate = hs.ys.length >= 3 ? sd(hs.ys) : 0;
+    res.lines[key].sigmaRate = sigmaRate;
+    mtdTot += mtd; remTot += expRem; varTot += sdd * sdd * remaining.length + sigmaRate * sigmaRate * remaining.length * remaining.length;
+  });
+  const band = Z80 * Math.sqrt(varTot);
+  res.mtd = mtdTot; res.expRem = remTot; res.proj = mtdTot + remTot; res.lo = Math.max(mtdTot, res.proj - band); res.hi = res.proj + band;
+  return res;
+}
+//#ANALYTICS-END
+if (typeof module !== 'undefined') module.exports = { fitBest, prep, projectMonth, forecastOutlook, seriesFor, lineRate, lineValue, monSatInMonth, elapsedMonSat, ols, mean, sd, median, LINES, LINE_KEYS, KNOWN_GAPS, NON_WORKING, monthInGap, nextMonths, daysInMonth, dowOf, addDays };
+
 const API_URL = "https://script.google.com/macros/s/AKfycbyLBA71ar4ikb7zLyI_k_GMd0k9OH3sr2PB5oT5goW19tR3SMUP4kzcDpDfnYN0h-Rg/exec";
 const NS = "http://www.w3.org/2000/svg";
-const GROUP_COLORS = { 'CKD DVA': '#ffc267', 'SKD 2W': '#5ee6cf', 'EV 2W': '#b28dff', '3W': '#6fa3ff' };
+const PINK = '#ff7ac8';
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const WD = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const FAMILY_COLORS = { 'NTORQ':'#5ee6cf', 'RTR':'#ff8f6b', 'JUPITER':'#ffc267', 'SPORT':'#d4e157', 'RAIDER':'#4dd0e1', 'RONIN':'#9fa8da', 'EV 2W':'#b28dff', '3W':'#6fa3ff', 'XL 100':'#ffc267' };
+const SEL_OPTS = [['ALL','All lines'],['CKD','CKD'],['SKDT','SKD + EV'],['W3','3W']];
+const SEL_COLOR = { ALL:'#5ee6cf', CKD:'#ffc267', SKDT:'#5ee6cf', W3:'#6fa3ff' };
 
-let DATA = null, selMonth = null;
+let DATA = null, P = null, FC = null, selMonth = null, selLine = 'ALL', scale = 1;
 
 function esc(v){ return String(v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-function fmt(n){ return (n === null || n === undefined) ? '—' : Number(n).toLocaleString('en-US', { maximumFractionDigits: 0 }); }
+function fmt(n){ return (n === null || n === undefined || isNaN(n)) ? '—' : Math.round(n).toLocaleString('en-US'); }
+function fmt1(n){ return (n === null || n === undefined || isNaN(n)) ? '—' : Number(n).toLocaleString('en-US', { maximumFractionDigits: 1, minimumFractionDigits: 1 }); }
 function $(id){ return document.getElementById(id); }
-function el(tag, attrs){ const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); return e; }
 function monthLabel(k){ const p = k.split('-'); return MONTHS[+p[1] - 1] + ' ' + p[0]; }
-function dayLabel(k){ const p = k.split('-'); const d = new Date(+p[0], +p[1] - 1, +p[2]); return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()] + ' ' + p[2] + ' ' + MONTHS[+p[1] - 1]; }
-function groupOfKey(k){ const m = DATA.models.find(x => x.key === k); return m ? m.group : null; }
-function labelOfKey(k){ const m = DATA.models.find(x => x.key === k); return m ? m.label : k; }
-
-const chartTipEl = document.createElement('div');
-chartTipEl.className = 'chart-tip';
-document.body.appendChild(chartTipEl);
+function monthShort(k){ return MONTHS[+k.slice(5) - 1]; }
+function dayLabel(k){ const p = k.split('-'); return WD[dowOf(k)] + ' ' + p[2] + ' ' + MONTHS[+p[1] - 1]; }
+function svgEl(tag, attrs, parent){ const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; }
+function txt(parent, x, y, s, attrs){ const t = svgEl('text', Object.assign({ x: x, y: y, 'font-size': 10, fill: '#6f7c96' }, attrs || {}), parent); t.textContent = s; return t; }
+function mkSvg(host, W, H){ host.innerHTML = ''; return svgEl('svg', { viewBox: '0 0 ' + W + ' ' + H, width: '100%', preserveAspectRatio: 'xMidYMid meet' }, host); }
+function niceMax(v){ if (!(v > 0)) return 1; const p = Math.pow(10, Math.floor(Math.log10(v))), f = v / p; const n = f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : f <= 7.5 ? 7.5 : 10; return n * p; }
+function defsHatch(svg){
+  const d = svgEl('defs', {}, svg);
+  const p = svgEl('pattern', { id: 'hatchPink', width: 6, height: 6, patternUnits: 'userSpaceOnUse', patternTransform: 'rotate(45)' }, d);
+  svgEl('rect', { width: 6, height: 6, fill: 'rgba(255,122,200,0.10)' }, p);
+  svgEl('rect', { width: 2.2, height: 6, fill: PINK, opacity: 0.85 }, p);
+  return d;
+}
+const chartTipEl = document.createElement('div'); chartTipEl.className = 'chart-tip'; document.body.appendChild(chartTipEl);
 function positionTip(evt){
   const w = chartTipEl.offsetWidth, h = chartTipEl.offsetHeight;
   let left = evt.clientX + 14, top = evt.clientY - h - 12;
@@ -280,16 +601,43 @@ function positionTip(evt){
   chartTipEl.style.left = left + 'px'; chartTipEl.style.top = top + 'px';
 }
 function addTip(node, html){
-  node.addEventListener('mouseenter', (e) => { chartTipEl.innerHTML = html; chartTipEl.classList.add('show'); positionTip(e); });
+  node.addEventListener('mouseenter', e => { chartTipEl.innerHTML = html; chartTipEl.classList.add('show'); positionTip(e); });
   node.addEventListener('mousemove', positionTip);
   node.addEventListener('mouseleave', () => chartTipEl.classList.remove('show'));
 }
-
-function monthTotals(mk){
-  const m = DATA.months[mk];
-  if (!m) return { total2W: 0, total3W: 0, total: 0, days: 0, avg: null, byModel: {}, byGroup: {} };
-  const total = m.total2W + m.total3W;
-  return { total2W: m.total2W, total3W: m.total3W, total: total, days: m.days, avg: m.days ? m.total2W / m.days : null, byModel: m.byModel, byGroup: m.byGroup };
+function modelOf(k){ return DATA.models.find(x => x.key === k); }
+function labelOfKey(k){ const m = modelOf(k); return m ? m.label : k; }
+function familyOf(m){ if (m.group === 'CKD DVA') return 'XL 100'; if (m.group === 'EV 2W') return 'EV 2W'; if (m.group === '3W') return '3W'; return m.label.split(' ')[0]; }
+function valueOf(mk, key){ if (key === 'T2W') return lineValue(P, mk, 'CKD') + lineValue(P, mk, 'SKDT'); return lineValue(P, mk, key); }
+function rateOf(mk, key){ const e = elapsedMonSat(P, mk); return e ? valueOf(mk, key) / e : 0; }
+function usesCkd(key){ return key === 'CKD' || key === 'T2W' || key === 'ALL'; }
+function isGapMonth(mk, key){ return usesCkd(key) && monthInGap('CKD', mk); }
+function dv(d, sel){ return sel === 'ALL' ? d.all : sel === 'SKDT' ? d.skdT : d.ln[sel]; }
+function isCompleted(mk){ return !(mk === P.latestMk && P.latestPartial); }
+function sparkSvg(vals, color, hollowLast){
+  const W = 100, H = 30, pad = 3, n = vals.length;
+  const nums = vals.filter(v => v !== null && v !== undefined);
+  if (!nums.length) return '';
+  const mx = Math.max.apply(null, nums), mn = Math.min.apply(null, nums), rg = (mx - mn) || 1;
+  const X = i => pad + (W - 2 * pad) * (n === 1 ? 0.5 : i / (n - 1)), Y = v => H - pad - (H - 2 * pad) * (v - mn) / rg;
+  let segs = [], cur = [];
+  vals.forEach((v, i) => { if (v === null || v === undefined){ if (cur.length) segs.push(cur); cur = []; } else cur.push([X(i), Y(v)]); });
+  if (cur.length) segs.push(cur);
+  let s = '<svg class="spark" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none">';
+  segs.forEach(sg => { if (sg.length > 1) s += '<polyline fill="none" stroke="' + color + '" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" points="' + sg.map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ') + '"/>'; });
+  const li = (() => { for (let i = n - 1; i >= 0; i--) if (vals[i] !== null && vals[i] !== undefined) return i; return -1; })();
+  if (li >= 0) s += '<circle cx="' + X(li).toFixed(1) + '" cy="' + Y(vals[li]).toFixed(1) + '" r="2.4" fill="' + (hollowLast ? '#06090f' : color) + '" stroke="' + color + '" stroke-width="1.4"/>';
+  return s + '</svg>';
+}
+function deltaChip(mk, key){
+  const i = P.mks.indexOf(mk); if (i < 1) return '';
+  const prev = P.mks[i - 1];
+  if (isGapMonth(mk, key) || isGapMonth(prev, key)) return '<span class="chip na">n/a · XL 100 data gap</span>';
+  const a = rateOf(mk, key), b = rateOf(prev, key);
+  if (!(b > 0)) return '<span class="chip na">n/a</span>';
+  const d = (a / b - 1) * 100;
+  const cls = d > 3 ? 'up' : d < -3 ? 'down' : 'flat';
+  return '<span class="chip ' + cls + '">' + (d > 3 ? '▲ ' : d < -3 ? '▼ ' : '● ') + Math.abs(d).toFixed(0) + '% vs ' + monthShort(prev) + '</span>';
 }
 
 function renderProvenance(){
@@ -300,169 +648,568 @@ function renderProvenance(){
     upd = ' <span class="sep">·</span> sheet last edited <b>' + esc(d.toLocaleString('en-GB', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' })) + '</b>';
   }
   const opts = DATA.availableMonths.slice().reverse().map(k => '<option value="' + k + '"' + (k === selMonth ? ' selected' : '') + '>' + monthLabel(k) + '</option>').join('');
-  $('provenance').innerHTML = 'Source: <b>' + esc(s.label || 'Planning sheet') + '</b> (tab ' + esc(s.tabName || '—') + ')' + upd +
+  const link = s.sheetId && s.sheetId !== '(hidden)'
+    ? '<span class="grow"></span><a class="btn-view" id="viewSheet" target="_blank" rel="noopener noreferrer" href="https://docs.google.com/spreadsheets/d/' + encodeURIComponent(s.sheetId) + '/htmlview"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>Source sheet · view only</a>'
+    : '';
+  $('provenance').innerHTML = 'Source: <b>' + esc(s.label || 'Planning sheet') + '</b>' + upd +
     ' <span class="sep">·</span> latest production day <b>' + (DATA.latestDate ? esc(dayLabel(DATA.latestDate)) : '—') + '</b>' +
-    ' <span class="sep">·</span> Month: <select id="monthSelect">' + opts + '</select>';
+    ' <span class="sep">·</span> Month: <select id="monthSelect">' + opts + '</select>' + link;
   $('monthSelect').addEventListener('change', e => { selMonth = e.target.value; render(); });
   $('dateLabel').textContent = DATA.latestDate ? 'Latest day ' + dayLabel(DATA.latestDate) : 'No data';
 }
 
-function renderChecks(){
+function renderNotes(){
+  const notes = [];
+  Object.keys(KNOWN_GAPS).forEach(k => notes.push('<b>Data gap · ' + esc(LINES[k].short) + ':</b> ' + esc(KNOWN_GAPS[k].note) + ' Trends and forecasts skip those months.'));
   const w = DATA.warnings || [];
+  if (w.length) notes.push('<b>' + w.length + ' data check' + (w.length === 1 ? '' : 's') + ' on the sheet</b> — worth a look by whoever maintains it:<ul class="chk-list">' + w.slice(0, 8).map(x => '<li>' + esc(x) + '</li>').join('') + (w.length > 8 ? '<li>…and ' + (w.length - 8) + ' more</li>' : '') + '</ul>');
   const box = $('checkNote');
-  if (!w.length){ box.style.display = 'none'; return; }
-  box.style.display = 'block';
-  box.innerHTML = '<b>' + w.length + ' data check' + (w.length === 1 ? '' : 's') + ' on the sheet</b> — worth a look by whoever maintains it:<ul class="chk-list">' +
-    w.slice(0, 12).map(x => '<li>' + esc(x) + '</li>').join('') + (w.length > 12 ? '<li>…and ' + (w.length - 12) + ' more</li>' : '') + '</ul>';
-}
-
-function kpi(cls, num, label, icon){
-  return '<div class="glass kpi ' + cls + '"><div class="kpi-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + icon + '</svg></div><div class="num">' + num + '</div><div class="label">' + label + '</div></div>';
+  if (!notes.length){ box.style.display = 'none'; return; }
+  box.style.display = 'block'; box.innerHTML = notes.join('<div style="height:8px"></div>');
 }
 
 function renderKpis(){
-  const t = monthTotals(selMonth);
-  const ic1 = '<path d="M3 21V9l6 4V9l6 4V5h6v16z"/>';
-  const ic2 = '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>';
-  const ic3 = '<path d="M5 17h14M7 17l1-8h8l1 8M9 9V6h6v3"/>';
-  $('kpiGrid').innerHTML =
-    kpi('ok', fmt(t.total), 'Total units · ' + monthLabel(selMonth), ic1) +
-    kpi('info', fmt(t.total2W), '2W units' + (t.avg !== null ? ' · avg ' + fmt(t.avg) + ' / day' : ''), ic3) +
-    kpi('neutral', fmt(t.total3W), '3W units', ic3) +
-    kpi('warn', fmt(t.days), 'Production days', ic2);
+  const ms = P.mstats[selMonth] || { n: 0 };
+  const partial = selMonth === P.latestMk && P.latestPartial;
+  $('heroTitle').innerHTML = '<h2>' + monthLabel(selMonth) + '</h2><span class="tag' + (partial ? ' pink' : '') + '">' + (partial ? 'Month to date · ' + ms.n + ' production days' : 'Closed month · ' + ms.n + ' production days') + '</span>';
+  const defs = [
+    { key: 'T2W', label: 'Total 2W · CKD + SKD', color: '#5ee6cf', glow: 'rgba(94,230,207,.30)' },
+    { key: 'CKD', label: '2W CKD · XL 100', color: LINES.CKD.color, glow: 'rgba(255,194,103,.30)' },
+    { key: 'SKD', label: '2W SKD · Petrol', color: LINES.SKD.color, glow: 'rgba(94,230,207,.28)' },
+    { key: 'EV', label: '2W SKD · EV', color: LINES.EV.color, glow: 'rgba(178,141,255,.30)' },
+    { key: 'W3', label: '3W SKD', color: LINES.W3.color, glow: 'rgba(111,163,255,.30)' },
+    { key: 'ALL', label: 'Grand total · 2W + 3W', color: '#ffd3ec', glow: 'rgba(255,122,200,.30)' }
+  ];
+  $('kpiGrid').innerHTML = defs.map(d => {
+    const v = valueOf(selMonth, d.key), r = rateOf(selMonth, d.key);
+    const series = P.mks.map(mk => isGapMonth(mk, d.key) ? null : rateOf(mk, d.key));
+    const gap = isGapMonth(selMonth, d.key);
+    return '<div class="glass k6" style="--c:' + d.color + ';--cg:' + d.glow + '"><div class="kl"><i></i>' + esc(d.label) + '</div><div class="kn">' + fmt(v) + '</div>' +
+      '<div class="ks">' + (gap ? '<span class="dim">XL 100 data incomplete</span>' : fmt1(r) + ' / working day') + '<br>' + deltaChip(selMonth, d.key) + '</div>' + sparkSvg(series, d.color, partial) + '</div>';
+  }).join('');
 }
 
+// ---------- the reading ----------
+function topModel(mk, groupFilter){
+  const ms = P.mstats[mk]; const tot = {};
+  ms.days.forEach(d => Object.keys(d.p).forEach(k => { if (!groupFilter || groupFilter.indexOf(P.modelGroup[k]) >= 0) tot[k] = (tot[k] || 0) + d.p[k]; }));
+  const ks = Object.keys(tot).sort((a, b) => tot[b] - tot[a]);
+  return ks.length ? { key: ks[0], units: tot[ks[0]], total: sum(ks.map(k => tot[k])), all: tot } : null;
+}
+function readMonth(mk){
+  const ms = P.mstats[mk], out = [];
+  if (!ms) return out;
+  const partial = mk === P.latestMk && P.latestPartial;
+  const i = P.mks.indexOf(mk), prev = i > 0 ? P.mks[i - 1] : null;
+  const all = ms.all, asm = ms.asm;
+  // 1. headline vs history (assembly lines are complete in every month, so they are the fair yardstick)
+  const hist = P.mks.filter(m => m !== mk && isCompleted(m) && m < mk).slice(-6);
+  const histRate = mean(hist.map(m => rateOf(m, 'ASM')));
+  const myRate = rateOf(mk, 'ASM');
+  let tone = 'info', cmp = '';
+  if (hist.length >= 3 && histRate > 0){
+    const d = (myRate / histRate - 1) * 100;
+    tone = d > 5 ? 'ok' : d < -5 ? 'warn' : 'info';
+    cmp = ' Assembly lines (SKD + EV + 3W) ' + (partial ? 'are running' : 'ran') + ' at <b>' + fmt(myRate) + ' units per working day</b>, <b>' + (d >= 0 ? '+' : '−') + Math.abs(d).toFixed(0) + '%</b> against the ' + hist.length + '-month average of ' + fmt(histRate) + '.';
+  }
+  out.push({ tone, html: '<b>' + monthLabel(mk) + (partial ? ' so far' : '') + ': ' + fmt(all) + ' units</b> over ' + ms.n + ' production days (' + fmt(all / Math.max(1, ms.n)) + ' per production day).' + cmp });
+  // 2. pace vs previous month at the same date
+  if (prev && partial){
+    const dayN = parseYMD(P.latestDate).d; const cutoff = prev + '-' + String(Math.min(dayN, daysInMonth(prev))).padStart(2, '0');
+    const prevToDate = sum(P.mstats[prev].days.filter(d => d.date <= cutoff).map(d => d.asm));
+    if (prevToDate > 0){
+      const d = (ms.asm / prevToDate - 1) * 100;
+      out.push({ tone: d > 5 ? 'ok' : d < -5 ? 'warn' : 'info', html: 'Pace check: at the same date, ' + monthShort(prev) + ' had built <b>' + fmt(prevToDate) + '</b> on the assembly lines versus <b>' + fmt(ms.asm) + '</b> now (<b>' + (d >= 0 ? '+' : '−') + Math.abs(d).toFixed(0) + '%</b>).' });
+    }
+  } else if (prev && isCompleted(prev)){
+    const d = (rateOf(mk, 'ASM') / rateOf(prev, 'ASM') - 1) * 100;
+    out.push({ tone: d > 5 ? 'ok' : d < -5 ? 'warn' : 'info', html: 'Against ' + monthLabel(prev) + ', assembly output per working day was <b>' + (d >= 0 ? '+' : '−') + Math.abs(d).toFixed(0) + '%</b> (' + fmt(rateOf(mk, 'ASM')) + ' vs ' + fmt(rateOf(prev, 'ASM')) + ').' });
+  }
+  // 3. mix
+  const skd = topModel(mk, ['SKD 2W']);
+  const parts = [];
+  if (ms.ln.SKD) parts.push('SKD petrol <b>' + (ms.ln.SKD / all * 100).toFixed(0) + '%</b>');
+  if (ms.ln.CKD) parts.push('CKD (XL 100) <b>' + (ms.ln.CKD / all * 100).toFixed(0) + '%</b>');
+  if (ms.ln.EV) parts.push('EV <b>' + (ms.ln.EV / all * 100).toFixed(0) + '%</b>');
+  if (ms.ln.W3) parts.push('3W <b>' + (ms.ln.W3 / all * 100).toFixed(0) + '%</b>');
+  let mixHtml = 'Mix: ' + parts.join(' · ') + '.';
+  if (skd && skd.total > 0) mixHtml += ' <b>' + esc(labelOfKey(skd.key)) + '</b> leads SKD petrol with ' + fmt(skd.units) + ' units (' + (skd.units / skd.total * 100).toFixed(0) + '% of it).';
+  out.push({ tone: 'info', html: mixHtml });
+  // 4. rhythm
+  const prodDays = ms.days.filter(d => d.asm > 0);
+  if (prodDays.length){
+    const best = prodDays.reduce((a, b) => b.asm > a.asm ? b : a), low = prodDays.reduce((a, b) => b.asm < a.asm ? b : a);
+    const cv = sd(prodDays.map(d => d.asm)) / (mean(prodDays.map(d => d.asm)) || 1);
+    const shape = cv < 0.35 ? 'fairly steady' : cv < 0.6 ? 'moderately uneven' : 'lumpy';
+    const idle = ms.days.filter(d => d.asm === 0 && d.ln.CKD > 0);
+    let h = 'Rhythm: strongest day <b>' + dayLabel(best.date) + '</b> (' + fmt(best.asm) + ' on SKD/EV/3W), weakest producing day ' + dayLabel(low.date) + ' (' + fmt(low.asm) + '). Daily output is <b>' + shape + '</b> (variation ' + (cv * 100).toFixed(0) + '%).';
+    if (idle.length) h += ' On <b>' + idle.length + '</b> day' + (idle.length > 1 ? 's' : '') + ' only XL 100 ran (' + idle.map(d => d.date.slice(8)).join(', ') + ').';
+    out.push({ tone: cv >= 0.6 ? 'warn' : 'info', html: h });
+  }
+  // 5. emerging / stopped models
+  // "new" = first built within ~90 days AND this month's units are at least 3x everything built before the month
+  const emerging = DATA.models.filter(m => {
+    const fs = P.firstSeen[m.key]; if (!fs || fs < addDays(P.latestDate, -90)) return false;
+    const here = lineValueModel(mk, m.key); if (!here) return false;
+    const before = sum(P.days.filter(d => d.date < mk + '-01').map(d => d.p[m.key] || 0));
+    return here >= 3 * before;
+  });
+  emerging.forEach(m => {
+    const u = sum(ms.days.map(d => d.p[m.key] || 0));
+    out.push({ tone: 'pink', html: 'New in the mix: <b>' + esc(m.label) + '</b> — first built ' + dayLabel(P.firstSeen[m.key]) + '; ' + fmt(u) + ' units in ' + monthLabel(mk) + (partial ? ' so far' : '') + '.' });
+  });
+  const stopped = DATA.models.filter(m => m.group !== 'CKD DVA' && prev && lineValueModel(prev, m.key) >= 100 && lineValueModel(mk, m.key) === 0);
+  if (stopped.length && isCompleted(mk)) out.push({ tone: 'warn', html: 'Not built this month (but built in ' + monthShort(prev) + '): ' + stopped.map(m => '<b>' + esc(m.label) + '</b>').join(', ') + '.' });
+  // 6. 3W
+  if (ms.ln.W3 || (prev && P.mstats[prev] && P.mstats[prev].ln.W3)){
+    const r = rateOf(mk, 'W3'), h3 = mean(P.mks.filter(m => m < mk && isCompleted(m)).slice(-3).map(m => rateOf(m, 'W3')));
+    if (h3 > 0){ const d = (r / h3 - 1) * 100; out.push({ tone: d > 8 ? 'ok' : d < -8 ? 'warn' : 'info', html: '3W: ' + fmt(ms.ln.W3) + ' units, <b>' + fmt1(r) + ' per working day</b> vs ' + fmt1(h3) + ' over the previous three months (' + (d >= 0 ? '+' : '−') + Math.abs(d).toFixed(0) + '%).' }); }
+  }
+  // 7. data caveat
+  if (monthInGap('CKD', mk)) out.push({ tone: 'bad', html: '<b>Caution:</b> XL 100 data is incomplete for ' + monthLabel(mk) + ', so CKD, total-2W and grand-total understate reality. The assembly-line figures above are complete.' });
+  return out;
+}
+function lineValueModel(mk, key){ const ms = P.mstats[mk]; return ms ? sum(ms.days.map(d => d.p[key] || 0)) : 0; }
+function renderReading(){
+  const items = readMonth(selMonth);
+  $('readingPanel').innerHTML = '<div class="panel-head"><h2>Reading of the month</h2></div><div class="sub">Generated from the sheet\'s numbers each time the page loads; it rewrites itself as the data changes.</div><ul class="reading">' +
+    items.map(it => '<li><span class="dot ' + (it.tone === 'ok' ? '' : it.tone) + '"></span><span>' + it.html + '</span></li>').join('') + '</ul>';
+}
+
+// ---------- month-end projection ----------
+function benchmarkMonths(){ return P.mks.filter(m => isCompleted(m) && !monthInGap('CKD', m)); }
+function renderProjection(){
+  const host = $('projPanel');
+  const partial = selMonth === P.latestMk && P.latestPartial;
+  const bm = benchmarkMonths();
+  const bmVals = bm.map(m => lineValue(P, m, 'ALL'));
+  const typical = median(bmVals);
+  const bestIdx = bmVals.indexOf(Math.max.apply(null, bmVals)); const bestV = bmVals[bestIdx], bestM = bm[bestIdx];
+  let head, sub, mtd, proj = null, lo = null, hi = null, rows = '', slider = '';
+  if (partial){
+    proj = projectMonth(P, scale);
+    mtd = proj.mtd;
+    head = '<div class="panel-head"><h2>Where ' + monthLabel(selMonth) + ' is heading</h2><span class="status new">Projection</span></div>';
+    sub = 'Run-rate model: month to date + remaining working days × the last four weeks\' daily average, per line.';
+    const L = proj.lines;
+    rows = '<div class="proj-rows"><div><b>' + fmt(mtd) + '</b>built so far</div><div><b>' + proj.remainingCount + '</b>working days left</div><div><b>' + fmt(typical) + '</b>typical month (median)</div></div>' +
+      '<div class="proj-rows" style="grid-template-columns:repeat(3,1fr)"><div><b>' + fmt(L.SKDT.rate * scale) + '</b>SKD + EV / day</div><div><b>' + fmt(L.CKD.rate * scale) + '</b>CKD / day</div><div><b>' + fmt1(L.W3.rate * scale) + '</b>3W / day</div></div>';
+    slider = '<div class="slider-row"><span>What if the daily rate changes?</span><input type="range" id="scaleSlider" min="-30" max="30" step="5" value="' + Math.round((scale - 1) * 100) + '"><b id="scaleVal">' + ((scale - 1) * 100 >= 0 ? '+' : '−') + Math.abs(Math.round((scale - 1) * 100)) + '%</b></div>';
+    lo = proj.lo; hi = proj.hi;
+    const vsT = (proj.proj / typical - 1) * 100;
+    head += '<div class="proj-big">≈ ' + fmt(proj.proj) + '</div><div class="proj-sub">80% range <b>' + fmt(lo) + ' – ' + fmt(hi) + '</b> · ' + (vsT >= 0 ? '+' : '−') + Math.abs(vsT).toFixed(0) + '% vs a typical month' + (bestV ? ' · best month ' + monthShort(bestM) + ' ' + fmt(bestV) : '') + '</div>';
+  } else {
+    const total = lineValue(P, selMonth, 'ALL');
+    mtd = total;
+    const gap = monthInGap('CKD', selMonth);
+    head = '<div class="panel-head"><h2>' + monthLabel(selMonth) + ' vs a typical month</h2><span class="status steady">Closed</span></div>';
+    const vsT = typical ? (total / typical - 1) * 100 : 0;
+    sub = gap ? 'XL 100 data is missing for this month, so the total understates; compare the assembly lines instead.' : 'Final total against the median of completed months with full data.';
+    head += '<div class="proj-big" style="color:var(--text-hi)">' + fmt(total) + '</div><div class="proj-sub">' + (gap ? 'Incomplete (XL 100 gap)' : (vsT >= 0 ? '+' : '−') + Math.abs(vsT).toFixed(0) + '% vs typical month ' + fmt(typical)) + '</div>';
+    rows = '<div class="proj-rows"><div><b>' + fmt(typical) + '</b>typical month</div><div><b>' + fmt(bestV) + '</b>best (' + (bestM ? monthShort(bestM) : '—') + ')</div><div><b>' + fmt(Math.min.apply(null, bmVals)) + '</b>lowest</div></div>';
+  }
+  host.innerHTML = head + '<div class="sub" style="margin-bottom:8px">' + sub + '</div><div id="projBar"></div>' + rows + slider;
+  // bullet bar
+  const W = 520, H = 92, padL = 8, padR = 14;
+  const maxV = niceMax(Math.max(hi || 0, mtd, bestV || 0, typical * 1.2));
+  const X = v => padL + (W - padL - padR) * v / maxV;
+  const svg = mkSvg($('projBar'), W, H); defsHatch(svg);
+  svgEl('rect', { x: padL, y: 40, width: W - padL - padR, height: 18, rx: 9, fill: 'rgba(255,255,255,0.06)' }, svg);
+  const mt = svgEl('rect', { x: padL, y: 40, width: Math.max(2, X(mtd) - padL), height: 18, rx: 9, fill: partial ? '#5ee6cf' : '#5ee6cf' }, svg);
+  addTip(mt, partial ? '<b>Built so far</b><br>' + fmt(mtd) : '<b>Final</b><br>' + fmt(mtd));
+  if (partial){
+    const r = svgEl('rect', { x: X(mtd), y: 40, width: Math.max(2, X(proj.proj) - X(mtd)), height: 18, fill: 'url(#hatchPink)', stroke: PINK, 'stroke-width': 1, rx: 4 }, svg);
+    addTip(r, '<b>Projected remainder</b><br>+' + fmt(proj.expRem) + ' → ' + fmt(proj.proj));
+    const yy = 49;
+    svgEl('line', { x1: X(lo), x2: X(hi), y1: yy, y2: yy, stroke: '#ffd3ec', 'stroke-width': 1.5, opacity: 0.9 }, svg);
+    svgEl('line', { x1: X(lo), x2: X(lo), y1: yy - 8, y2: yy + 8, stroke: '#ffd3ec', 'stroke-width': 1.5 }, svg);
+    svgEl('line', { x1: X(hi), x2: X(hi), y1: yy - 8, y2: yy + 8, stroke: '#ffd3ec', 'stroke-width': 1.5 }, svg);
+    svgEl('circle', { cx: X(proj.proj), cy: yy, r: 4.5, fill: '#fff', stroke: PINK, 'stroke-width': 2 }, svg);
+  }
+  const mark = (v, label, color, dy) => { if (!v) return; svgEl('line', { x1: X(v), x2: X(v), y1: 30, y2: 70, stroke: color, 'stroke-dasharray': '3 3', 'stroke-width': 1.3 }, svg); txt(svg, X(v), dy, label, { 'text-anchor': 'middle', fill: color, 'font-size': 10, 'font-weight': 700 }); };
+  mark(typical, 'typical ' + fmt(typical), '#e8eefc', 22);
+  if (bestV && bestV !== typical) mark(bestV, 'best ' + fmt(bestV), '#ffc267', 22);
+  for (let i = 0; i <= 4; i++){ const v = maxV * i / 4; txt(svg, X(v), 86, fmt(v), { 'text-anchor': i === 0 ? 'start' : i === 4 ? 'end' : 'middle' }); }
+  const sl = $('scaleSlider');
+  if (sl) sl.addEventListener('input', e => { scale = 1 + (+e.target.value) / 100; renderProjection(); renderPace(); });
+}
+
+// ---------- infographics ----------
+function renderDonut(){
+  const ms = P.mstats[selMonth]; const host = $('donut');
+  const parts = LINE_KEYS.map(k => ({ k, v: ms.ln[k], c: LINES[k].color, l: LINES[k].label })).filter(p => p.v > 0);
+  const tot = sum(parts.map(p => p.v));
+  $('donutSub').textContent = 'Share of ' + monthLabel(selMonth) + ' units by line.';
+  const svg = mkSvg(host, 230, 230); svg.style.maxWidth = '230px';
+  const cx = 115, cy = 115, R = 92, r = 60; let a0 = -Math.PI / 2;
+  if (!tot){ txt(svg, cx, cy, 'No data', { 'text-anchor': 'middle', 'font-size': 12 }); return; }
+  parts.forEach(p => {
+    const a1 = a0 + 2 * Math.PI * p.v / tot, large = (a1 - a0) > Math.PI ? 1 : 0;
+    const pt = (rad, a) => [cx + rad * Math.cos(a), cy + rad * Math.sin(a)];
+    const gap = parts.length > 1 ? 0.018 : 0; const s0 = a0 + gap, s1 = a1 - gap;
+    let d;
+    if (parts.length === 1) d = 'M' + (cx) + ',' + (cy - R) + ' A' + R + ',' + R + ' 0 1 1 ' + (cx - 0.01) + ',' + (cy - R) + ' L' + (cx - 0.01) + ',' + (cy - r) + ' A' + r + ',' + r + ' 0 1 0 ' + cx + ',' + (cy - r) + ' Z';
+    else { const A = pt(R, s0), B = pt(R, s1), C = pt(r, s1), D = pt(r, s0); d = 'M' + A[0] + ',' + A[1] + ' A' + R + ',' + R + ' 0 ' + large + ' 1 ' + B[0] + ',' + B[1] + ' L' + C[0] + ',' + C[1] + ' A' + r + ',' + r + ' 0 ' + large + ' 0 ' + D[0] + ',' + D[1] + ' Z'; }
+    const path = svgEl('path', { d: d, fill: p.c, opacity: 0.92 }, svg);
+    addTip(path, '<b>' + esc(p.l) + '</b><br>' + fmt(p.v) + ' units · ' + (p.v / tot * 100).toFixed(1) + '%');
+    a0 = a1;
+  });
+  txt(svg, cx, cy - 2, fmt(tot), { 'text-anchor': 'middle', 'font-size': 24, 'font-weight': 800, fill: '#f5f8fd' });
+  txt(svg, cx, cy + 16, 'units', { 'text-anchor': 'middle', 'font-size': 11 });
+  $('donutLegend').innerHTML = parts.map(p => '<span class="li"><span class="sw" style="background:' + p.c + '"></span>' + esc(LINES[p.k].short) + ' ' + (p.v / tot * 100).toFixed(0) + '%</span>').join('');
+}
+function renderTopModels(){
+  const ms = P.mstats[selMonth]; const tot = {};
+  ms.days.forEach(d => Object.keys(d.p).forEach(k => tot[k] = (tot[k] || 0) + d.p[k]));
+  const ks = Object.keys(tot).sort((a, b) => tot[b] - tot[a]).slice(0, 8);
+  const mx = ks.length ? tot[ks[0]] : 1, all = ms.all || 1;
+  $('topSub').textContent = 'Best-selling builds of ' + monthLabel(selMonth) + ', all colours combined.';
+  $('topModels').innerHTML = ks.length ? ks.map(k => {
+    const m = modelOf(k), c = LINES[(LINE_KEYS.find(l => LINES[l].groups.indexOf(m.group) >= 0))].color;
+    return '<div class="hbar"><span class="nm" title="' + esc(m.label) + '">' + esc(m.label) + '</span><span class="tr"><i style="width:' + (tot[k] / mx * 100).toFixed(1) + '%;background:' + c + '"></i></span><span class="v">' + fmt(tot[k]) + '</span></div>';
+  }).join('') + '<div class="mini-sub" style="margin-top:8px">Top 8 = ' + (sum(ks.map(k => tot[k])) / all * 100).toFixed(0) + '% of the month.</div>' : '<div class="empty-note">No production logged.</div>';
+}
+function renderFamilyMix(){
+  const host = $('familyMix');
+  const fams = [], famOf = {};
+  DATA.models.forEach(m => { if (m.group === 'CKD DVA') return; const f = familyOf(m); famOf[m.key] = f; if (fams.indexOf(f) < 0) fams.push(f); });
+  const W = 360, H = 250, padL = 8, padR = 8, padT = 10, padB = 26;
+  const svg = mkSvg(host, W, H);
+  const slot = (W - padL - padR) / P.mks.length, bw = slot * 0.7;
+  P.mks.forEach((mk, i) => {
+    const ms = P.mstats[mk]; const t = {}; let tot = 0;
+    ms.days.forEach(d => Object.keys(d.p).forEach(k => { if (famOf[k]){ t[famOf[k]] = (t[famOf[k]] || 0) + d.p[k]; tot += d.p[k]; } }));
+    let y = H - padB; const x = padL + slot * i + (slot - bw) / 2;
+    fams.forEach(f => {
+      if (!t[f]) return;
+      const h = (H - padT - padB) * t[f] / tot;
+      const r = svgEl('rect', { x: x, y: y - h, width: bw, height: Math.max(0.5, h), fill: FAMILY_COLORS[f] || '#888', opacity: mk === selMonth ? 1 : 0.72 }, svg);
+      addTip(r, '<b>' + monthLabel(mk) + '</b><br>' + esc(f) + ': ' + fmt(t[f]) + ' units (' + (t[f] / tot * 100).toFixed(1) + '%)');
+      y -= h;
+    });
+    txt(svg, x + bw / 2, H - 9, monthShort(mk).slice(0, 1), { 'text-anchor': 'middle', fill: mk === selMonth ? '#f5f8fd' : '#6f7c96', 'font-weight': mk === selMonth ? 700 : 400 });
+  });
+  $('familyLegend').innerHTML = fams.map(f => '<span class="li"><span class="sw" style="background:' + (FAMILY_COLORS[f] || '#888') + '"></span>' + esc(f) + '</span>').join('');
+}
+
+// ---------- daily movement ----------
+function renderSeg(){
+  $('lineSeg').innerHTML = SEL_OPTS.map(o => '<button data-k="' + o[0] + '" class="' + (o[0] === selLine ? 'on' : '') + '">' + o[1] + '</button>').join('');
+  Array.prototype.forEach.call($('lineSeg').querySelectorAll('button'), b => b.addEventListener('click', () => { selLine = b.getAttribute('data-k'); renderMovement(); }));
+}
+function renderMovement(){ renderSeg(); renderDaily(); renderPace(); renderWeekday(); renderHeat(); }
+function renderDaily(){
+  const ms = P.mstats[selMonth]; const days = ms.days.filter(d => dv(d, selLine) > 0 || selLine === 'ALL');
+  const lab = (SEL_OPTS.find(o => o[0] === selLine) || [])[1];
+  $('dailySub').textContent = 'Units per production day for ' + monthLabel(selMonth) + (selLine === 'ALL' ? ', stacked by line' : ' · ' + lab) + '. The white line is the 7-production-day average.';
+  $('dailyLegend').innerHTML = (selLine === 'ALL' ? LINE_KEYS.map(k => '<span class="li"><span class="sw" style="background:' + LINES[k].color + '"></span>' + esc(LINES[k].short) + '</span>').join('') : '<span class="li"><span class="sw" style="background:' + SEL_COLOR[selLine] + '"></span>' + esc(lab) + '</span>') +
+    '<span class="li"><span class="sw" style="background:#fff;height:3px;margin-top:3px"></span>7-day average</span><span class="li"><span class="sw" style="background:' + PINK + ';border-radius:50%"></span>Sunday</span>';
+  const host = $('dailyChart');
+  if (!days.length){ host.innerHTML = '<div class="empty-note">No production logged for this line in this month.</div>'; $('dailyChips').innerHTML = ''; return; }
+  const W = 1000, H = 270, padL = 42, padR = 12, padT = 14, padB = 40;
+  const max = Math.max.apply(null, days.map(d => dv(d, selLine))) || 1; const nm = niceMax(max * 1.08);
+  const svg = mkSvg(host, W, H);
+  for (let i = 0; i <= 4; i++){
+    const y = padT + (H - padT - padB) * (1 - i / 4);
+    svgEl('line', { x1: padL, x2: W - padR, y1: y, y2: y, stroke: 'rgba(255,255,255,0.07)' }, svg);
+    txt(svg, padL - 6, y + 4, fmt(nm * i / 4), { 'text-anchor': 'end' });
+  }
+  const slot = (W - padL - padR) / days.length, bw = Math.min(40, slot * 0.68), hh = H - padT - padB;
+  const maPts = [];
+  days.forEach((d, i) => {
+    const x = padL + slot * i + (slot - bw) / 2; let y = padT + hh;
+    const comps = selLine === 'ALL' ? LINE_KEYS.map(k => [k, d.ln[k], LINES[k].color]) : [[selLine, dv(d, selLine), SEL_COLOR[selLine]]];
+    const tip = '<b>' + esc(dayLabel(d.date)) + '</b><br>' + (selLine === 'ALL' ? LINE_KEYS.filter(k => d.ln[k]).map(k => esc(LINES[k].short) + ' ' + fmt(d.ln[k])).join(' · ') + '<br>Total ' + fmt(d.all) : fmt(dv(d, selLine)) + ' units') + '<br><span style="color:#aab6cc">' + Object.keys(d.p).sort((a, b) => d.p[b] - d.p[a]).slice(0, 5).map(k => esc(labelOfKey(k)) + ' ' + d.p[k]).join('<br>') + '</span>';
+    comps.forEach(c => { if (!c[1]) return; const h = hh * c[1] / nm; const r = svgEl('rect', { x: x, y: y - h, width: bw, height: Math.max(0.6, h), fill: c[2], rx: 2 }, svg); addTip(r, tip); y -= h; });
+    const lx = x + bw / 2;
+    txt(svg, lx, H - padB + 14, d.date.slice(8), { 'text-anchor': 'middle', 'font-size': 10 });
+    txt(svg, lx, H - padB + 26, WD[d.dow].slice(0, 2), { 'text-anchor': 'middle', 'font-size': 8.5, fill: d.dow === 0 ? PINK : '#4d5a74' });
+    if (d.dow === 0) svgEl('circle', { cx: lx, cy: H - padB + 33, r: 2.2, fill: PINK }, svg);
+    const win = days.slice(Math.max(0, i - 6), i + 1); maPts.push([lx, padT + hh - hh * mean(win.map(z => dv(z, selLine))) / nm]);
+  });
+  if (maPts.length > 1) svgEl('polyline', { points: maPts.map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' '), fill: 'none', stroke: '#fff', 'stroke-width': 2.2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round', opacity: 0.92 }, svg);
+  maPts.forEach(p => svgEl('circle', { cx: p[0], cy: p[1], r: 2.2, fill: '#fff' }, svg));
+  const vals = days.map(d => dv(d, selLine)).filter(v => v > 0);
+  const best = days.reduce((a, b) => dv(b, selLine) > dv(a, selLine) ? b : a);
+  const lowD = days.filter(d => dv(d, selLine) > 0).reduce((a, b) => dv(b, selLine) < dv(a, selLine) ? b : a);
+  const cv = sd(vals) / (mean(vals) || 1);
+  $('dailyChips').innerHTML = [['Total', fmt(sum(vals))], ['Average / producing day', fmt(mean(vals))], ['Best day', fmt(dv(best, selLine)) + ' · ' + best.date.slice(8) + ' ' + monthShort(selMonth)], ['Weakest day', fmt(dv(lowD, selLine)) + ' · ' + lowD.date.slice(8) + ' ' + monthShort(selMonth)], ['Day-to-day variation', (cv * 100).toFixed(0) + '%']]
+    .map(a => '<div class="statpill"><b>' + a[1] + '</b>' + a[0] + '</div>').join('');
+}
+
+// ---------- pace: cumulative by calendar day, month over month ----------
+function cumByDay(mk, sel){
+  const ms = P.mstats[mk]; const n = daysInMonth(mk); const arr = []; let c = 0;
+  const byDay = {}; ms.days.forEach(d => byDay[+d.date.slice(8)] = dv(d, sel));
+  for (let day = 1; day <= n; day++){ c += byDay[day] || 0; arr.push(c); }
+  return arr;
+}
+function renderPace(){
+  const host = $('paceChart'); const sel = selLine;
+  const partial = selMonth === P.latestMk && P.latestPartial;
+  const lastDay = partial ? parseYMD(P.latestDate).d : daysInMonth(selMonth);
+  $('paceSub').textContent = 'Cumulative units by day of month' + (sel === 'ALL' ? '' : ' · ' + (SEL_OPTS.find(o => o[0] === sel) || [])[1]) + '. Is ' + monthLabel(selMonth) + ' ahead of or behind the earlier months?';
+  $('paceLegend').innerHTML = '<span class="li"><span class="sw" style="background:#5ee6cf"></span>' + monthShort(selMonth) + '</span><span class="li"><span class="sw" style="background:#6f7c96"></span>Earlier months</span><span class="li"><span class="sw" style="background:#fff;height:2px;margin-top:4px"></span>Average of completed months</span>' + (partial ? '<span class="li"><span class="sw hatch"></span>Projection</span>' : '');
+  const others = P.mks.filter(m => m !== selMonth && !isGapMonth(m, sel));
+  const completed = others.filter(isCompleted);
+  const series = {}; P.mks.forEach(m => series[m] = cumByDay(m, sel));
+  const avg = []; for (let d = 0; d < 31; d++){ const vs = completed.map(m => { const a = series[m]; return d < a.length ? a[d] : a[a.length - 1]; }); avg.push(vs.length ? mean(vs) : null); }
+  let projEnd = null; const pr = partial ? projectMonth(P, scale) : null;
+  if (pr){ projEnd = sel === 'ALL' ? pr.proj : sel === 'CKD' ? pr.lines.CKD.proj : sel === 'SKDT' ? pr.lines.SKDT.proj : pr.lines.W3.proj; }
+  const sMax = Math.max(Math.max.apply(null, others.map(m => series[m][series[m].length - 1])), series[selMonth][series[selMonth].length - 1], projEnd || 0, 1);
+  const W = 640, H = 290, padL = 46, padR = 14, padT = 14, padB = 30; const nm = niceMax(sMax * 1.05);
+  const X = d => padL + (W - padL - padR) * (d - 1) / 30, Y = v => padT + (H - padT - padB) * (1 - v / nm);
+  const svg = mkSvg(host, W, H); defsHatch(svg);
+  for (let i = 0; i <= 4; i++){ const y = padT + (H - padT - padB) * (1 - i / 4); svgEl('line', { x1: padL, x2: W - padR, y1: y, y2: y, stroke: 'rgba(255,255,255,0.07)' }, svg); txt(svg, padL - 6, y + 4, fmt(nm * i / 4), { 'text-anchor': 'end' }); }
+  [1, 5, 10, 15, 20, 25, 31].forEach(d => txt(svg, X(d), H - 10, d, { 'text-anchor': 'middle' }));
+  const poly = (arr, upto) => arr.slice(0, upto).map((v, i) => X(i + 1).toFixed(1) + ',' + Y(v).toFixed(1)).join(' ');
+  others.forEach(m => { const l = svgEl('polyline', { points: poly(series[m], series[m].length), fill: 'none', stroke: '#6f7c96', 'stroke-width': 1.2, opacity: 0.45 }, svg); addTip(l, '<b>' + monthLabel(m) + '</b><br>Final ' + fmt(series[m][series[m].length - 1])); });
+  const avgPts = avg.map((v, i) => v === null ? null : X(i + 1).toFixed(1) + ',' + Y(v).toFixed(1)).filter(Boolean).join(' ');
+  if (avgPts) svgEl('polyline', { points: avgPts, fill: 'none', stroke: '#fff', 'stroke-width': 1.8, 'stroke-dasharray': '5 4', opacity: 0.9 }, svg);
+  const mine = series[selMonth];
+  const mpts = poly(mine, lastDay);
+  svgEl('polyline', { points: mpts, fill: 'none', stroke: '#5ee6cf', 'stroke-width': 3, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }, svg);
+  const endV = mine[lastDay - 1];
+  svgEl('circle', { cx: X(lastDay), cy: Y(endV), r: 4.5, fill: '#5ee6cf', stroke: '#06090f', 'stroke-width': 2 }, svg);
+  if (pr){
+    const endDay = daysInMonth(selMonth);
+    svgEl('line', { x1: X(lastDay), y1: Y(endV), x2: X(endDay), y2: Y(projEnd), stroke: PINK, 'stroke-width': 2.4, 'stroke-dasharray': '6 4' }, svg);
+    svgEl('circle', { cx: X(endDay), cy: Y(projEnd), r: 5, fill: '#fff', stroke: PINK, 'stroke-width': 2 }, svg);
+    txt(svg, X(endDay) - 6, Y(projEnd) - 9, '≈ ' + fmt(projEnd), { 'text-anchor': 'end', fill: '#ffd3ec', 'font-size': 11, 'font-weight': 700 });
+  }
+  txt(svg, X(lastDay) + 8, Y(endV) + 4, fmt(endV), { fill: '#5ee6cf', 'font-size': 11, 'font-weight': 700 });
+  // reading under the chart
+}
+
+// ---------- weekday rhythm ----------
+function renderWeekday(){
+  const host = $('weekdayChart'); const sel = selLine;
+  const order = [1, 2, 3, 4, 5, 6, 0]; const agg = {}; order.forEach(w => agg[w] = []);
+  P.days.forEach(d => { if (sel === 'CKD' && inGap('CKD', d.date)) return; const v = dv(d, sel); if (v > 0) agg[d.dow].push(v); });
+  const avgs = order.map(w => ({ w, n: agg[w].length, a: mean(agg[w]) }));
+  const mx = Math.max.apply(null, avgs.map(x => x.a)) || 1; const bestW = avgs.reduce((a, b) => b.a > a.a ? b : a);
+  $('wkSub').textContent = 'Average units on days with production, across all months. Bar = typical output; the small number is how many such days exist.';
+  const W = 460, H = 270, padL = 34, padR = 10, padT = 24, padB = 44; const nm = niceMax(mx * 1.1);
+  const svg = mkSvg(host, W, H);
+  for (let i = 0; i <= 4; i++){ const y = padT + (H - padT - padB) * (1 - i / 4); svgEl('line', { x1: padL, x2: W - padR, y1: y, y2: y, stroke: 'rgba(255,255,255,0.07)' }, svg); txt(svg, padL - 5, y + 4, fmt(nm * i / 4), { 'text-anchor': 'end' }); }
+  const slot = (W - padL - padR) / 7, bw = slot * 0.62, hh = H - padT - padB;
+  avgs.forEach((x, i) => {
+    const bx = padL + slot * i + (slot - bw) / 2, h = hh * x.a / nm;
+    const isBest = x.w === bestW.w; const col = x.w === 0 ? PINK : SEL_COLOR[sel];
+    const r = svgEl('rect', { x: bx, y: padT + hh - h, width: bw, height: Math.max(1, h), rx: 4, fill: col, opacity: isBest ? 1 : 0.62 }, svg);
+    addTip(r, '<b>' + WD[x.w] + '</b><br>Average ' + fmt(x.a) + ' units<br>' + x.n + ' production days');
+    txt(svg, bx + bw / 2, padT + hh - h - 6, fmt(x.a), { 'text-anchor': 'middle', fill: '#e8eefc', 'font-size': 10.5, 'font-weight': 700 });
+    txt(svg, bx + bw / 2, H - 24, WD[x.w], { 'text-anchor': 'middle', fill: x.w === 0 ? PINK : '#aab6cc', 'font-size': 11, 'font-weight': isBest ? 700 : 400 });
+    txt(svg, bx + bw / 2, H - 10, 'n=' + x.n, { 'text-anchor': 'middle', 'font-size': 9, fill: '#4d5a74' });
+  });
+}
+
+// ---------- calendar heat-map ----------
+function renderHeat(){
+  const host = $('heatChart'); const sel = selLine;
+  const col = SEL_COLOR[sel];
+  $('heatSub').textContent = 'Every production day since January' + (sel === 'ALL' ? '' : ' · ' + (SEL_OPTS.find(o => o[0] === sel) || [])[1]) + '. Darker = more units. Pink outline = Sunday. Look for stripes (weekday habits), blocks of empty days (stoppages, holidays) and months that run hotter.';
+  const vals = []; P.days.forEach(d => { const v = dv(d, sel); if (v > 0) vals.push(v); });
+  vals.sort((a, b) => a - b); const cap = vals.length ? vals[Math.floor(vals.length * 0.92)] : 1;
+  const rows = P.mks.length, cw = 28, ch = 24, padL = 62, padT = 22, padR = 70;
+  const W = padL + 31 * cw + padR, H = padT + rows * ch + 8;
+  const svg = mkSvg(host, W, H);
+  for (let d = 1; d <= 31; d++) txt(svg, padL + (d - 1) * cw + cw / 2, 14, d, { 'text-anchor': 'middle', 'font-size': 9.5 });
+  P.mks.forEach((mk, ri) => {
+    const y = padT + ri * ch; const ms = P.mstats[mk]; const byD = {}; ms.days.forEach(d => byD[+d.date.slice(8)] = d);
+    txt(svg, padL - 10, y + ch / 2 + 4, monthShort(mk) + ' ' + mk.slice(2, 4), { 'text-anchor': 'end', fill: mk === selMonth ? '#f5f8fd' : '#aab6cc', 'font-size': 11, 'font-weight': mk === selMonth ? 700 : 400 });
+    const nD = daysInMonth(mk);
+    for (let day = 1; day <= nD; day++){
+      const key = mk + '-' + String(day).padStart(2, '0'); if (key > P.latestDate && NON_WORKING.indexOf(key) < 0) continue; const x = padL + (day - 1) * cw; const dow = dowOf(key);
+      const d = byD[day]; const v = d ? dv(d, sel) : 0; const gapCell = sel === 'CKD' && inGap('CKD', key);
+      const isNon = NON_WORKING.indexOf(key) >= 0;
+      let fill, op;
+      if (gapCell){ fill = 'rgba(255,255,255,0.03)'; op = 1; }
+      else if (v > 0){ fill = col; op = 0.14 + 0.86 * Math.min(1, v / cap); }
+      else { fill = 'rgba(255,255,255,0.045)'; op = 1; }
+      const r = svgEl('rect', { x: x + 1.5, y: y + 1.5, width: cw - 3, height: ch - 3, rx: 4, fill: fill, 'fill-opacity': op, stroke: dow === 0 ? PINK : 'none', 'stroke-width': 1, 'stroke-opacity': dow === 0 ? 0.55 : 0 }, svg);
+      addTip(r, '<b>' + esc(dayLabel(key)) + '</b><br>' + (gapCell ? 'No XL 100 data (source gap)' : v > 0 ? fmt(v) + ' units' : isNon ? 'Plant closed (Poya)' : d ? 'Line idle' : 'No production logged'));
+      if (isNon) txt(svg, x + cw / 2, y + ch / 2 + 3, '●', { 'text-anchor': 'middle', fill: '#ffc267', 'font-size': 8 });
+    }
+    txt(svg, padL + 31 * cw + 8, y + ch / 2 + 4, fmt(sel === 'SKDT' ? ms.skdT : sel === 'ALL' ? ms.all : ms.ln[sel]), { fill: '#aab6cc', 'font-size': 10.5, 'font-weight': 600 });
+  });
+}
+
+// ---------- history & forecast ----------
+function renderHistory(){
+  FC = forecastOutlook(P, 3);
+  const pr = P.latestPartial ? projectMonth(P, scale) : null;
+  $('histSub').textContent = 'Monthly units by line (solid), the projected finish of the current month and the next three months (pink) with their 80% range. ' + 'XL 100 data is missing for Aug–Sep, so those bars are short on CKD.';
+  $('histLegend').innerHTML = LINE_KEYS.map(k => '<span class="li"><span class="sw" style="background:' + LINES[k].color + '"></span>' + esc(LINES[k].short) + '</span>').join('') + '<span class="li"><span class="sw hatch"></span>Projected / forecast</span><span class="li"><span class="sw" style="background:transparent;border:1.5px dashed #ffc267"></span>XL 100 data missing</span>';
+  const host = $('histChart');
+  const slots = P.mks.length + FC.targets.length;
+  const maxStack = Math.max.apply(null, P.mks.map(m => lineValue(P, m, 'ALL')));
+  const maxF = Math.max.apply(null, FC.total.map(t => t.hi).concat(pr ? [pr.hi] : []));
+  const W = 1000, H = 330, padL = 46, padR = 12, padT = 24, padB = 34; const nm = niceMax(Math.max(maxStack, maxF) * 1.04);
+  const svg = mkSvg(host, W, H); defsHatch(svg);
+  for (let i = 0; i <= 4; i++){ const y = padT + (H - padT - padB) * (1 - i / 4); svgEl('line', { x1: padL, x2: W - padR, y1: y, y2: y, stroke: 'rgba(255,255,255,0.07)' }, svg); txt(svg, padL - 6, y + 4, fmt(nm * i / 4), { 'text-anchor': 'end' }); }
+  const slot = (W - padL - padR) / slots, bw = Math.min(56, slot * 0.62), hh = H - padT - padB;
+  const Y = v => padT + hh * (1 - v / nm);
+  P.mks.forEach((mk, i) => {
+    const x = padL + slot * i + (slot - bw) / 2; const ms = P.mstats[mk]; let y = padT + hh;
+    const partial = mk === P.latestMk && P.latestPartial; const sel = mk === selMonth;
+    LINE_KEYS.forEach(k => { const v = ms.ln[k]; if (!v) return; const h = hh * v / nm; const r = svgEl('rect', { x: x, y: y - h, width: bw, height: h, fill: LINES[k].color, opacity: sel ? 1 : 0.62, class: 'mbar' }, svg); addTip(r, '<b>' + monthLabel(mk) + '</b><br>' + esc(LINES[k].label) + ': ' + fmt(v) + '<br>Total ' + fmt(ms.all) + ' · ' + ms.n + ' days'); r.addEventListener('click', () => { selMonth = mk; render(); }); y -= h; });
+    let topY = y;
+    if (monthInGap('CKD', mk)){ svgEl('rect', { x: x, y: topY - 20, width: bw, height: 20, fill: 'none', stroke: '#ffc267', 'stroke-dasharray': '3 3', rx: 3, opacity: 0.8 }, svg); txt(svg, x + bw / 2, topY - 7, 'no XL', { 'text-anchor': 'middle', fill: '#ffc267', 'font-size': 8.5 }); topY -= 20; }
+    if (partial && pr){
+      const h = hh * pr.expRem / nm; const r = svgEl('rect', { x: x, y: y - h, width: bw, height: h, fill: 'url(#hatchPink)', stroke: PINK, 'stroke-width': 1, rx: 3 }, svg);
+      addTip(r, '<b>' + monthLabel(mk) + ' projection</b><br>≈ ' + fmt(pr.proj) + '<br>80% range ' + fmt(pr.lo) + ' – ' + fmt(pr.hi));
+      const cx = x + bw / 2; svgEl('line', { x1: cx, x2: cx, y1: Y(pr.lo), y2: Y(pr.hi), stroke: '#ffd3ec', 'stroke-width': 1.6 }, svg);
+      [pr.lo, pr.hi].forEach(v => svgEl('line', { x1: cx - 6, x2: cx + 6, y1: Y(v), y2: Y(v), stroke: '#ffd3ec', 'stroke-width': 1.6 }, svg));
+      txt(svg, cx, Y(pr.hi) - 6, '≈ ' + fmt(pr.proj), { 'text-anchor': 'middle', fill: '#ffd3ec', 'font-size': 10.5, 'font-weight': 700 });
+    } else txt(svg, x + bw / 2, topY - 5, fmt(ms.all), { 'text-anchor': 'middle', fill: '#aab6cc', 'font-size': 10.5, 'font-weight': 700 });
+    txt(svg, x + bw / 2, H - padB + 15, monthShort(mk), { 'text-anchor': 'middle', fill: sel ? '#f5f8fd' : '#6f7c96', 'font-size': 10.5, 'font-weight': sel ? 700 : 400 });
+  });
+  const sep = padL + slot * P.mks.length; svgEl('line', { x1: sep, x2: sep, y1: padT - 6, y2: H - padB, stroke: PINK, 'stroke-dasharray': '2 4', opacity: 0.4 }, svg);
+  txt(svg, sep + 6, padT - 8, 'forecast →', { fill: '#ffb3df', 'font-size': 10, 'font-weight': 700 });
+  FC.targets.forEach((mk, j) => {
+    const i = P.mks.length + j; const x = padL + slot * i + (slot - bw) / 2; const t = FC.total[j]; const cx = x + bw / 2;
+    const r = svgEl('rect', { x: x, y: Y(t.units), width: bw, height: hh * t.units / nm, fill: 'url(#hatchPink)', stroke: PINK, 'stroke-width': 1, rx: 3 }, svg);
+    addTip(r, '<b>' + monthLabel(mk) + ' forecast</b><br>≈ ' + fmt(t.units) + '<br>80% range ' + fmt(t.lo) + ' – ' + fmt(t.hi));
+    svgEl('line', { x1: cx, x2: cx, y1: Y(t.lo), y2: Y(t.hi), stroke: '#ffd3ec', 'stroke-width': 1.6 }, svg);
+    [t.lo, t.hi].forEach(v => svgEl('line', { x1: cx - 6, x2: cx + 6, y1: Y(v), y2: Y(v), stroke: '#ffd3ec', 'stroke-width': 1.6 }, svg));
+    txt(svg, cx, Y(t.hi) - 6, '≈ ' + fmt(t.units), { 'text-anchor': 'middle', fill: '#ffd3ec', 'font-size': 10.5, 'font-weight': 700 });
+    txt(svg, cx, H - padB + 15, monthShort(mk), { 'text-anchor': 'middle', fill: '#ffb3df', 'font-size': 10.5 });
+  });
+  // forecast table
+  const S = FC.series; const names = { SKDT: 'SKD + EV', W3: '3W', CKD: 'CKD (XL 100)' };
+  let h = '<thead><tr><th>Forecast</th>' + ['SKDT', 'CKD', 'W3'].map(k => '<th>' + names[k] + '</th>').join('') + '<th class="pk">Total</th><th class="pk">80% range</th></tr></thead><tbody>';
+  FC.targets.forEach((mk, j) => {
+    h += '<tr><td>' + monthLabel(mk) + ' <span class="dim">(' + monSatInMonth(mk) + ' working days)</span></td>' + ['SKDT', 'CKD', 'W3'].map(k => '<td>' + (S[k] ? fmt(S[k].pts[j].units) : '—') + '</td>').join('') + '<td class="pk"><b>' + fmt(FC.total[j].units) + '</b></td><td class="pk">' + fmt(FC.total[j].lo) + ' – ' + fmt(FC.total[j].hi) + '</td></tr>';
+  });
+  h += '<tr class="tot"><td>Typical miss of the method *</td>' + ['SKDT', 'CKD', 'W3'].map(k => '<td>' + (S[k] && S[k].mape !== null ? '±' + (S[k].mape * 100).toFixed(0) + '%' : '—') + '</td>').join('') + '<td></td><td></td></tr></tbody>';
+  $('fcTable').innerHTML = h;
+  const desc = k => { const s = S[k]; if (!s) return ''; return '<b>' + names[k] + ':</b> ' + (s.rule.kind === 'trend' ? 'a straight-line trend (it beat the flat level in back-testing)' : 'a flat level of about <b>' + fmt(s.rule.level) + ' units per working day</b> — ' + (s.rule.tStat !== null && Math.abs(s.rule.tStat) < 2 ? 'no statistically reliable trend (t = ' + (Math.abs(s.rule.tStat) < 0.05 ? '0.0' : s.rule.tStat.toFixed(1)) + ')' : 'a trend exists but did not out-predict the flat level')) + '.'; };
+  $('fcMethod').innerHTML = '<b>How to read this.</b> Each line\'s run-rate (units per Mon–Sat day) is projected forward and multiplied by the working days of the target month. ' + ['SKDT', 'W3', 'CKD'].map(desc).join(' ') +
+    ' * "Typical miss" is the average error when the same method was used to predict earlier months it had not seen. The range combines the lines assuming they move independently. It does not know about orders, parts shortages, holidays beyond 24 Oct, or the new NTORQ 150 launch, and with under a year of history it is a guide for planning, not a commitment.';
+}
+
+// ---------- run-rate mini charts ----------
+function renderRates(){
+  const host = $('rateCharts'); host.innerHTML = '';
+  const defs = [['SKDT', 'SKD + EV', '#5ee6cf'], ['CKD', 'CKD · XL 100', '#ffc267'], ['W3', '3W', '#6fa3ff']];
+  defs.forEach(([key, title, color]) => {
+    const wrap = document.createElement('div'); wrap.className = 'glass'; wrap.style.cssText = 'padding:14px 14px 8px;border-radius:16px;';
+    const s = FC.series[key];
+    const div = document.createElement('div'); div.innerHTML = '<div class="mini-title">' + title + '</div><div class="mini-sub"></div>';
+    wrap.appendChild(div); const chartHost = document.createElement('div'); wrap.appendChild(chartHost); host.appendChild(wrap);
+    const sub = div.querySelector('.mini-sub');
+    if (!s){ sub.textContent = 'Not enough history.'; return; }
+    sub.innerHTML = (s.rule.kind === 'trend' ? 'Trending' : 'Flat') + ' · ~<b>' + fmt1(s.rule.level) + '</b> / day · typical miss ' + (s.mape !== null ? '±' + (s.mape * 100).toFixed(0) + '%' : 'n/a');
+    const lineKey = key === 'SKDT' ? 'SKD' : key;
+    const allM = P.mks.concat(FC.targets); const n = allM.length;
+    const hist = P.mks.map(mk => ({ mk, v: rateOf(mk, key), gap: monthInGap(lineKey === 'W3' ? 'W3' : lineKey, mk), partial: mk === P.latestMk && P.latestPartial }));
+    const bandFor = pt => { const b = Z80 * s.rule.sigma * Math.sqrt(1 + 1 / s.rule.n); const r = pt.rate; return [Math.max(0, r - b), r + b]; };
+    const fvals = s.pts.map(p => bandFor(p));
+    const maxV = Math.max.apply(null, hist.filter(h => !h.gap).map(h => h.v).concat(fvals.map(f => f[1]), [1]));
+    const W = 340, H = 170, padL = 34, padR = 8, padT = 12, padB = 22; const nm = niceMax(maxV * 1.08);
+    const svg = mkSvg(chartHost, W, H);
+    const X = i => padL + (W - padL - padR) * (i + 0.5) / n, Y = v => padT + (H - padT - padB) * (1 - v / nm);
+    for (let i = 0; i <= 3; i++){ const y = padT + (H - padT - padB) * (1 - i / 3); svgEl('line', { x1: padL, x2: W - padR, y1: y, y2: y, stroke: 'rgba(255,255,255,0.07)' }, svg); txt(svg, padL - 4, y + 3, fmt(nm * i / 3), { 'text-anchor': 'end', 'font-size': 9 }); }
+    // forecast band
+    const fx0 = X(P.mks.length - 1);
+    const bandPts = s.pts.map((p, j) => X(P.mks.length + j).toFixed(1) + ',' + Y(fvals[j][1]).toFixed(1)).concat(s.pts.slice().reverse().map((p, jj) => { const j = s.pts.length - 1 - jj; return X(P.mks.length + j).toFixed(1) + ',' + Y(fvals[j][0]).toFixed(1); }));
+    svgEl('polygon', { points: bandPts.join(' '), fill: 'rgba(255,122,200,0.16)', stroke: 'none' }, svg);
+    // level / trend line
+    const ex = [];
+    if (s.rule.kind === 'trend'){ ex.push([X(0), Y(s.rule.predict(monthIndex(P.mks[0])))]); s.pts.forEach((p, j) => ex.push([X(P.mks.length + j), Y(p.rate)])); }
+    else { ex.push([X(Math.max(0, P.mks.length - 6)), Y(s.rule.level)]); ex.push([X(P.mks.length + s.pts.length - 1), Y(s.rule.level)]); }
+    svgEl('polyline', { points: ex.map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' '), fill: 'none', stroke: PINK, 'stroke-width': 1.6, 'stroke-dasharray': '4 3' }, svg);
+    // history
+    let seg = [];
+    const flush = () => { if (seg.length > 1) svgEl('polyline', { points: seg.map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' '), fill: 'none', stroke: color, 'stroke-width': 2.2, 'stroke-linejoin': 'round' }, svg); seg = []; };
+    hist.forEach((h, i) => {
+      if (h.gap){ flush(); txt(svg, X(i), H - padB - 4, '·', { 'text-anchor': 'middle', fill: '#ffc267', 'font-size': 12 }); return; }
+      if (h.partial){ flush(); if (seg.length === 0 && i > 0 && !hist[i - 1].gap){ svgEl('line', { x1: X(i - 1), y1: Y(hist[i - 1].v), x2: X(i), y2: Y(h.v), stroke: color, 'stroke-dasharray': '2 3', opacity: 0.6 }, svg); } }
+      else seg.push([X(i), Y(h.v)]);
+    });
+    flush();
+    hist.forEach((h, i) => { if (h.gap) return; const c = svgEl('circle', { cx: X(i), cy: Y(h.v), r: h.partial ? 3.6 : 2.8, fill: h.partial ? '#06090f' : color, stroke: color, 'stroke-width': 1.6 }, svg); addTip(c, '<b>' + monthLabel(h.mk) + (h.partial ? ' (to date)' : '') + '</b><br>' + fmt1(h.v) + ' / working day'); });
+    s.pts.forEach((p, j) => { const c = svgEl('circle', { cx: X(P.mks.length + j), cy: Y(p.rate), r: 3.2, fill: PINK, stroke: '#06090f', 'stroke-width': 1.2 }, svg); addTip(c, '<b>' + monthLabel(p.mk) + ' forecast</b><br>' + fmt1(p.rate) + ' / working day<br>range ' + fmt1(fvals[j][0]) + ' – ' + fmt1(fvals[j][1])); });
+    allM.forEach((mk, i) => { if (i % 2 === 0 || n <= 8) txt(svg, X(i), H - 6, monthShort(mk).slice(0, 3), { 'text-anchor': 'middle', 'font-size': 9, fill: i >= P.mks.length ? '#ffb3df' : '#6f7c96' }); });
+  });
+}
+
+// ---------- model momentum ----------
+function renderMomentum(){
+  const last = P.latestDate; const w1 = addDays(last, -55), w0 = addDays(last, -111), w0e = addDays(last, -56);
+  $('momSub').textContent = 'Last 8 weeks (to ' + dayLabel(last) + ') against the 8 weeks before. Sparkline = units per working day, month by month.';
+  const rows = DATA.models.map(m => {
+    let a = 0, b = 0; P.days.forEach(d => { const v = d.p[m.key] || 0; if (!v) return; if (d.date >= w1) a += v; else if (d.date >= w0 && d.date <= w0e) b += v; });
+    let gapDays = 0; if (m.group === 'CKD DVA'){ for (let k = w0; k <= last; k = addDays(k, 1)) if (inGap('CKD', k)) gapDays++; }
+    const na = gapDays > 0; // any missing data in either window makes the comparison unfair
+    const fs = P.firstSeen[m.key];
+    let st, cls, chg = null;
+    if (na){ st = 'Data gap'; cls = 'na'; }
+    else if (a === 0 && b === 0){ st = 'Not built'; cls = 'na'; }
+    else if (fs && fs >= w0){ st = 'New'; cls = 'new'; }
+    else if (b === 0){ st = 'Back in build'; cls = 'rising'; }
+    else if (a === 0){ st = 'Stopped'; cls = 'stopped'; }
+    else { chg = (a / b - 1) * 100; if (chg > 20){ st = 'Rising'; cls = 'rising'; } else if (chg < -20){ st = 'Falling'; cls = 'falling'; } else { st = 'Steady'; cls = 'steady'; } }
+    const lk = LINE_KEYS.find(l => LINES[l].groups.indexOf(m.group) >= 0);
+    const series = P.mks.map(mk => { if (lk === 'CKD' && monthInGap('CKD', mk)) return null; const e = elapsedMonSat(P, mk); return e ? lineValueModel(mk, m.key) / e : 0; });
+    return { m, a, b, chg, st, cls, series, color: LINES[lk].color };
+  }).filter(r => r.a > 0 || r.b > 0 || r.series.some(v => v)).sort((x, y) => y.a - x.a);
+  let h = '<thead><tr><th>Model</th><th>Trend</th><th>Last 8 wks</th><th>Prior 8 wks</th><th>Change</th><th>Status</th></tr></thead><tbody>';
+  rows.forEach(r => {
+    h += '<tr><td><span class="sw" style="display:inline-block;width:8px;height:8px;border-radius:3px;margin-right:8px;background:' + r.color + '"></span>' + esc(r.m.label) + '</td><td style="width:120px">' + sparkSvg(r.series, r.color, true) + '</td><td>' + fmt(r.a) + '</td><td>' + (r.st === 'Data gap' ? '<span class="dim">n/a</span>' : fmt(r.b)) + '</td><td>' + (r.chg === null ? '<span class="dim">—</span>' : (r.chg >= 0 ? '+' : '−') + Math.abs(r.chg).toFixed(0) + '%') + '</td><td><span class="status ' + r.cls + '">' + r.st + '</span></td></tr>';
+  });
+  $('momTable').innerHTML = h + '</tbody>';
+  Array.prototype.forEach.call($('momTable').querySelectorAll('svg.spark'), s => { s.style.height = '24px'; s.style.width = '110px'; });
+}
+
+// ---------- model table (selected month) ----------
+const GROUP_COLORS = { 'CKD DVA': LINES.CKD.color, 'SKD 2W': LINES.SKD.color, 'EV 2W': LINES.EV.color, '3W': LINES.W3.color };
 function renderModelTable(){
-  const t = monthTotals(selMonth);
-  const tbl = $('modelTable');
-  const stock = DATA.latestStock || {};
+  const ms = P.mstats[selMonth]; const byModel = {};
+  ms.days.forEach(d => Object.keys(d.p).forEach(k => byModel[k] = (byModel[k] || 0) + d.p[k]));
+  const total = ms.all; const stock = DATA.latestStock || {};
   let h = '<thead><tr><th>Model</th><th>' + monthLabel(selMonth) + '</th><th>Share</th><th>Period total</th><th>Opening stock</th><th>Stock in</th></tr></thead><tbody>';
   let grandPeriod = 0;
   DATA.groups.forEach(g => {
-    const ms = DATA.models.filter(m => m.group === g);
-    if (!ms.length) return;
-    const gMonth = t.byGroup[g] || 0;
-    let gPeriod = 0; ms.forEach(m => { gPeriod += (DATA.periodByModel[m.key] || 0); });
-    grandPeriod += gPeriod;
+    const ms2 = DATA.models.filter(m => m.group === g); if (!ms2.length) return;
+    let gMonth = 0, gPeriod = 0; ms2.forEach(m => { gMonth += byModel[m.key] || 0; gPeriod += DATA.periodByModel[m.key] || 0; }); grandPeriod += gPeriod;
     h += '<tr class="grp"><td><span class="sw" style="background:' + GROUP_COLORS[g] + '"></span>' + esc(g) + '</td><td>' + fmt(gMonth) + '</td><td></td><td>' + fmt(gPeriod) + '</td><td></td><td></td></tr>';
-    ms.forEach(m => {
-      const v = t.byModel[m.key] || 0;
-      const per = DATA.periodByModel[m.key] || 0;
-      const share = t.total > 0 ? (v / t.total * 100) : 0;
-      const s = stock[m.key] || {};
-      h += '<tr class="' + (v === 0 ? 'zero' : '') + '"><td class="model">' + esc(m.label) + '</td><td>' + (v ? fmt(v) : '—') + '</td>' +
-        '<td><span class="share"><i style="width:' + share.toFixed(1) + '%;background:' + GROUP_COLORS[g] + '"></i></span> <span class="dim">' + (v ? share.toFixed(1) + '%' : '') + '</span></td>' +
-        '<td>' + (per ? fmt(per) : '—') + '</td>' +
-        '<td>' + (s.opn !== undefined ? fmt(s.opn) + ' <span class="dim">' + esc(s.opnDate.slice(5)) + '</span>' : '<span class="dim">—</span>') + '</td>' +
-        '<td>' + (s.stockIn !== undefined ? fmt(s.stockIn) + ' <span class="dim">' + esc(s.stockInDate.slice(5)) + '</span>' : '<span class="dim">—</span>') + '</td></tr>';
+    ms2.forEach(m => {
+      const v = byModel[m.key] || 0, per = DATA.periodByModel[m.key] || 0, share = total > 0 ? v / total * 100 : 0, s = stock[m.key] || {};
+      h += '<tr class="' + (v === 0 ? 'zero' : '') + '"><td class="model">' + esc(m.label) + '</td><td>' + (v ? fmt(v) : '—') + '</td><td><span class="share"><i style="width:' + share.toFixed(1) + '%;background:' + GROUP_COLORS[g] + '"></i></span> <span class="dim">' + (v ? share.toFixed(1) + '%' : '') + '</span></td><td>' + (per ? fmt(per) : '—') + '</td>' +
+        '<td>' + (s.opn !== undefined ? fmt(s.opn) + ' <span class="dim">' + esc(s.opnDate.slice(5)) + '</span>' : '<span class="dim">—</span>') + '</td><td>' + (s.stockIn !== undefined ? fmt(s.stockIn) + ' <span class="dim">' + esc(s.stockInDate.slice(5)) + '</span>' : '<span class="dim">—</span>') + '</td></tr>';
     });
   });
-  h += '<tr class="tot"><td>Total</td><td>' + fmt(t.total) + '</td><td></td><td>' + fmt(grandPeriod) + '</td><td></td><td></td></tr></tbody>';
-  tbl.innerHTML = h;
-  $('stockNote').textContent = DATA.stockLoaded
-    ? 'Opening stock and stock-in show the latest figure entered in the sheet for each model (month-day in grey).'
-    : 'Opening stock and stock-in are not loaded yet — the OPN STOCK / STOCK IN columns in the sheet are empty. They fill in here as soon as Shantha\'s daily stock is added.';
+  h += '<tr class="tot"><td>Total</td><td>' + fmt(total) + '</td><td></td><td>' + fmt(grandPeriod) + '</td><td></td><td></td></tr></tbody>';
+  $('modelTable').innerHTML = h;
+  $('stockNote').textContent = DATA.stockLoaded ? 'Opening stock and stock-in show the latest figure entered in the sheet for each model (month-day in grey).' : 'Opening stock and stock-in are not loaded yet — the OPN STOCK / STOCK IN columns in the sheet are empty. They fill in here as soon as Shantha\'s daily stock is added.';
 }
-
-function renderDaily(){
-  const days = DATA.daily.filter(d => d.date.slice(0, 7) === selMonth);
-  $('dailyLegend').innerHTML = '<div class="li"><span class="sw" style="background:#5ee6cf"></span>2W</div><div class="li"><span class="sw" style="background:#6fa3ff"></span>3W</div>';
-  const host = $('dailyChart');
-  host.innerHTML = '';
-  if (!days.length){ host.innerHTML = '<div class="empty-note">No production logged for this month.</div>'; $('dailyTable').innerHTML = ''; return; }
-
-  const W = 1000, H = 230, padL = 38, padR = 10, padT = 12, padB = 34;
-  const max = Math.max.apply(null, days.map(d => d.t2 + d.t3)) || 1;
-  const niceMax = Math.ceil(max / 100) * 100 || 100;
-  const svg = el('svg', { viewBox: '0 0 ' + W + ' ' + H, width: '100%', preserveAspectRatio: 'xMidYMid meet' });
-  for (let i = 0; i <= 4; i++){
-    const y = padT + (H - padT - padB) * (1 - i / 4);
-    svg.appendChild(el('line', { x1: padL, x2: W - padR, y1: y, y2: y, stroke: 'rgba(255,255,255,0.07)' }));
-    const tx = el('text', { x: padL - 6, y: y + 4, 'text-anchor': 'end', 'font-size': 10, fill: '#6f7c96' }); tx.textContent = Math.round(niceMax * i / 4); svg.appendChild(tx);
-  }
-  const slot = (W - padL - padR) / days.length, bw = Math.min(34, slot * 0.7);
-  days.forEach((d, i) => {
-    const x = padL + slot * i + (slot - bw) / 2;
-    const hh = (H - padT - padB);
-    const h2 = hh * d.t2 / niceMax, h3 = hh * d.t3 / niceMax;
-    const y2 = padT + hh - h2, y3 = y2 - h3;
-    const r2 = el('rect', { x: x, y: y2, width: bw, height: h2, fill: '#5ee6cf', rx: 2 });
-    const r3 = el('rect', { x: x, y: y3, width: bw, height: h3, fill: '#6fa3ff', rx: 2 });
-    svg.appendChild(r2); svg.appendChild(r3);
-    const top = Object.keys(d.p).sort((a, b) => d.p[b] - d.p[a]).slice(0, 6).map(k => esc(labelOfKey(k)) + ' ' + d.p[k]).join('<br>');
-    const tip = '<b>' + esc(dayLabel(d.date)) + '</b><br>2W ' + fmt(d.t2) + ' · 3W ' + fmt(d.t3) + '<br>' + top;
-    [r2, r3].forEach(r => addTip(r, tip));
-    if (days.length <= 31){
-      const lx = el('text', { x: x + bw / 2, y: H - padB + 14, 'text-anchor': 'middle', 'font-size': 10, fill: '#6f7c96' }); lx.textContent = d.date.slice(8); svg.appendChild(lx);
-    }
-  });
-  host.appendChild(svg);
-
-  let h = '<thead><tr><th>Date</th>' + DATA.groups.map(g => '<th>' + esc(g) + '</th>').join('') + '<th>2W</th><th>3W</th><th>Total</th></tr></thead><tbody>';
-  const gSum = {}; DATA.groups.forEach(g => gSum[g] = 0);
-  let s2 = 0, s3 = 0;
-  days.slice().reverse().forEach(d => {
-    const g = {}; DATA.groups.forEach(x => g[x] = 0);
-    Object.keys(d.p).forEach(k => { const gg = groupOfKey(k); if (gg) g[gg] += d.p[k]; });
-    h += '<tr><td>' + esc(dayLabel(d.date)) + '</td>' + DATA.groups.map(x => '<td>' + (g[x] ? fmt(g[x]) : '<span class="dim">—</span>') + '</td>').join('') +
-      '<td>' + fmt(d.t2) + '</td><td>' + fmt(d.t3) + '</td><td>' + fmt(d.t2 + d.t3) + '</td></tr>';
-    DATA.groups.forEach(x => gSum[x] += g[x]); s2 += d.t2; s3 += d.t3;
-  });
-  h += '<tr class="tot"><td>Month</td>' + DATA.groups.map(x => '<td>' + fmt(gSum[x]) + '</td>').join('') + '<td>' + fmt(s2) + '</td><td>' + fmt(s3) + '</td><td>' + fmt(s2 + s3) + '</td></tr></tbody>';
+function renderDailyTable(){
+  const days = P.mstats[selMonth].days;
+  let h = '<thead><tr><th>Date</th>' + LINE_KEYS.map(k => '<th>' + esc(LINES[k].short) + '</th>').join('') + '<th>Total</th></tr></thead><tbody>';
+  days.slice().reverse().forEach(d => { h += '<tr><td>' + esc(dayLabel(d.date)) + '</td>' + LINE_KEYS.map(k => '<td>' + (d.ln[k] ? fmt(d.ln[k]) : '<span class="dim">—</span>') + '</td>').join('') + '<td>' + fmt(d.all) + '</td></tr>'; });
+  h += '<tr class="tot"><td>Month</td>' + LINE_KEYS.map(k => '<td>' + fmt(P.mstats[selMonth].ln[k]) + '</td>').join('') + '<td>' + fmt(P.mstats[selMonth].all) + '</td></tr></tbody>';
   $('dailyTable').innerHTML = h;
 }
 
-function renderTrend(){
-  const host = $('trendChart');
-  host.innerHTML = '';
-  const keys = DATA.availableMonths;
-  if (!keys.length){ host.innerHTML = '<div class="empty-note">No data.</div>'; return; }
-  const W = 1000, H = 250, padL = 44, padR = 10, padT = 18, padB = 34;
-  const vals = keys.map(k => monthTotals(k));
-  const max = Math.max.apply(null, vals.map(v => v.total)) || 1;
-  const niceMax = Math.ceil(max / 2000) * 2000 || 2000;
-  const svg = el('svg', { viewBox: '0 0 ' + W + ' ' + H, width: '100%', preserveAspectRatio: 'xMidYMid meet' });
-  for (let i = 0; i <= 4; i++){
-    const y = padT + (H - padT - padB) * (1 - i / 4);
-    svg.appendChild(el('line', { x1: padL, x2: W - padR, y1: y, y2: y, stroke: 'rgba(255,255,255,0.07)' }));
-    const tx = el('text', { x: padL - 6, y: y + 4, 'text-anchor': 'end', 'font-size': 10, fill: '#6f7c96' }); tx.textContent = fmt(niceMax * i / 4); svg.appendChild(tx);
-  }
-  const slot = (W - padL - padR) / keys.length, bw = Math.min(56, slot * 0.62);
-  const hh = H - padT - padB;
-  keys.forEach((k, i) => {
-    const v = vals[i];
-    const x = padL + slot * i + (slot - bw) / 2;
-    const h2 = hh * v.total2W / niceMax, h3 = hh * v.total3W / niceMax;
-    const y2 = padT + hh - h2, y3 = y2 - h3;
-    const sel = k === selMonth;
-    const r2 = el('rect', { x: x, y: y2, width: bw, height: h2, fill: '#5ee6cf', rx: 3, opacity: sel ? 1 : 0.55, class: 'mbar' });
-    const r3 = el('rect', { x: x, y: y3, width: bw, height: h3, fill: '#6fa3ff', rx: 3, opacity: sel ? 1 : 0.55, class: 'mbar' });
-    svg.appendChild(r2); svg.appendChild(r3);
-    const tip = '<b>' + monthLabel(k) + '</b><br>Total ' + fmt(v.total) + '<br>2W ' + fmt(v.total2W) + (v.avg !== null ? ' (avg ' + fmt(v.avg) + '/day)' : '') + '<br>3W ' + fmt(v.total3W) + '<br>' + v.days + ' production days';
-    [r2, r3].forEach(r => { addTip(r, tip); r.addEventListener('click', () => { selMonth = k; render(); }); });
-    const tv = el('text', { x: x + bw / 2, y: y3 - 5, 'text-anchor': 'middle', 'font-size': 10.5, fill: '#aab6cc', 'font-weight': 700 }); tv.textContent = fmt(v.total); svg.appendChild(tv);
-    const lx = el('text', { x: x + bw / 2, y: H - padB + 15, 'text-anchor': 'middle', 'font-size': 10.5, fill: sel ? '#f5f8fd' : '#6f7c96', 'font-weight': sel ? 700 : 400 }); lx.textContent = MONTHS[+k.slice(5) - 1]; svg.appendChild(lx);
-  });
-  host.appendChild(svg);
-}
-
 function render(){
-  renderProvenance(); renderChecks(); renderKpis(); renderModelTable(); renderDaily(); renderTrend();
+  renderProvenance(); renderNotes(); renderKpis(); renderReading(); renderProjection();
+  renderDonut(); renderTopModels(); renderFamilyMix(); renderMovement();
+  renderHistory(); renderRates(); renderMomentum(); renderModelTable(); renderDailyTable();
 }
-
 function init(payload){
   if (payload.error){ $('provenance').innerHTML = 'Could not load the planning sheet: <b>' + esc(payload.error) + '</b>'; $('dateLabel').textContent = 'Error'; return; }
-  DATA = payload;
-  selMonth = DATA.latestMonth;
-  if (!selMonth){ $('provenance').textContent = 'The planning sheet has no production rows yet.'; return; }
+  DATA = payload; P = prep(DATA); selMonth = DATA.latestMonth;
+  if (!selMonth || !P.days.length){ $('provenance').textContent = 'The planning sheet has no production rows yet.'; return; }
   render();
 }
-
 if (window.__MOCK_PLANNING__) init(window.__MOCK_PLANNING__);
 else fetch(API_URL).then(r => r.json()).then(init).catch(err => {
   $('provenance').innerHTML = 'Could not load the planning data: <b>' + esc(err.message || err) + '</b>';
   $('dateLabel').textContent = 'Error';
 });
+
 </script>
 </body>
 </html>
