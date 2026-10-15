@@ -296,6 +296,16 @@ details.fold .inner{padding:0 22px 20px;}
   <div class="hero-title" id="heroTitle"></div>
   <div class="kpi-grid6" id="kpiGrid"></div>
 
+  <div class="panel glass" id="planPanel" style="display:none">
+    <div class="panel-head"><h2>Plan vs actual</h2><span id="planBadge"></span></div>
+    <div class="sub" id="planSub"></div>
+    <div class="chips" id="planChips" style="margin:0 0 14px"></div>
+    <div class="legend2" id="planLegend"></div>
+    <div id="planChart"></div>
+    <div class="tscroll" style="margin-top:14px"><table class="mtable" id="planTable"></table></div>
+    <div class="method" id="planNote"></div>
+  </div>
+
   <div class="grid-main">
     <div class="panel glass" id="readingPanel"></div>
     <div class="panel glass" id="projPanel"></div>
@@ -390,6 +400,9 @@ const NON_WORKING = ['2026-10-24'];
 // Periods where a line has NO data in the source (not "zero production"). Excluded from trends and forecasts.
 // (Empty: Aug-Sep 2026 XL 100 was confirmed as genuine 'No Production' in the production executive sheet.)
 const KNOWN_GAPS = {};
+// The master's actuals come from the production executive sheet from this date (MIS Planning Sync).
+// Earlier months come from the original planning file, so plan-vs-actual there mixes two sources.
+const SYNC_FROM_WEB = '2026-08-01';
 const Z80 = 1.2816; // 80% prediction interval
 
 const LINES = {
@@ -456,7 +469,21 @@ function prep(DATA){
   const latestPartial = !!latestDate && latestDate < monthEnd && monSatBetween(addDays(latestDate, 1), monthEnd) > 0;
   const firstSeen = {};
   days.forEach(d => Object.keys(d.p).forEach(k => { if (d.p[k] > 0 && !firstSeen[k]) firstSeen[k] = d.date; }));
-  return { DATA, days, mstats, mks, latestDate, latestMk, monthEnd, latestPartial, firstSeen, modelGroup };
+  // plan (Daily Planned Qty from the production executive sheet), same line split as actuals
+  const planDay = {}, planM = {};
+  if (DATA.plan && DATA.plan.daily){
+    Object.keys(DATA.plan.daily).forEach(dk => {
+      const p = DATA.plan.daily[dk], ln = { CKD: 0, SKD: 0, EV: 0, W3: 0 };
+      Object.keys(p).forEach(k => { const l = grpLine[modelGroup[k]]; if (l) ln[l] += p[k]; });
+      const all = ln.CKD + ln.SKD + ln.EV + ln.W3;
+      planDay[dk] = { ln, all, skdT: ln.SKD + ln.EV, p };
+      const mk = dk.slice(0, 7), m = planM[mk] || (planM[mk] = { ln: { CKD: 0, SKD: 0, EV: 0, W3: 0 }, all: 0, skdT: 0, p: {} });
+      LINE_KEYS.forEach(l => m.ln[l] += ln[l]); m.all += all; m.skdT += ln.SKD + ln.EV;
+      Object.keys(p).forEach(k => m.p[k] = (m.p[k] || 0) + p[k]);
+    });
+  }
+  const hasPlan = Object.keys(planDay).length > 0;
+  return { DATA, days, mstats, mks, latestDate, latestMk, monthEnd, latestPartial, firstSeen, modelGroup, planDay, planM, hasPlan };
 }
 function dayVal(d, sel){ // sel: ALL | CKD | SKD | EV | W3
   if (sel === 'ALL') return d.all;
@@ -648,6 +675,62 @@ function deltaChip(mk, key){
   return '<span class="chip ' + cls + '">' + (d > 3 ? '▲ ' : d < -3 ? '▼ ' : '● ') + Math.abs(d).toFixed(0) + '% vs ' + monthShort(prev) + '</span>';
 }
 
+// ---------- plan vs actual ----------
+function planOf(mk, key){ const m = P.planM[mk]; if (!m) return null; if (key === 'T2W') return m.ln.CKD + m.skdT; if (key === 'ALL') return m.all; if (key === 'SKDT') return m.skdT; if (key === 'ASM') return m.skdT + m.ln.W3; return m.ln[key]; }
+function achCls(p){ return p >= 99.5 ? 'up' : p >= 95 ? 'flat' : 'down'; }
+function achColor(p){ return p >= 99.5 ? '#5ee6cf' : p >= 95 ? '#ffc267' : '#ff7a7a'; }
+function renderPlan(){
+  const panel = $('planPanel');
+  if (!P.hasPlan){ panel.style.display = 'none'; return; }
+  panel.style.display = 'block';
+  const months = P.mks.filter(mk => P.planM[mk]);
+  const ytdPlan = sum(months.map(mk => P.planM[mk].all)), ytdAct = sum(months.map(mk => P.mstats[mk].all));
+  const ach = ytdPlan ? ytdAct / ytdPlan * 100 : 0;
+  const onPlan = months.filter(mk => P.mstats[mk].all >= P.planM[mk].all * 0.995).length;
+  $('planBadge').innerHTML = '<span class="chip ' + achCls(ach) + '" style="font-size:12px;padding:3px 10px">YTD ' + ach.toFixed(1) + '%</span>';
+  $('planSub').innerHTML = 'Plan = <b>Daily Planned Qty</b> in the production executive sheet, all lines, colours combined. Actual = the Planning Master. Click a month to see it by line and model.';
+  $('planChips').innerHTML = [['Plan ' + monthShort(months[0]) + '–' + monthShort(months[months.length - 1]), fmt(ytdPlan)], ['Actual', fmt(ytdAct)], ['Achievement', ach.toFixed(1) + '%'], ['Gap (actual − plan)', (ytdAct - ytdPlan >= 0 ? '+' : '−') + fmt(Math.abs(ytdAct - ytdPlan))], ['Months at or above plan', onPlan + ' of ' + months.length]]
+    .map(x => '<div class="statpill"><b>' + x[1] + '</b>' + x[0] + '</div>').join('');
+  $('planLegend').innerHTML = '<span class="li"><span class="sw" style="background:transparent;border:1.5px solid #aab6cc"></span>Plan</span><span class="li"><span class="sw" style="background:#5ee6cf"></span>Actual (≥ 99.5% of plan)</span><span class="li"><span class="sw" style="background:#ffc267"></span>95–99.5%</span><span class="li"><span class="sw" style="background:#ff7a7a"></span>below 95%</span>';
+  // chart
+  const W = 1000, H = 300, padL = 46, padR = 12, padT = 26, padB = 34;
+  const mx = Math.max.apply(null, months.map(mk => Math.max(P.planM[mk].all, P.mstats[mk].all)));
+  const nm = niceMax(mx * 1.08), hh = H - padT - padB, Y = v => padT + hh * (1 - v / nm);
+  const svg = mkSvg($('planChart'), W, H);
+  for (let i = 0; i <= 4; i++){ const y = padT + hh * (1 - i / 4); svgEl('line', { x1: padL, x2: W - padR, y1: y, y2: y, stroke: 'rgba(255,255,255,0.07)' }, svg); txt(svg, padL - 6, y + 4, fmt(nm * i / 4), { 'text-anchor': 'end' }); }
+  const slot = (W - padL - padR) / months.length, bw = Math.min(30, slot * 0.32);
+  months.forEach((mk, i) => {
+    const pl = P.planM[mk].all, ac = P.mstats[mk].all, pc = pl ? ac / pl * 100 : 0, cx = padL + slot * i + slot / 2, sel = mk === selMonth;
+    const tip = '<b>' + monthLabel(mk) + (mk === P.latestMk && P.latestPartial ? ' (to date)' : '') + '</b><br>Plan ' + fmt(pl) + '<br>Actual ' + fmt(ac) + '<br>Achievement ' + pc.toFixed(1) + '% · gap ' + (ac - pl >= 0 ? '+' : '−') + fmt(Math.abs(ac - pl));
+    if (sel) svgEl('rect', { x: padL + slot * i + 3, y: padT - 20, width: slot - 6, height: hh + 20, rx: 8, fill: 'rgba(255,255,255,0.045)' }, svg);
+    const r1 = svgEl('rect', { x: cx - bw - 2, y: Y(pl), width: bw, height: hh * pl / nm, rx: 3, fill: 'rgba(170,182,204,0.10)', stroke: '#aab6cc', 'stroke-width': 1.2 }, svg);
+    const r2 = svgEl('rect', { x: cx + 2, y: Y(ac), width: bw, height: hh * ac / nm, rx: 3, fill: achColor(pc), opacity: sel ? 1 : 0.8 }, svg);
+    [r1, r2].forEach(r => { addTip(r, tip); r.style.cursor = 'pointer'; r.addEventListener('click', () => { selMonth = mk; render(); }); });
+    txt(svg, cx, Math.min(Y(pl), Y(ac)) - 7, pc.toFixed(pc >= 99.95 && pc < 100.05 ? 0 : 1) + '%', { 'text-anchor': 'middle', fill: achColor(pc), 'font-size': 11, 'font-weight': 700 });
+    txt(svg, cx, H - padB + 15, monthShort(mk), { 'text-anchor': 'middle', fill: sel ? '#f5f8fd' : '#6f7c96', 'font-size': 10.5, 'font-weight': sel ? 700 : 400 });
+    if (mk < SYNC_FROM_WEB) svgEl('circle', { cx: cx, cy: H - padB + 24, r: 2, fill: '#ffc267' }, svg);
+  });
+  // table for the selected month
+  const pm = P.planM[selMonth], am = P.mstats[selMonth];
+  let h = '';
+  if (!pm){ h = '<tbody><tr><td class="empty-note">No plan recorded for ' + monthLabel(selMonth) + '.</td></tr></tbody>'; }
+  else {
+    const row = (name, pl, ac, cls, color) => { const pc = pl ? ac / pl * 100 : null; return '<tr class="' + (cls || '') + '"><td' + (cls === 'grp' ? '' : ' class="model"') + '>' + (color ? '<span class="sw" style="background:' + color + '"></span>' : '') + esc(name) + '</td><td>' + (pl ? fmt(pl) : '<span class="dim">—</span>') + '</td><td>' + (ac ? fmt(ac) : '<span class="dim">—</span>') + '</td><td>' + ((ac - pl) === 0 ? '<span class="dim">0</span>' : (ac - pl > 0 ? '+' : '−') + fmt(Math.abs(ac - pl))) + '</td><td>' + (pc === null ? '<span class="dim">no plan</span>' : '<span class="chip ' + achCls(pc) + '">' + pc.toFixed(1) + '%</span>') + '</td></tr>'; };
+    h = '<thead><tr><th>' + monthLabel(selMonth) + (selMonth === P.latestMk && P.latestPartial ? ' (to date)' : '') + '</th><th>Plan</th><th>Actual</th><th>Gap</th><th>Achievement</th></tr></thead><tbody>';
+    LINE_KEYS.forEach(l => {
+      const grp = LINES[l].groups[0]; const ms = DATA.models.filter(m => m.group === grp && ((pm.p[m.key] || 0) || am.days.some(d => d.p[m.key])));
+      if (!pm.ln[l] && !am.ln[l]) return;
+      h += row(LINES[l].label, pm.ln[l], am.ln[l], 'grp', LINES[l].color);
+      ms.forEach(m => { const ac = sum(am.days.map(d => d.p[m.key] || 0)); h += row(m.label, pm.p[m.key] || 0, ac, '', null); });
+    });
+    h += row('Total (2W + 3W)', pm.all, am.all, 'tot', null) + '</tbody>';
+  }
+  $('planTable').innerHTML = h;
+  $('planNote').innerHTML = '<b>Note.</b> The production executive records the planned quantity on the day, so it usually sits close to the actual — a gap means the day\'s plan was not met (or was over-run). ' +
+    'From ' + dayLabel(SYNC_FROM_WEB) + ' the actuals here come from the same sheet. <span style="color:#ffc267">●</span> Months before that (Jan–Jul) use actuals from the original planning file, which differ from the production executive sheet, so those achievement figures partly reflect the two sources rather than line performance.' +
+    (DATA.plan && DATA.plan.unmapped && Object.keys(DATA.plan.unmapped).length ? '<br>Plan for item codes not matched to a model: ' + esc(JSON.stringify(DATA.plan.unmapped)) : '');
+}
+
 function renderProvenance(){
   const s = DATA.source || {};
   let upd = '';
@@ -694,6 +777,7 @@ function renderSync(){
   list.innerHTML = h;
 }
 
+function planChip(mk, key){ const pl = typeof planOf === 'function' ? planOf(mk, key) : null; if (!pl) return ''; const pc = valueOf(mk, key) / pl * 100; return '<br><span class="chip ' + achCls(pc) + '" title="Plan ' + fmt(pl) + '">' + pc.toFixed(1) + '% of plan ' + fmt(pl) + '</span>'; }
 function renderKpis(){
   const ms = P.mstats[selMonth] || { n: 0 };
   const partial = selMonth === P.latestMk && P.latestPartial;
@@ -711,7 +795,7 @@ function renderKpis(){
     const series = P.mks.map(mk => isGapMonth(mk, d.key) ? null : rateOf(mk, d.key));
     const gap = isGapMonth(selMonth, d.key);
     return '<div class="glass k6" style="--c:' + d.color + ';--cg:' + d.glow + '"><div class="kl"><i></i>' + esc(d.label) + '</div><div class="kn">' + fmt(v) + '</div>' +
-      '<div class="ks">' + (gap ? '<span class="dim">XL 100 data incomplete</span>' : fmt1(r) + ' / working day') + '<br>' + deltaChip(selMonth, d.key) + '</div>' + sparkSvg(series, d.color, partial) + '</div>';
+      '<div class="ks">' + (gap ? '<span class="dim">XL 100 data incomplete</span>' : fmt1(r) + ' / working day') + '<br>' + deltaChip(selMonth, d.key) + planChip(selMonth, d.key) + '</div>' + sparkSvg(series, d.color, partial) + '</div>';
   }).join('');
 }
 
@@ -750,6 +834,13 @@ function readMonth(mk){
   } else if (prev && isCompleted(prev)){
     const d = (rateOf(mk, 'ASM') / rateOf(prev, 'ASM') - 1) * 100;
     out.push({ tone: d > 5 ? 'ok' : d < -5 ? 'warn' : 'info', html: 'Against ' + monthLabel(prev) + ', assembly output per working day was <b>' + (d >= 0 ? '+' : '−') + Math.abs(d).toFixed(0) + '%</b> (' + fmt(rateOf(mk, 'ASM')) + ' vs ' + fmt(rateOf(prev, 'ASM')) + ').' });
+  }
+  // 2b. plan
+  const pm = P.planM && P.planM[mk];
+  if (pm && pm.all){
+    const pc = all / pm.all * 100, gap = all - pm.all;
+    const worst = DATA.models.map(m => ({ m, pl: pm.p[m.key] || 0, ac: sum(ms.days.map(d => d.p[m.key] || 0)) })).filter(x => x.pl > 0).sort((a, b) => (a.ac - a.pl) - (b.ac - b.pl))[0];
+    out.push({ tone: pc >= 99.5 ? 'ok' : pc >= 95 ? 'warn' : 'bad', html: 'Plan: <b>' + pc.toFixed(1) + '%</b> achieved (' + fmt(all) + ' of ' + fmt(pm.all) + ', gap ' + (gap >= 0 ? '+' : '−') + fmt(Math.abs(gap)) + ')' + (worst && worst.ac < worst.pl ? '; biggest shortfall <b>' + esc(worst.m.label) + '</b> (' + fmt(worst.ac) + ' vs ' + fmt(worst.pl) + ')' : '') + '.' + (mk < SYNC_FROM_WEB ? ' <span class="dim">(actuals for this month come from the original planning file)</span>' : '') });
   }
   // 3. mix
   const skd = topModel(mk, ['SKD 2W']);
@@ -929,11 +1020,12 @@ function renderDaily(){
   const lab = (SEL_OPTS.find(o => o[0] === selLine) || [])[1];
   $('dailySub').textContent = 'Units per production day for ' + monthLabel(selMonth) + (selLine === 'ALL' ? ', stacked by line' : ' · ' + lab) + '. The white line is the 7-production-day average.';
   $('dailyLegend').innerHTML = (selLine === 'ALL' ? LINE_KEYS.map(k => '<span class="li"><span class="sw" style="background:' + LINES[k].color + '"></span>' + esc(LINES[k].short) + '</span>').join('') : '<span class="li"><span class="sw" style="background:' + SEL_COLOR[selLine] + '"></span>' + esc(lab) + '</span>') +
-    '<span class="li"><span class="sw" style="background:#fff;height:3px;margin-top:3px"></span>7-day average</span><span class="li"><span class="sw" style="background:' + PINK + ';border-radius:50%"></span>Sunday</span>';
+    '<span class="li"><span class="sw" style="background:#fff;height:3px;margin-top:3px"></span>7-day average</span>' + (P.hasPlan ? '<span class="li"><span class="sw" style="background:#ffd3ec;height:3px;margin-top:3px"></span>Plan</span>' : '') + '<span class="li"><span class="sw" style="background:' + PINK + ';border-radius:50%"></span>Sunday</span>';
   const host = $('dailyChart');
   if (!days.length){ host.innerHTML = '<div class="empty-note">No production logged for this line in this month.</div>'; $('dailyChips').innerHTML = ''; return; }
   const W = 1000, H = 270, padL = 42, padR = 12, padT = 14, padB = 40;
-  const max = Math.max.apply(null, days.map(d => dv(d, selLine))) || 1; const nm = niceMax(max * 1.08);
+  const planVals = days.map(d => { const pd = P.planDay[d.date]; return pd ? (selLine === 'ALL' ? pd.all : selLine === 'SKDT' ? pd.skdT : pd.ln[selLine]) : 0; });
+  const max = Math.max.apply(null, days.map(d => dv(d, selLine)).concat(planVals)) || 1; const nm = niceMax(max * 1.08);
   const svg = mkSvg(host, W, H);
   for (let i = 0; i <= 4; i++){
     const y = padT + (H - padT - padB) * (1 - i / 4);
@@ -947,6 +1039,8 @@ function renderDaily(){
     const comps = selLine === 'ALL' ? LINE_KEYS.map(k => [k, d.ln[k], LINES[k].color]) : [[selLine, dv(d, selLine), SEL_COLOR[selLine]]];
     const tip = '<b>' + esc(dayLabel(d.date)) + '</b><br>' + (selLine === 'ALL' ? LINE_KEYS.filter(k => d.ln[k]).map(k => esc(LINES[k].short) + ' ' + fmt(d.ln[k])).join(' · ') + '<br>Total ' + fmt(d.all) : fmt(dv(d, selLine)) + ' units') + '<br><span style="color:#aab6cc">' + Object.keys(d.p).sort((a, b) => d.p[b] - d.p[a]).slice(0, 5).map(k => esc(labelOfKey(k)) + ' ' + d.p[k]).join('<br>') + '</span>';
     comps.forEach(c => { if (!c[1]) return; const h = hh * c[1] / nm; const r = svgEl('rect', { x: x, y: y - h, width: bw, height: Math.max(0.6, h), fill: c[2], rx: 2 }, svg); addTip(r, tip); y -= h; });
+    const pd = P.planDay[d.date]; const pv = pd ? (selLine === 'ALL' ? pd.all : selLine === 'SKDT' ? pd.skdT : pd.ln[selLine]) : 0;
+    if (pv > 0){ const py = padT + hh - hh * pv / nm; const pm = svgEl('line', { x1: x - 3, x2: x + bw + 3, y1: py, y2: py, stroke: '#ffd3ec', 'stroke-width': 2.4, 'stroke-linecap': 'round' }, svg); addTip(pm, '<b>' + esc(dayLabel(d.date)) + '</b><br>Plan ' + fmt(pv) + ' · actual ' + fmt(dv(d, selLine)) + ' (' + (dv(d, selLine) / pv * 100).toFixed(0) + '%)'); }
     const lx = x + bw / 2;
     txt(svg, lx, H - padB + 14, d.date.slice(8), { 'text-anchor': 'middle', 'font-size': 10 });
     txt(svg, lx, H - padB + 26, WD[d.dow].slice(0, 2), { 'text-anchor': 'middle', 'font-size': 8.5, fill: d.dow === 0 ? PINK : '#4d5a74' });
@@ -1220,7 +1314,7 @@ function renderDailyTable(){
 }
 
 function render(){
-  renderProvenance(); renderNotes(); renderKpis(); renderReading(); renderProjection();
+  renderProvenance(); renderNotes(); renderKpis(); renderPlan(); renderReading(); renderProjection();
   renderDonut(); renderTopModels(); renderFamilyMix(); renderMovement();
   renderHistory(); renderRates(); renderMomentum(); renderModelTable(); renderDailyTable(); renderSync();
 }
