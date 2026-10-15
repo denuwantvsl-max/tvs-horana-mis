@@ -563,7 +563,12 @@ function forecastOutlook(P, horizon){
 // ---------- month-end projection (within-month run-rate) ----------
 function projectMonth(P, scale){
   if (!P.latestPartial) return null;
-  const mk = P.latestMk, last = P.latestDate, end = P.monthEnd;
+  const mk = P.latestMk, end = P.monthEnd;
+  // The production executive enters days late; trailing days with almost nothing recorded are
+  // "not entered yet", not real output. Project from the last day that looks fully recorded.
+  const recent = P.days.filter(d => d.all > 0).slice(-20).map(d => d.all), med = median(recent);
+  let last = P.latestDate;
+  for (let i = P.days.length - 1; i >= 0; i--){ const d = P.days[i]; if (d.mk !== mk) break; if (d.all >= 0.25 * med){ last = d.date; break; } }
   const remaining = [];
   for (let k = addDays(last, 1); k <= end; k = addDays(k, 1)) if (dowOf(k) !== 0 && NON_WORKING.indexOf(k) < 0) remaining.push(k);
   const WINDOW = 24; // last 24 Mon-Sat calendar days (~4 weeks)
