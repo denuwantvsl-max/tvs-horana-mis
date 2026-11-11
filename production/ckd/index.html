@@ -1102,8 +1102,12 @@ fetch(CSV_URL + '&_=' + Date.now(), { cache: 'no-store' }).then(r => {
       const stripped = txt.replace(/batch\s*0*\d+/ig, ' ').replace(/\d+(?:\.\d+)?\s*%/g, ' ');
       const m = stripped.match(/(\d[\d,]*)/);
       let target = m ? parseInt(m[1].replace(/,/g,''), 10) : null;
-      let batch = null;
-      if (bm) batch = +bm[1];
+      let batch = null, sizeHint = null;
+      // 2026-11-11: "Ministry Inspection of batch 720 at 80%" names the batch by its SIZE, not its number
+      if (bm && +bm[1] > 9) {
+        sizeHint = +bm[1];
+        batch = sizeHint === maxPlan1 ? 1 : sizeHint === maxPlan2 ? 2 : (Math.abs(sizeHint - maxPlan1) <= Math.abs(sizeHint - maxPlan2) ? 1 : 2);
+      } else if (bm) batch = +bm[1];
       else if (type === 'customs') batch = 'all';
       else if (target !== null){
         if (target === maxPlan1 || target === Math.round(maxPlan1 * 0.8)) batch = 1;
@@ -1111,7 +1115,7 @@ fetch(CSV_URL + '&_=' + Date.now(), { cache: 'no-store' }).then(r => {
         else if (target === maxPlan1 + maxPlan2) batch = 'all';
         else batch = Math.abs(target - maxPlan1) <= Math.abs(target - maxPlan2) ? 1 : 2;
       }
-      if (target === null && pct !== null && batch !== null) target = Math.round(sizeOf(batch) * pct / 100);
+      if (target === null && pct !== null && batch !== null) target = Math.round((sizeHint || sizeOf(batch)) * pct / 100);
       // Agreed rule (Madura, 30 Sep): Ministry inspection happens at 80% of the batch. When the sheet
       // names the batch by its full size ("720 Ministry Inspection Batch 01"), inspect at 80% of it.
       // An explicit other qty ("600 ...") or % ("... 90%") in the text still overrides this.
